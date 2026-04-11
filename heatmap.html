@@ -338,7 +338,7 @@
   // Le CSV est lu avec d3.dsv (séparateur point-virgule).
   // Pour chaque partie, on extrait les coups depuis la colonne PGN
   // et on les passe à parseMoves pour alimenter heatData.
-  d3.dsv(';', 'Dataset_Échecs_modified.csv').then(rows => {
+  d3.dsv(';', 'data/Dataset-Échecs.csv').then(rows => {
     rows.forEach(row => {
       if (!row.pgn) return;
       const side  = row.userColor === 'white' ? 'w' : 'b';
