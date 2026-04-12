@@ -527,11 +527,11 @@
     var med = d3.quantile(nonZero, 0.50);
     var q3  = d3.quantile(nonZero, 0.75);
 
-    var legendData = [
-      { label: '1er quartile', val: Math.round(q1),  hint: 'Q1' },
-      { label: 'Médiane',      val: Math.round(med), hint: 'Q2' },
-      { label: '3e quartile',  val: Math.round(q3),  hint: 'Q3' }
-    ];
+  var legendData = [
+  { label: '1er quartile', val: Math.round(q1),  hint: '25% des cases sont visitées moins de ' + Math.round(q1) + ' fois' },
+  { label: 'Médiane',      val: Math.round(med), hint: 'La moitié des cases sont en-dessous de ' + Math.round(med) + ' coups' },
+  { label: '3e quartile',  val: Math.round(q3),  hint: '75% des cases sont en-dessous de ' + Math.round(q3) + ' coups' }
+];
 
     var legendDiv = d3.select('#legend-dots');
     legendDiv.html('');  // vider avant de redessiner
@@ -547,7 +547,8 @@
           .attr('r', r)
           .attr('fill', '#922b21')
           .attr('opacity', 0.72);
-      item.append('span').text(ld.hint + ' — ' + ld.val.toLocaleString() + ' coups');
+      item.append('span').text(ld.label + ' (' + ld.val.toLocaleString() + ' coups)');
+item.append('span').style('font-size', '0.58rem').style('color', '#bbb').style('margin-top', '2px').text(ld.hint);
     });
 
 
