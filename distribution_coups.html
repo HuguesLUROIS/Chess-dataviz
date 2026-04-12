@@ -348,8 +348,8 @@ d3.dsv(';', 'data/games.csv').then(function(rows) {
       .attr('width', x.bandwidth())
       .attr('y', function(d) { return y(d.loss); })
       .attr('height', function(d) { return h - y(d.loss); })
-      .attr('fill', '#b54040')
-      .attr('opacity', 0.68);
+      .attr('fill', '#c0392b')
+      .attr('opacity', 0.85);
 
   // barres victoires (devant)
   g.selectAll('.bar-win')
@@ -360,8 +360,8 @@ d3.dsv(';', 'data/games.csv').then(function(rows) {
       .attr('width', x.bandwidth())
       .attr('y', function(d) { return y(d.win); })
       .attr('height', function(d) { return h - y(d.win); })
-      .attr('fill', '#3266ad')
-      .attr('opacity', 0.72);
+      .attr('fill', '#1a56b0')
+      .attr('opacity', 0.85);
 
 
   // axe X 
