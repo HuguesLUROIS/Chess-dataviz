@@ -1,401 +1,437 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Analyse des parties</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8" />
+  <title>Distribution du nombre de coups</title>
 
-  body {
-    background: #f7f4ef;
-    color: #2a2a2a;
-    font-family: 'Georgia', serif;
-    padding: 36px 28px 60px;
-    max-width: 900px;
-    margin: 0 auto;
-  }
+  <!-- D3 pour charger le CSV et dessiner les graphiques -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 
-  h1 {
-    font-size: 1.35rem;
-    font-weight: normal;
-    letter-spacing: .5px;
-    color: #1a1a1a;
-    margin-bottom: 4px;
-  }
-  .tagline {
-    font-size: .78rem;
-    color: #888;
-    font-family: monospace;
-    margin-bottom: 32px;
-  }
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-  .section-title {
-    font-size: .7rem;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: #aaa;
-    font-family: monospace;
-    margin-bottom: 6px;
-  }
-  .section-question {
-    font-size: 1rem;
-    font-weight: normal;
-    color: #333;
-    margin-bottom: 4px;
-  }
-  .section-note {
-    font-size: .78rem;
-    color: #888;
-    margin-bottom: 18px;
-    line-height: 1.5;
-  }
+    body {
+      font-family: Georgia, serif;
+      background: #f7f4ef;
+      color: #2a2a2a;
+      padding: 32px 28px 60px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
 
-  .chart-wrap {
-    background: #fff;
-    border: 1px solid #e4dfd8;
-    border-radius: 4px;
-    padding: 22px 24px 14px;
-    margin-bottom: 32px;
-  }
+    h2 {
+      font-size: 1.2rem;
+      font-weight: normal;
+      margin-bottom: 18px;
+    }
 
-  .row-charts {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
-    margin-bottom: 0;
-  }
+    /* les deux cartes "moyenne" côte à côte */
+    .metrics {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .metric-card {
+      flex: 1;
+      background: #fff;
+      border: 1px solid #e0dbd4;
+      border-radius: 6px;
+      padding: 12px 16px;
+    }
+    .metric-card .label {
+      font-size: 0.72rem;
+      color: #999;
+      font-family: monospace;
+      margin-bottom: 4px;
+    }
+    .metric-card .value {
+      font-size: 1.3rem;
+      font-family: monospace;
+      font-weight: normal;
+    }
 
-  .legend {
-    display: flex;
-    gap: 20px;
-    font-size: .74rem;
-    font-family: monospace;
-    color: #666;
-    margin-bottom: 14px;
-  }
-  .leg {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .leg-box {
-    width: 12px;
-    height: 12px;
-    border-radius: 2px;
-    flex-shrink: 0;
-  }
+    /* légende du graphique principal */
+    .legend {
+      display: flex;
+      gap: 18px;
+      font-size: 0.75rem;
+      font-family: monospace;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    .legend span {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .legend i {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+    }
 
-  .stat-callout {
-    display: flex;
-    gap: 24px;
-    margin-bottom: 14px;
-  }
-  .callout {
-    font-family: monospace;
-    font-size: .72rem;
-    color: #888;
-  }
-  .callout strong {
-    display: block;
-    font-size: 1.3rem;
-    font-family: 'Georgia', serif;
-    font-weight: normal;
-  }
-  .callout.blue strong { color: #3a78b5; }
-  .callout.red  strong { color: #b54040; }
+    /* le SVG de l'histogramme */
+    #hist-container svg {
+      display: block;
+    }
 
-  .axis path, .axis line { stroke: #e0dbd4; }
-  .axis text { fill: #999; font-size: 11px; font-family: monospace; }
+    /* texte explicatif entre les deux sections */
+    .note {
+      font-size: 0.82rem;
+      color: #777;
+      line-height: 1.7;
+      border-left: 2px solid #ddd;
+      padding-left: 12px;
+      margin: 22px 0;
+    }
 
-  .annotation {
-    font-size: .72rem;
-    font-family: monospace;
-    color: #bbb;
-  }
+    /* les deux camemberts */
+    .pies {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .pie-card {
+      background: #fff;
+      border: 1px solid #e0dbd4;
+      border-radius: 6px;
+      padding: 16px;
+    }
+    .pie-card h3 {
+      font-size: 0.78rem;
+      font-weight: normal;
+      font-family: monospace;
+      margin-bottom: 12px;
+    }
+    .pie-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .pie-legend {
+      flex: 1;
+      font-size: 0.72rem;
+      font-family: monospace;
+      color: #666;
+    }
+    .pie-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 6px;
+    }
+    .pie-legend-item .pct {
+      margin-left: auto;
+      color: #333;
+      font-weight: bold;
+    }
 
-  #loading {
-    font-family: monospace;
-    font-size: .82rem;
-    color: #aaa;
-    padding: 40px 0;
-    text-align: center;
-  }
-  #error {
-    font-family: monospace;
-    font-size: .82rem;
-    color: #c00;
-    padding: 20px 0;
-    display: none;
-  }
-</style>
+    /* conclusion finale */
+    .conclusion {
+      font-size: 0.82rem;
+      color: #777;
+      line-height: 1.7;
+      border-left: 2px solid #ddd;
+      padding-left: 12px;
+      margin-top: 22px;
+    }
+
+    /* axes d3 */
+    .axis path, .axis line { stroke: #ddd; }
+    .axis text { fill: #aaa; font-size: 10px; font-family: monospace; }
+  </style>
 </head>
 <body>
 
-<h1>Durée des parties : victoires vs défaites</h1>
-<p class="tagline">5 093 parties · chess.com · 2018–2026</p>
+  <h2>Distribution du nombre de coups par partie</h2>
 
-<div id="loading">Chargement des données…</div>
-<div id="error"></div>
-
-<div id="content" style="display:none">
-
-  <!-- Chart 1: histogram -->
-  <div class="section-title">Distribution</div>
-  <div class="section-question">Est-ce que je perds dans des parties plus longues ?</div>
-  <p class="section-note">
-    Chaque barre représente le nombre de parties terminées dans une tranche de 5 coups.
-    Les barres se superposent — bleu devant pour les victoires, rouge pour les défaites.
-  </p>
-
-  <div class="chart-wrap">
-    <div class="stat-callout">
-      <div class="callout blue">
-        <strong id="mean-win">—</strong>
-        coups en moyenne (victoires)
-      </div>
-      <div class="callout red">
-        <strong id="mean-loss">—</strong>
-        coups en moyenne (défaites)
-      </div>
+  <!-- les moyennes seront remplies par JS -->
+  <div class="metrics">
+    <div class="metric-card">
+      <div class="label">Moyenne en cas de victoire</div>
+      <div class="value" id="mean-win" style="color: #3266ad;">—</div>
     </div>
-    <div class="legend">
-      <div class="leg"><div class="leg-box" style="background:#3a78b5;opacity:.75"></div> Victoires</div>
-      <div class="leg"><div class="leg-box" style="background:#b54040;opacity:.75"></div> Défaites</div>
-    </div>
-    <svg id="hist"></svg>
-  </div>
-
-  <!-- Charts 2+3: outcome breakdown -->
-  <div class="section-title">Explication</div>
-  <div class="section-question">Comment est-ce que je gagne et comment est-ce que je perds ?</div>
-  <p class="section-note">
-    Quand je <em>gagne</em>, l'adversaire abandonne souvent tôt.
-    Quand je <em>perds</em>, je me fais souvent mater — ce qui allonge mécaniquement les parties.
-  </p>
-
-  <div class="row-charts">
-    <div class="chart-wrap">
-      <div class="legend" style="margin-bottom:10px">
-        <div class="leg"><div class="leg-box" style="background:#3a78b5"></div> Victoires</div>
-      </div>
-      <svg id="bar-win"></svg>
-    </div>
-    <div class="chart-wrap">
-      <div class="legend" style="margin-bottom:10px">
-        <div class="leg"><div class="leg-box" style="background:#b54040"></div> Défaites</div>
-      </div>
-      <svg id="bar-loss"></svg>
+    <div class="metric-card">
+      <div class="label">Moyenne en cas de défaite</div>
+      <div class="value" id="mean-loss" style="color: #b54040;">—</div>
     </div>
   </div>
 
-</div>
+  <div class="legend">
+    <span><i style="background:#3266ad;opacity:.8"></i> Victoires</span>
+    <span><i style="background:#b54040;opacity:.8"></i> Défaites</span>
+  </div>
+
+  <!-- l'histogramme sera injecté ici -->
+  <div id="hist-container"></div>
+
+  <p class="note">
+    Ce graphique illustre qu'en moyenne, les parties ont tendance à durer plus longtemps
+    lorsque je perds. Cela s'observe également distinctement à la queue de la distribution.
+    Mais alors, est-ce parce que je rencontre des difficultés en final ou est-ce pour une
+    autre raison&nbsp;? Nous nous proposons d'observer comment, en moyenne, se sont terminées
+    les parties lorsque j'ai gagné ou perdu pour tenter d'obtenir la réponse à cette question.
+  </p>
+
+  <!-- les deux camemberts -->
+  <div class="pies">
+    <div class="pie-card">
+      <h3 style="color:#3266ad">Comment je gagne</h3>
+      <div class="pie-wrap">
+        <svg id="pie-win" width="110" height="110"></svg>
+        <div class="pie-legend" id="legend-win"></div>
+      </div>
+    </div>
+    <div class="pie-card">
+      <h3 style="color:#b54040">Comment je perds</h3>
+      <div class="pie-wrap">
+        <svg id="pie-loss" width="110" height="110"></svg>
+        <div class="pie-legend" id="legend-loss"></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="conclusion">
+    On observe que j'ai tendance à perdre davantage par échec et mat, tandis que mes
+    adversaires abandonnent plus souvent. Il m'est difficile de juger mon niveau en final
+    à partir de ces données, mais une chose est sûre&nbsp;: mon manque de fairplay, consistant
+    à ne pas abandonner lorsque je suis perdant, contribue à expliquer le différentiel
+    observé précédemment.
+  </p>
 
 <script>
-const CSV_URL = 'https://raw.githubusercontent.com/Linxxx54/chess_analysis/main/data/games.csv';
 
-// ── parse ──────────────────────────────────────────────────────────────────
-function parseCSV(text) {
-  const lines = text.split('\n').filter(l => l.trim());
-  const sep = ';';
-  const headers = lines[0].split(sep).map(h => h.trim());
-  return lines.slice(1).map(line => {
-    // handle quoted fields
-    const vals = [];
-    let cur = '', inQ = false;
-    for (let i = 0; i < line.length; i++) {
-      const c = line[i];
-      if (c === '"') { inQ = !inQ; }
-      else if (c === sep && !inQ) { vals.push(cur); cur = ''; }
-      else cur += c;
-    }
-    vals.push(cur);
-    const obj = {};
-    headers.forEach((h, i) => obj[h] = (vals[i] || '').trim());
-    return obj;
-  });
-}
+// ─── Noms lisibles pour les modes de fin de partie ────────────────────────
+const OUTCOME_LABELS = {
+  resigned:   'Abandon',
+  checkmated: 'Échec et mat',
+  timeout:    'Temps écoulé',
+  abandoned:  'Autre'
+};
 
-function classify(result) {
-  if (result === 'win') return 'win';
-  if (['checkmated','resigned','timeout','abandoned'].includes(result)) return 'loss';
-  return 'draw';
-}
+// Palettes (bleu pour victoires, rouge pour défaites)
+const WIN_COLORS  = ['#3266ad', '#6fa8d6', '#aac8e8', '#d0e4f3'];
+const LOSS_COLORS = ['#b54040', '#cd7373', '#e0a0a0', '#f0d0d0'];
 
-// ── compute ────────────────────────────────────────────────────────────────
-function processData(rows) {
-  const winMoves = [], lossMoves = [];
-  const winOutcomes = {}, lossOutcomes = {};
 
-  for (const r of rows) {
-    const mc = parseInt(r.moveCount);
-    if (!mc || isNaN(mc)) continue;
-    const res = classify(r.result);
-    const out = r.outcome;
+// ─── Chargement des données ────────────────────────────────────────────────
+// Le CSV est lu avec d3.dsv (séparateur point-virgule)
+d3.dsv(';', 'data/games.csv').then(function(rows) {
+
+  // ── 1. Classement de chaque partie en victoire / défaite ────────────────
+  var winMoves  = [];   // nombre de coups des parties gagnées
+  var lossMoves = [];   // nombre de coups des parties perdues
+
+  var winOutcomes  = {};   // comptage des modes de victoire
+  var lossOutcomes = {};   // comptage des modes de défaite
+
+  rows.forEach(function(row) {
+    var mc  = parseInt(row.moveCount);
+    var res = row.result;
+    var out = row.outcome;
+
+    if (!mc || isNaN(mc)) return;
+
     if (res === 'win') {
       winMoves.push(mc);
       winOutcomes[out] = (winOutcomes[out] || 0) + 1;
-    } else if (res === 'loss') {
+
+    } else if (['checkmated', 'resigned', 'timeout', 'abandoned'].includes(res)) {
       lossMoves.push(mc);
       lossOutcomes[out] = (lossOutcomes[out] || 0) + 1;
     }
-  }
+  });
 
-  // bucket by 5
-  const STEP = 5, MAX = 105;
-  const buckets = {};
-  for (let b = 0; b <= MAX; b += STEP) buckets[b] = { win: 0, loss: 0 };
-  for (const m of winMoves)  { const b = Math.min(Math.floor(m/STEP)*STEP, MAX); buckets[b].win++; }
-  for (const m of lossMoves) { const b = Math.min(Math.floor(m/STEP)*STEP, MAX); buckets[b].loss++; }
 
-  const mean = arr => arr.reduce((a,b) => a+b, 0) / arr.length;
+  // ── 2. Calcul des moyennes ───────────────────────────────────────────────
+  var meanWin  = winMoves.reduce(function(a, b) { return a + b; }, 0) / winMoves.length;
+  var meanLoss = lossMoves.reduce(function(a, b) { return a + b; }, 0) / lossMoves.length;
 
-  return {
-    histData: Object.entries(buckets).map(([k,v]) => ({ x: +k, win: v.win, loss: v.loss })),
-    meanWin:  mean(winMoves).toFixed(1),
-    meanLoss: mean(lossMoves).toFixed(1),
-    winOutcomes,
-    lossOutcomes
-  };
-}
+  document.getElementById('mean-win').textContent  = meanWin.toFixed(1)  + ' coups';
+  document.getElementById('mean-loss').textContent = meanLoss.toFixed(1) + ' coups';
 
-// ── draw histogram ─────────────────────────────────────────────────────────
-function drawHist(data, meanWin, meanLoss) {
-  const W = document.getElementById('hist').closest('.chart-wrap').clientWidth - 48;
-  const H = 220;
-  const m = { t: 10, r: 10, b: 36, l: 44 };
-  const w = W - m.l - m.r;
-  const h = H - m.t - m.b;
 
-  const svg = d3.select('#hist').attr('width', W).attr('height', H);
-  const g = svg.append('g').attr('transform', `translate(${m.l},${m.t})`);
+  // ── 3. Distribution coup par coup (en % pour comparer les volumes) ───────
+  // On compte combien de parties finissent exactement à N coups
+  var MAX_MOVE = 100;
 
-  const xs = data.map(d => d.x);
-  const x = d3.scaleBand().domain(xs).range([0, w]).padding(0.12);
-  const maxY = d3.max(data, d => Math.max(d.win, d.loss));
-  const y = d3.scaleLinear().domain([0, maxY + 10]).range([h, 0]);
+  var winCount  = {};
+  var lossCount = {};
+  winMoves.forEach(function(m)  { var k = Math.min(m, MAX_MOVE); winCount[k]  = (winCount[k]  || 0) + 1; });
+  lossMoves.forEach(function(m) { var k = Math.min(m, MAX_MOVE); lossCount[k] = (lossCount[k] || 0) + 1; });
 
-  // grid
-  g.selectAll('.grid').data(y.ticks(5)).enter().append('line')
-    .attr('x1', 0).attr('x2', w)
-    .attr('y1', d => y(d)).attr('y2', d => y(d))
-    .attr('stroke', '#f0ebe4').attr('stroke-width', 1);
+  var allMoves = d3.range(1, MAX_MOVE + 1);
+  var wT = winMoves.length;
+  var lT = lossMoves.length;
 
-  // axes
-  const xAxis = d3.axisBottom(x)
-    .tickValues(xs.filter(x => x % 20 === 0))
-    .tickFormat(d => d === 100 ? '100+' : d);
-  g.append('g').attr('class','axis').attr('transform',`translate(0,${h})`).call(xAxis);
-  g.append('g').attr('class','axis').call(d3.axisLeft(y).ticks(5));
+  var histData = allMoves.map(function(m) {
+    return {
+      move: m,
+      win:  ((winCount[m]  || 0) / wT * 100),
+      loss: ((lossCount[m] || 0) / lT * 100)
+    };
+  });
 
-  // x label
-  svg.append('text').attr('x', m.l + w/2).attr('y', H - 2)
-    .attr('text-anchor','middle').attr('fill','#bbb').attr('font-size',10).attr('font-family','monospace')
+
+  // ── 4. Dessin de l'histogramme avec D3 ──────────────────────────────────
+  var margin = { top: 10, right: 16, bottom: 36, left: 42 };
+  var W = document.getElementById('hist-container').clientWidth || 780;
+  var H = 220;
+  var w = W - margin.left - margin.right;
+  var h = H - margin.top  - margin.bottom;
+
+  var svg = d3.select('#hist-container').append('svg')
+    .attr('width', W).attr('height', H);
+
+  var g = svg.append('g')
+    .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+  // échelles
+  var x = d3.scaleBand()
+    .domain(allMoves)
+    .range([0, w])
+    .padding(0.05);
+
+  var maxY = d3.max(histData, function(d) { return Math.max(d.win, d.loss); });
+  var y = d3.scaleLinear()
+    .domain([0, maxY + 0.2])
+    .range([h, 0]);
+
+  // grille horizontale légère
+  g.selectAll('.grid-line')
+    .data(y.ticks(4))
+    .enter().append('line')
+      .attr('x1', 0).attr('x2', w)
+      .attr('y1', function(d) { return y(d); })
+      .attr('y2', function(d) { return y(d); })
+      .attr('stroke', '#ede9e3')
+      .attr('stroke-width', 1);
+
+  // barres défaites (derrière)
+  g.selectAll('.bar-loss')
+    .data(histData)
+    .enter().append('rect')
+      .attr('class', 'bar-loss')
+      .attr('x', function(d) { return x(d.move); })
+      .attr('width', x.bandwidth())
+      .attr('y', function(d) { return y(d.loss); })
+      .attr('height', function(d) { return h - y(d.loss); })
+      .attr('fill', '#b54040')
+      .attr('opacity', 0.68);
+
+  // barres victoires (devant)
+  g.selectAll('.bar-win')
+    .data(histData)
+    .enter().append('rect')
+      .attr('class', 'bar-win')
+      .attr('x', function(d) { return x(d.move); })
+      .attr('width', x.bandwidth())
+      .attr('y', function(d) { return y(d.win); })
+      .attr('height', function(d) { return h - y(d.win); })
+      .attr('fill', '#3266ad')
+      .attr('opacity', 0.72);
+
+  // lignes verticales pour les moyennes
+  [
+    { val: meanWin,  color: '#1a4f8a', label: 'moy. vic. ' + meanWin.toFixed(1)  },
+    { val: meanLoss, color: '#8a2020', label: 'moy. déf. ' + meanLoss.toFixed(1) }
+  ].forEach(function(m) {
+    var xPos = x(Math.round(m.val)) + x.bandwidth() / 2;
+    g.append('line')
+      .attr('x1', xPos).attr('x2', xPos)
+      .attr('y1', 0).attr('y2', h)
+      .attr('stroke', m.color)
+      .attr('stroke-width', 1.4)
+      .attr('stroke-dasharray', '4,3');
+    g.append('text')
+      .attr('x', xPos + 3).attr('y', 13)
+      .attr('fill', m.color)
+      .attr('font-size', 10)
+      .attr('font-family', 'monospace')
+      .text(m.label);
+  });
+
+  // axe X — on n'affiche qu'un label tous les 10 coups pour éviter la surcharge
+  g.append('g')
+    .attr('class', 'axis')
+    .attr('transform', 'translate(0,' + h + ')')
+    .call(
+      d3.axisBottom(x)
+        .tickValues(allMoves.filter(function(m) { return m % 10 === 0; }))
+        .tickSize(4)
+    );
+
+  // label axe X
+  svg.append('text')
+    .attr('x', margin.left + w / 2)
+    .attr('y', H - 4)
+    .attr('text-anchor', 'middle')
+    .attr('fill', '#bbb')
+    .attr('font-size', 10)
+    .attr('font-family', 'monospace')
     .text('Nombre de coups');
 
-  // bars — loss behind, win in front
-  for (const color of ['loss','win']) {
-    g.selectAll(`.bar-${color}`).data(data).enter().append('rect')
-      .attr('class', `bar-${color}`)
-      .attr('x', d => x(d.x))
-      .attr('width', x.bandwidth())
-      .attr('y', d => y(d[color]))
-      .attr('height', d => h - y(d[color]))
-      .attr('fill', color === 'win' ? '#3a78b5' : '#b54040')
-      .attr('opacity', 0.72);
-  }
+  // axe Y
+  g.append('g')
+    .attr('class', 'axis')
+    .call(
+      d3.axisLeft(y)
+        .ticks(4)
+        .tickFormat(function(d) { return d.toFixed(1) + '%'; })
+        .tickSize(3)
+    );
 
-  // mean lines
-  const xScale2 = d3.scaleLinear().domain([0, 105]).range([0, w]);
-  for (const [val, col, lbl] of [[+meanWin,'#1a5a9a','moy. vic.'],[+meanLoss,'#8a2020','moy. déf.']]) {
-    const xp = xScale2(val);
-    g.append('line')
-      .attr('x1', xp).attr('x2', xp).attr('y1', 0).attr('y2', h)
-      .attr('stroke', col).attr('stroke-width', 1.5).attr('stroke-dasharray','4,3');
-    g.append('text').attr('class','annotation')
-      .attr('x', xp + 4).attr('y', 14)
-      .attr('fill', col).attr('font-size', 10).attr('font-family','monospace')
-      .text(`${lbl} ${val}`);
-  }
-}
 
-// ── draw outcome bar ───────────────────────────────────────────────────────
-function drawOutcomeBar(svgId, counts, color) {
-  const LABELS = {
-    resigned:   'Abandon adv.',
-    checkmated: 'Mat',
-    timeout:    'Timeout',
-    abandoned:  'Abandon (moi)',
-    repetition: 'Répétition',
-    stalemate:  'Pat',
-    agreed:     'Nulle',
-    insufficient: 'Mat insuff.',
-    timevsinsufficient: 'Time vs insuf.',
-  };
+  // ── 5. Camemberts ────────────────────────────────────────────────────────
+  drawPie('pie-win',  'legend-win',  winOutcomes,  WIN_COLORS);
+  drawPie('pie-loss', 'legend-loss', lossOutcomes, LOSS_COLORS);
 
-  const data = Object.entries(counts)
-    .map(([k, v]) => ({ key: k, label: LABELS[k] || k, count: v }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 6);
-
-  const total = data.reduce((s, d) => s + d.count, 0);
-
-  const wrap = document.getElementById(svgId).closest('.chart-wrap');
-  const W = wrap.clientWidth - 48;
-  const H = 40 + data.length * 30;
-  const m = { t: 6, r: 50, b: 10, l: 110 };
-  const w = W - m.l - m.r;
-  const h = H - m.t - m.b;
-
-  const svg = d3.select(`#${svgId}`).attr('width', W).attr('height', H);
-  const g = svg.append('g').attr('transform', `translate(${m.l},${m.t})`);
-
-  const y = d3.scaleBand().domain(data.map(d => d.key)).range([0, h]).padding(0.3);
-  const x = d3.scaleLinear().domain([0, d3.max(data, d => d.count)]).range([0, w]);
-
-  // labels left
-  g.selectAll('.lbl').data(data).enter().append('text')
-    .attr('x', -8).attr('y', d => y(d.key) + y.bandwidth()/2 + 4)
-    .attr('text-anchor','end').attr('fill','#888').attr('font-size',11).attr('font-family','monospace')
-    .text(d => d.label);
-
-  // bars
-  g.selectAll('.bar').data(data).enter().append('rect')
-    .attr('y', d => y(d.key))
-    .attr('height', y.bandwidth())
-    .attr('x', 0)
-    .attr('width', d => x(d.count))
-    .attr('fill', color).attr('opacity', 0.75).attr('rx', 2);
-
-  // count + % label
-  g.selectAll('.cnt').data(data).enter().append('text')
-    .attr('x', d => x(d.count) + 6)
-    .attr('y', d => y(d.key) + y.bandwidth()/2 + 4)
-    .attr('fill','#aaa').attr('font-size',10).attr('font-family','monospace')
-    .text(d => `${d.count} (${(d.count/total*100).toFixed(0)}%)`);
-}
-
-// ── load ───────────────────────────────────────────────────────────────────
-d3.dsv(';', 'data/games.csv').then(rows => {
-  const { histData, meanWin, meanLoss, winOutcomes, lossOutcomes } = processData(rows);
- 
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('content').style.display = 'block';
- 
-  document.getElementById('mean-win').textContent  = meanWin;
-  document.getElementById('mean-loss').textContent = meanLoss;
- 
-  drawHist(histData, meanWin, meanLoss);
-  drawOutcomeBar('bar-win',  winOutcomes,  '#3a78b5');
-  drawOutcomeBar('bar-loss', lossOutcomes, '#b54040');
- 
-}).catch(e => {
-  document.getElementById('loading').style.display = 'none';
-  const err = document.getElementById('error');
-  err.style.display = 'block';
-  err.textContent = `Impossible de charger les données : ${e.message}`;
-  console.error(e);
 });
+
+
+// ─── Fonction générique pour dessiner un camembert ────────────────────────
+function drawPie(svgId, legendId, counts, colors) {
+
+  // tri par fréquence décroissante
+  var data = Object.entries(counts)
+    .sort(function(a, b) { return b[1] - a[1]; });
+
+  var total = data.reduce(function(s, d) { return s + d[1]; }, 0);
+
+  var radius = 52;
+  var svg = d3.select('#' + svgId);
+  var g   = svg.append('g')
+    .attr('transform', 'translate(55,55)');   // centré dans le 110×110
+
+  var pie = d3.pie().value(function(d) { return d[1]; }).sort(null);
+  var arc = d3.arc().innerRadius(0).outerRadius(radius);
+
+  // tranches
+  g.selectAll('path')
+    .data(pie(data))
+    .enter().append('path')
+      .attr('d', arc)
+      .attr('fill', function(d, i) { return colors[i % colors.length]; })
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 1.5);
+
+  // légende HTML à côté
+  var legendDiv = d3.select('#' + legendId);
+  data.forEach(function(d, i) {
+    var pct = Math.round(d[1] / total * 100);
+    var label = OUTCOME_LABELS[d[0]] || d[0];
+
+    var item = legendDiv.append('div').attr('class', 'pie-legend-item');
+    item.append('i').style('display','inline-block')
+      .style('width','9px').style('height','9px')
+      .style('border-radius','2px').style('flex-shrink','0')
+      .style('background', colors[i % colors.length]);
+    item.append('span').text(label);
+    item.append('span').attr('class','pct').text(pct + '%');
+  });
+}
+
 </script>
 </body>
 </html>
