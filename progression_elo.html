@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Progression Elo par cadence</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Georgia, serif;
+      background: #f7f4ef;
+      color: #2a2a2a;
+      padding: 32px 28px 60px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    h2 {
+      font-size: 1.2rem;
+      font-weight: normal;
+      margin-bottom: 6px;
+    }
+
+    /* textes narratifs */
+    .note {
+      font-size: 0.82rem;
+      color: #777;
+      line-height: 1.7;
+      border-left: 2px solid #ddd;
+      padding-left: 12px;
+      margin: 20px 0;
+    }
+
+    /* boutons de sélection de cadence */
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .cbtn {
+      padding: 6px 16px;
+      border-radius: 4px;
+      border: 1px solid #e0dbd4;
+      background: #fff;
+      font-family: monospace;
+      font-size: 0.72rem;
+      cursor: pointer;
+      color: #888;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .cbtn:hover:not(.active) { background: #f0ebe3; }
+    .cbtn[data-tc="rapid"].active  { background: #3266ad; color: #fff; border-color: #3266ad; }
+    .cbtn[data-tc="blitz"].active  { background: #b07a2a; color: #fff; border-color: #b07a2a; }
+    .cbtn[data-tc="bullet"].active { background: #7a2a8a; color: #fff; border-color: #7a2a8a; }
+    .cbtn[data-tc="all"].active    { background: #2a2520; color: #f7f4ef; border-color: #2a2520; }
+
+    /* légende custom */
+    .leg-row {
+      display: flex;
+      gap: 18px;
+      margin-bottom: 10px;
+      font-size: 0.72rem;
+      font-family: monospace;
+      color: #666;
+      flex-wrap: wrap;
+    }
+    .leg { display: flex; align-items: center; gap: 5px; }
+
+    /* axes Chart.js */
+    .chart-wrap {
+      position: relative;
+      width: 100%;
+    }
+
+    /* section volume */
+    .section-sep {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #aaa;
+      font-family: monospace;
+      margin: 32px 0 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Progression Elo par cadence</h2>
+
+  <p class="note">
+    Rapide, Blitz, Bullet — chaque cadence raconte une histoire différente. Le temps de réflexion
+    change tout&nbsp;: en Rapide, la progression est plus lisse, plus linéaire. En Blitz, elle est
+    plus volatile, marquée par des paliers et des rechutes. En Bullet, la courbe ressemble à du
+    bruit — et pourtant, une tendance se dessine. Les pointillés représentent la droite de
+    tendance (régression linéaire) pour chaque cadence.
+  </p>
+
+  <!-- boutons de filtrage -->
+  <div class="btn-row">
+    <button class="cbtn active" data-tc="all">Toutes cadences</button>
+    <button class="cbtn" data-tc="rapid">Rapide</button>
+    <button class="cbtn" data-tc="blitz">Blitz</button>
+    <button class="cbtn" data-tc="bullet">Bullet</button>
+  </div>
+
+  <!-- légende dynamique -->
+  <div class="leg-row" id="leg-elo"></div>
+
+  <!-- graphique Elo -->
+  <div class="chart-wrap" style="height: 280px;">
+    <canvas id="elo-chart" role="img"
+      aria-label="Progression Elo mensuelle par cadence de 2018 à 2026.">
+      Elo Rapide : 1099 → 2045. Blitz : 760 → 1873. Bullet : 962 → 1493.
+    </canvas>
+  </div>
+
+  <p class="note">
+    La progression Elo ne dit pas tout — le volume de parties jouées révèle autant sur
+    l'investissement que sur le niveau. Une longue période sans jouer laisse des traces dans la
+    courbe. On voit ici comment les cadences se sont succédé, parfois en se chevauchant,
+    parfois en s'excluant mutuellement.
+  </p>
+
+  <p class="section-sep">Volume</p>
+  <h2>Quand est-ce que je joue, et quoi&nbsp;?</h2>
+
+  <!-- légende volume (statique) -->
+  <div class="leg-row" style="margin-top: 10px; margin-bottom: 10px;">
+    <div class="leg">
+      <div style="width:10px;height:10px;border-radius:2px;background:#3266ad;"></div>
+      <span>Rapide</span>
+    </div>
+    <div class="leg">
+      <div style="width:10px;height:10px;border-radius:2px;background:#b07a2a;"></div>
+      <span>Blitz</span>
+    </div>
+    <div class="leg">
+      <div style="width:10px;height:10px;border-radius:2px;background:#7a2a8a;"></div>
+      <span>Bullet</span>
+    </div>
+  </div>
+
+  <!-- graphique volume -->
+  <div class="chart-wrap" style="height: 220px;">
+    <canvas id="vol-chart" role="img"
+      aria-label="Volume de parties par cadence et par année, 2018 à 2026.">
+      2020 dominé par le Blitz. 2021-2022 forte activité Rapide. 2022 pic Bullet.
+    </canvas>
+  </div>
+
+
+<script>
+
+  // ── Couleurs et labels par cadence ────────────────────────────────────────
+  var C      = { rapid: '#3266ad', blitz: '#b07a2a', bullet: '#7a2a8a' };
+  var LABELS = { rapid: 'Rapide',  blitz: 'Blitz',   bullet: 'Bullet'  };
+
+  // ── Structures de données (remplies après chargement du CSV) ─────────────
+  // elo[cadence][mois] = moyenne des ratings sur le mois
+  // vol[cadence][mois] = nombre de parties jouées
+  var elo = { rapid: {}, blitz: {}, bullet: {} };
+  var vol = { rapid: {}, blitz: {}, bullet: {} };
+
+  // compteurs intermédiaires pour calculer la moyenne
+  var eloSum   = { rapid: {}, blitz: {}, bullet: {} };
+  var eloCount = { rapid: {}, blitz: {}, bullet: {} };
+
+
+  // ── Régression linéaire simple ────────────────────────────────────────────
+  // Retourne un tableau de valeurs ajustées pour chaque mois de `months`.
+  // Sert à tracer la droite de tendance en pointillés.
+  function linReg(months, obj) {
+    var pts = months
+      .map(function(m, i) { return { x: i, y: obj[m] }; })
+      .filter(function(p) { return p.y !== undefined; });
+
+    if (pts.length < 2) return months.map(function() { return null; });
+
+    var n   = pts.length;
+    var sx  = pts.reduce(function(s, p) { return s + p.x; }, 0);
+    var sy  = pts.reduce(function(s, p) { return s + p.y; }, 0);
+    var sxy = pts.reduce(function(s, p) { return s + p.x * p.y; }, 0);
+    var sx2 = pts.reduce(function(s, p) { return s + p.x * p.x; }, 0);
+
+    var slope     = (n * sxy - sx * sy) / (n * sx2 - sx * sx);
+    var intercept = (sy - slope * sx) / n;
+
+    return months.map(function(_, i) { return Math.round(intercept + slope * i); });
+  }
+
+
+  // ── Construction des datasets Chart.js ───────────────────────────────────
+  // En mode "all" : une courbe + une tendance par cadence (6 datasets)
+  // En mode cadence unique : une courbe + une tendance (2 datasets)
+  function makeDatasets(tc, months) {
+    if (tc === 'all') {
+      return ['rapid', 'blitz', 'bullet'].flatMap(function(t) {
+        return [
+          {
+            label: LABELS[t],
+            data: months.map(function(m) { return elo[t][m] !== undefined ? elo[t][m] : null; }),
+            borderColor: C[t],
+            backgroundColor: C[t] + '22',
+            borderWidth: 2,
+            pointRadius: 3,
+            pointHoverRadius: 5,
+            spanGaps: false,
+            tension: 0.3
+          },
+          {
+            label: LABELS[t] + ' (tendance)',
+            data: linReg(months, elo[t]),
+            borderColor: C[t],
+            borderWidth: 1,
+            borderDash: [5, 4],
+            pointRadius: 0,
+            backgroundColor: 'transparent',
+            tension: 0
+          }
+        ];
+      });
+    }
+
+    return [
+      {
+        label: LABELS[tc],
+        data: months.map(function(m) { return elo[tc][m] !== undefined ? elo[tc][m] : null; }),
+        borderColor: C[tc],
+        backgroundColor: C[tc] + '22',
+        borderWidth: 2.5,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        spanGaps: false,
+        tension: 0.3,
+        fill: true
+      },
+      {
+        label: 'Tendance',
+        data: linReg(months, elo[tc]),
+        borderColor: C[tc],
+        borderWidth: 1.5,
+        borderDash: [6, 4],
+        pointRadius: 0,
+        backgroundColor: 'transparent',
+        tension: 0
+      }
+    ];
+  }
+
+
+  // ── Légende dynamique ─────────────────────────────────────────────────────
+  function buildLegend(tc) {
+    var el = document.getElementById('leg-elo');
+    el.innerHTML = '';
+
+    var items = tc === 'all'
+      ? ['rapid', 'blitz', 'bullet'].map(function(t) {
+          return { label: LABELS[t], color: C[t], dash: false };
+        })
+      : [
+          { label: LABELS[tc], color: C[tc], dash: false },
+          { label: 'Tendance', color: C[tc], dash: true  }
+        ];
+
+    items.forEach(function(it) {
+      var div = document.createElement('div');
+      div.className = 'leg';
+
+      var line = document.createElement('div');
+      if (it.dash) {
+        line.style.cssText = 'width:18px;height:0;border-top:2px dashed ' + it.color + ';';
+      } else {
+        line.style.cssText = 'width:18px;height:2px;background:' + it.color + ';border-radius:1px;';
+      }
+      var span = document.createElement('span');
+      span.textContent = it.label;
+
+      div.appendChild(line);
+      div.appendChild(span);
+      el.appendChild(div);
+    });
+  }
+
+
+  // ── Chargement des données ────────────────────────────────────────────────
+  // Même système que les autres visualisations du projet
+  d3.dsv(';', 'data/games.csv').then(function(rows) {
+
+    rows.forEach(function(row) {
+      var tc = row.timeClass ? row.timeClass.trim() : '';
+      if (!['rapid', 'blitz', 'bullet'].includes(tc)) return;
+
+      var d = row.date ? row.date.trim() : '';
+      if (!d) return;
+
+      var rating = parseInt(row.userRating);
+      if (isNaN(rating)) return;
+
+      // format mois : "2021-03"
+      var month = d.slice(0, 7).replace('.', '-').replace('.', '-');
+
+      // accumuler pour la moyenne mensuelle
+      if (!eloSum[tc][month])   eloSum[tc][month]   = 0;
+      if (!eloCount[tc][month]) eloCount[tc][month] = 0;
+      eloSum[tc][month]   += rating;
+      eloCount[tc][month] += 1;
+
+      // volume
+      if (!vol[tc][month]) vol[tc][month] = 0;
+      vol[tc][month] += 1;
+    });
+
+    // calculer les moyennes
+    ['rapid', 'blitz', 'bullet'].forEach(function(tc) {
+      Object.keys(eloSum[tc]).forEach(function(month) {
+        elo[tc][month] = Math.round(eloSum[tc][month] / eloCount[tc][month]);
+      });
+    });
+
+    // union triée de tous les mois
+    var allMonths = Array.from(new Set(
+      ['rapid', 'blitz', 'bullet'].flatMap(function(tc) {
+        return Object.keys(elo[tc]);
+      })
+    )).sort();
+
+    // ── Graphique Elo ─────────────────────────────────────────────────────
+    var eloChart = new Chart(document.getElementById('elo-chart'), {
+      type: 'line',
+      data: {
+        labels: allMonths,
+        datasets: makeDatasets('all', allMonths)
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            // on masque les datasets de tendance dans le tooltip
+            filter: function(item) { return !item.dataset.borderDash; },
+            callbacks: {
+              title: function(ctx) { return ctx[0].label; },
+              label: function(ctx) {
+                return ' ' + ctx.dataset.label + ' : ' + ctx.parsed.y + ' Elo';
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: {
+              font: { size: 10, family: 'monospace' },
+              color: '#aaa',
+              maxRotation: 45,
+              autoSkip: true,
+              maxTicksLimit: 14,
+              // n'afficher que les débuts d'année
+              callback: function(val, i) {
+                return allMonths[i] && allMonths[i].slice(5) === '01'
+                  ? allMonths[i].slice(0, 4)
+                  : '';
+              }
+            },
+            grid: { color: 'rgba(0,0,0,0.05)' }
+          },
+          y: {
+            ticks: { font: { size: 10, family: 'monospace' }, color: '#aaa' },
+            grid: { color: 'rgba(0,0,0,0.05)' },
+            title: {
+              display: true,
+              text: 'Elo moyen mensuel',
+              font: { size: 11, family: 'monospace' },
+              color: '#aaa'
+            }
+          }
+        }
+      }
+    });
+
+    buildLegend('all');
+
+    // boutons de filtre — changent les datasets à la volée
+    document.querySelectorAll('.cbtn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.cbtn').forEach(function(b) {
+          b.classList.remove('active');
+        });
+        btn.classList.add('active');
+        var tc = btn.dataset.tc;
+        eloChart.data.datasets = makeDatasets(tc, allMonths);
+        eloChart.update();
+        buildLegend(tc);
+      });
+    });
+
+
+    // ── Graphique volume (barres empilées par année) ───────────────────────
+    var years = Array.from(new Set(
+      allMonths.map(function(m) { return m.slice(0, 4); })
+    )).sort();
+
+    // somme des parties par cadence et par année
+    function yearVol(tc) {
+      return years.map(function(y) {
+        return Object.entries(vol[tc])
+          .filter(function(e) { return e[0].startsWith(y); })
+          .reduce(function(s, e) { return s + e[1]; }, 0);
+      });
+    }
+
+    new Chart(document.getElementById('vol-chart'), {
+      type: 'bar',
+      data: {
+        labels: years,
+        datasets: [
+          {
+            label: 'Rapide',
+            data: yearVol('rapid'),
+            backgroundColor: '#3266ad',
+            stack: 's'
+          },
+          {
+            label: 'Blitz',
+            data: yearVol('blitz'),
+            backgroundColor: '#b07a2a',
+            stack: 's'
+          },
+          {
+            label: 'Bullet',
+            data: yearVol('bullet'),
+            backgroundColor: '#7a2a8a',
+            stack: 's'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { mode: 'index', intersect: false }
+        },
+        scales: {
+          x: {
+            stacked: true,
+            ticks: { font: { size: 11, family: 'monospace' }, color: '#aaa' },
+            grid: { display: false }
+          },
+          y: {
+            stacked: true,
+            ticks: { font: { size: 10, family: 'monospace' }, color: '#aaa' },
+            grid: { color: 'rgba(0,0,0,0.05)' },
+            title: {
+              display: true,
+              text: 'Parties jouées',
+              font: { size: 11, family: 'monospace' },
+              color: '#aaa'
+            }
+          }
+        }
+      }
+    });
+
+  }); // fin du .then()
+
+</script>
+</body>
+</html>
