@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Distribution du nombre de coups</title>
 
-  <!-- D3 pour charger le CSV et dessiner les graphiques -->
+  <!-- Librairie D3 pour charger le CSV et créer les graphiques -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 
   <style>
@@ -25,7 +25,7 @@
       margin-bottom: 18px;
     }
 
-    /* les deux cartes "moyenne" côte à côte */
+    /* Les deux stats "moyenne" côte à côte */
     .metrics {
       display: flex;
       gap: 12px;
@@ -50,7 +50,7 @@
       font-weight: normal;
     }
 
-    /* légende du graphique principal */
+    /* Légende du premier graphique */
     .legend {
       display: flex;
       gap: 18px;
@@ -71,12 +71,12 @@
       border-radius: 2px;
     }
 
-    /* le SVG de l'histogramme */
+    /* SVG de l'histogramme */
     #hist-container svg {
       display: block;
     }
 
-    /* texte explicatif entre les deux sections */
+    /* Texte explicatif de la première figure */
     .note {
       font-size: 0.82rem;
       color: #777;
@@ -86,7 +86,7 @@
       margin: 22px 0;
     }
 
-    /* les deux camemberts */
+    /* Les deux camemberts venant étailler le premier graphique */
     .pies {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -127,7 +127,7 @@
       font-weight: bold;
     }
 
-    /* conclusion finale */
+    /* Conclusion  */
     .conclusion {
       font-size: 0.82rem;
       color: #777;
@@ -137,7 +137,7 @@
       margin-top: 22px;
     }
 
-    /* axes d3 */
+    /* Axes d3 */
     .axis path, .axis line { stroke: #ddd; }
     .axis text { fill: #aaa; font-size: 10px; font-family: monospace; }
 
@@ -158,7 +158,7 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.07);
     }
 
-    /* wrapper pour positionner le tooltip par rapport au graphique */
+    /* Positionner le tooltip par rapport au graphique */
     #hist-wrap {
       position: relative;
     }
@@ -363,27 +363,8 @@ d3.dsv(';', 'data/games.csv').then(function(rows) {
       .attr('fill', '#3266ad')
       .attr('opacity', 0.72);
 
-  // lignes verticales pour les moyennes
-  [
-    { val: meanWin,  color: '#1a4f8a', label: 'moy. vic. ' + meanWin.toFixed(1)  },
-    { val: meanLoss, color: '#8a2020', label: 'moy. déf. ' + meanLoss.toFixed(1) }
-  ].forEach(function(m) {
-    var xPos = x(Math.round(m.val)) + x.bandwidth() / 2;
-    g.append('line')
-      .attr('x1', xPos).attr('x2', xPos)
-      .attr('y1', 0).attr('y2', h)
-      .attr('stroke', m.color)
-      .attr('stroke-width', 1.4)
-      .attr('stroke-dasharray', '4,3');
-    g.append('text')
-      .attr('x', xPos + 3).attr('y', 13)
-      .attr('fill', m.color)
-      .attr('font-size', 10)
-      .attr('font-family', 'monospace')
-      .text(m.label);
-  });
 
-  // axe X — on n'affiche qu'un label tous les 10 coups pour éviter la surcharge
+  // axe X 
   g.append('g')
     .attr('class', 'axis')
     .attr('transform', 'translate(0,' + h + ')')
