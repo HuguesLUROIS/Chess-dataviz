@@ -140,6 +140,28 @@
     /* axes d3 */
     .axis path, .axis line { stroke: #ddd; }
     .axis text { fill: #aaa; font-size: 10px; font-family: monospace; }
+
+    /* tooltip flottant sur l'histogramme */
+    #tooltip {
+      position: absolute;
+      background: #fff;
+      border: 1px solid #e0dbd4;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 0.72rem;
+      font-family: monospace;
+      color: #333;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.1s;
+      white-space: nowrap;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+    }
+
+    /* wrapper pour positionner le tooltip par rapport au graphique */
+    #hist-wrap {
+      position: relative;
+    }
   </style>
 </head>
 <body>
@@ -163,15 +185,22 @@
     <span><i style="background:#b54040;opacity:.8"></i> Défaites</span>
   </div>
 
-  <!-- l'histogramme sera injecté ici -->
-  <div id="hist-container"></div>
+  <!-- wrapper relatif pour positionner le tooltip -->
+  <div id="hist-wrap">
+    <div id="hist-container"></div>
+    <div id="tooltip"></div>
+  </div>
 
   <p class="note">
-    Ce graphique illustre qu'en moyenne, les parties ont tendance à durer plus longtemps
-    lorsque je perds. Cela s'observe également distinctement à la queue de la distribution.
-    Mais alors, est-ce parce que je rencontre des difficultés en finale ou est-ce pour une
-    autre raison&nbsp;? Nous nous proposons d'observer comment, en moyenne, se sont terminées
-    les parties lorsque j'ai gagné ou perdu pour tenter d'obtenir la réponse à cette question.
+    La forme des deux distributions évoque une gaussienne légèrement asymétrique — un pic
+    prononcé autour de 25&ndash;30 coups, puis une queue qui s'étire vers la droite. Ce qui
+    est frappant, c'est que les deux courbes ne se superposent pas parfaitement&nbsp;: la
+    distribution des défaites est plus large et décalée vers la droite, signe que je tends
+    à perdre dans des parties plus longues. L'écart est également visible dans la queue&nbsp;:
+    au-delà de 60 coups, les défaites restent relativement fréquentes là où les victoires
+    ont pratiquement disparu. Mais cette observation soulève une question&nbsp;: est-ce parce
+    que je souffre davantage en fin de partie, ou y a-t-il une autre explication&nbsp;?
+    Les deux camemberts ci-dessous apportent un éclairage intéressant.
   </p>
 
   <!-- les deux camemberts -->
@@ -193,11 +222,13 @@
   </div>
 
   <p class="conclusion">
-    Nous observons que j'ai tendance à perdre davantage par échec et mat, tandis que mes
-    adversaires abandonnent plus souvent. Il m'est difficile de juger mon niveau en finale
-    à partir de ces données, mais une chose est sûre&nbsp;: mon manque de fairplay, consistant
-    à ne pas abandonner lorsque je suis perdant, contribue à expliquer le différentiel
-    observé précédemment.
+    Le contraste est saisissant&nbsp;: quand je gagne, mes adversaires abandonnent dans plus
+    d'une partie sur deux — des capitulations souvent précoces. Quand je perds, c'est l'échec
+    et mat qui domine, un dénouement qui suppose que la partie a été jouée jusqu'au bout.
+    Difficile d'en tirer une conclusion définitive sur mon niveau en finale, mais une chose
+    semble claire&nbsp;: je n'abandonne pas, même dos au mur. Ce manque de fairplay a un effet
+    mécanique direct — il allonge mes défaites et explique, au moins en partie, le décalage
+    observé dans la distribution.
   </p>
 
 <script>
@@ -383,7 +414,57 @@ d3.dsv(';', 'data/games.csv').then(function(rows) {
     );
 
 
-  // ── 5. Camemberts ────────────────────────────────────────────────────────
+  // ── 5. Tooltip interactif ────────────────────────────────────────────────
+  // Une ligne verticale suit la souris et affiche les valeurs exactes au survol
+
+  var tooltip = d3.select('#tooltip');
+
+  // ligne verticale du curseur (cachée par défaut)
+  var cursor = g.append('line')
+    .attr('y1', 0).attr('y2', h)
+    .attr('stroke', '#aaa')
+    .attr('stroke-width', 1)
+    .attr('stroke-dasharray', '3,3')
+    .attr('opacity', 0);
+
+  // zone invisible qui capte les événements souris sur tout le graphique
+  g.append('rect')
+    .attr('width', w).attr('height', h)
+    .attr('fill', 'none')
+    .attr('pointer-events', 'all')
+    .on('mousemove', function(event) {
+      var mouseX = d3.pointer(event)[0];
+
+      // retrouver le coup correspondant à la position X
+      var move = Math.round(x.domain()[0] + (mouseX / w) * (MAX_MOVE - 1));
+      move = Math.max(1, Math.min(MAX_MOVE, move));
+
+      var d = histData[move - 1];
+      var xPos = x(move) + x.bandwidth() / 2;
+
+      // déplacer la ligne curseur
+      cursor.attr('x1', xPos).attr('x2', xPos).attr('opacity', 1);
+
+      // contenu du tooltip
+      var winPct  = d.win.toFixed(2);
+      var lossPct = d.loss.toFixed(2);
+      tooltip
+        .style('opacity', 1)
+        .style('left', (xPos + margin.left + 10) + 'px')
+        .style('top', '10px')
+        .html(
+          '<strong>' + move + ' coups</strong><br>' +
+          '<span style="color:#3266ad">■</span> Victoires&nbsp;: ' + winPct + '%<br>' +
+          '<span style="color:#b54040">■</span> Défaites&nbsp;&nbsp;: ' + lossPct + '%'
+        );
+    })
+    .on('mouseleave', function() {
+      cursor.attr('opacity', 0);
+      tooltip.style('opacity', 0);
+    });
+
+
+  // ── 6. Camemberts ────────────────────────────────────────────────────────
   drawPie('pie-win',  'legend-win',  winOutcomes,  WIN_COLORS);
   drawPie('pie-loss', 'legend-loss', lossOutcomes, LOSS_COLORS);
 
