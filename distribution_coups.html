@@ -376,35 +376,26 @@ function drawOutcomeBar(svgId, counts, color) {
 }
 
 // ── load ───────────────────────────────────────────────────────────────────
-async function load() {
-  try {
-    const resp = await fetch(CSV_URL);
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const text = await resp.text();
-    const rows = parseCSV(text);
-
-    const { histData, meanWin, meanLoss, winOutcomes, lossOutcomes } = processData(rows);
-
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('content').style.display = 'block';
-
-    document.getElementById('mean-win').textContent  = meanWin;
-    document.getElementById('mean-loss').textContent = meanLoss;
-
-    drawHist(histData, meanWin, meanLoss);
-    drawOutcomeBar('bar-win',  winOutcomes,  '#3a78b5');
-    drawOutcomeBar('bar-loss', lossOutcomes, '#b54040');
-
-  } catch(e) {
-    document.getElementById('loading').style.display = 'none';
-    const err = document.getElementById('error');
-    err.style.display = 'block';
-    err.textContent = `Impossible de charger les données : ${e.message}`;
-    console.error(e);
-  }
-}
-
-load();
+d3.dsv(';', 'data/games.csv').then(rows => {
+  const { histData, meanWin, meanLoss, winOutcomes, lossOutcomes } = processData(rows);
+ 
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('content').style.display = 'block';
+ 
+  document.getElementById('mean-win').textContent  = meanWin;
+  document.getElementById('mean-loss').textContent = meanLoss;
+ 
+  drawHist(histData, meanWin, meanLoss);
+  drawOutcomeBar('bar-win',  winOutcomes,  '#3a78b5');
+  drawOutcomeBar('bar-loss', lossOutcomes, '#b54040');
+ 
+}).catch(e => {
+  document.getElementById('loading').style.display = 'none';
+  const err = document.getElementById('error');
+  err.style.display = 'block';
+  err.textContent = `Impossible de charger les données : ${e.message}`;
+  console.error(e);
+});
 </script>
 </body>
 </html>
