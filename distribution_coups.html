@@ -4,8 +4,13 @@
   <meta charset="UTF-8" />
   <title>Distribution du nombre de coups</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-
-  <!-- Style et police -->
+  
+ /* -----------------------------------------------------------------
+       Section 1 : Structure et visualisation de la page
+    ----------------------------------------------------------------- */
+  
+  <!-- Style et police : choix d'un design simple et lisible -->
+  
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -22,7 +27,7 @@
       margin-bottom: 18px;
     }
 
-    /*  Moyenne du nombre de coups côte à côte */
+    /*  Bloc des indicateurs (moyennes) */
     .metrics {
       display: flex;
       gap: 12px;
@@ -83,7 +88,7 @@
       margin: 22px 0;
     }
 
-    /* Les deux camemberts venant étailler le premier graphique */
+    /* Mise en page des deux diagrammes circulaires venant étailler le premier graphique */
     .pies {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -134,11 +139,11 @@
       margin-top: 22px;
     }
 
-    /* Axes d3 */
+    /* Style des axes  */
     .axis path, .axis line { stroke: #ddd; }
     .axis text { fill: #aaa; font-size: 10px; font-family: monospace; }
 
-    /* tooltip flottant sur l'histogramme */
+    /* Infobulle sur l'histogramme pour + d'interactivité */
     #tooltip {
       position: absolute;
       background: #fff;
@@ -155,7 +160,7 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.07);
     }
 
-    /* Positionner le tooltip par rapport au graphique */
+    /* Positionner l'infobulle par rapport au graphique */
     #hist-wrap {
       position: relative;
     }
@@ -163,9 +168,10 @@
 </head>
 <body>
 
+  <!-- Le titre -->
   <h2>Distribution du nombre de coups par partie</h2>
 
-  <!-- les moyennes seront remplies par JS -->
+  <!-- Moyennes en cas de victoires et défaites -->
   <div class="metrics">
     <div class="metric-card">
       <div class="label">Moyenne en cas de victoire</div>
@@ -177,24 +183,27 @@
     </div>
   </div>
 
+  <!-- Légende du graphique -->
+  
   <div class="legend">
     <span><i style="background:#3266ad;opacity:.8"></i> Victoires</span>
     <span><i style="background:#b54040;opacity:.8"></i> Défaites</span>
   </div>
-
-  <!-- wrapper relatif pour positionner le tooltip -->
+  
+  <!-- Infobulle-->
   <div id="hist-wrap">
     <div id="hist-container"></div>
     <div id="tooltip"></div>
   </div>
 
+   <!-- Analyse pour storytelling-->
   <p class="note">
 Les deux distributions semblent suivre une forme proche d’une gausienne asymétrique, avec un pic marqué autour de 25 à 30 coups et une queue de distribution étirée vers la droite. Ce qui est intriguant en observant ce graphique, c’est que les deux courbes ne coïncident pas et un pattern semble se dessiner : la distribution des parties perdues est plus étendue vers la droite, ce qui signifie que j’ai tendance à davantage perdre lorsque les parties sont longues. 
 Au-delà de 60 coups, les défaites restent relativement fréquentes, là où les victoires se réduisent considérablement. Ce constat s’observe également dans la moyenne des coups : 35,7 quand je gagne contre 39 lorsque je perds. Mais alors, d’où vient ce différentiel ? Est-ce parce que je rencontre des difficultés en fin de partie (finale), ou y a-t-il une autre explication ?
 Les deux diagrammes circulaires ci-dessous, illustrant la façon dont la partie se termine lorsque je gagne et lorsque je perds, apportent un éclairage plus qu’intéressant.
   </p>
 
-  <!-- les deux camemberts -->
+  <!-- Les deux diagrammes circulaires pour apporter de l'info complémentaire-->
   <div class="pies">
     <div class="pie-card">
       <h3 style="color:#3266ad">Comment je gagne</h3>
@@ -212,10 +221,18 @@ Les deux diagrammes circulaires ci-dessous, illustrant la façon dont la partie 
     </div>
   </div>
 
+   <!-- Interpréation de conclusion -->
   <p class="conclusion">
 On observe que j’ai tendance à perdre davantage par échec et mat (48 % contre 20 % pour mes adversaires), tandis que mes adversaires abandonnent plus souvent (54 % contre 41 % concernant les parties où je perds par abandon). Il m’est difficile de juger mon niveau en finale à partir de ces données, mais une chose est sûre : mon manque de fair-play, consistant à ne pas abandonner lorsque je suis perdant, contribue à expliquer le différentiel observé précédemment.
   </p>
 
+  
+ /* -----------------------------------------------------------------
+      SECTION 2 : SCRIPT ET TRAITEMENT DES DONNÉES
+    ----------------------------------------------------------------- */
+
+
+  
 <script>
 
 // Traduction du code brut du dataset afin de le rendre compréhensible pour le lecteur
