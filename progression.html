@@ -5,13 +5,15 @@
   <title>Ma progression de 2018 à 2026</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 
+<!--  -----------------------------------------------------------------
+       Section 1 : Structure et visualisation de la page
+    ----------------------------------------------------------------- -->
+  
+  <!-- Style et police : choix d'un design simple et lisible -->
+  
+  
   <style>
-    /* -----------------------------------------------------------------
-       Base & typographie
-       Police sérif pour les textes courants, monospace pour les données
-    ----------------------------------------------------------------- */
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: Georgia, serif;
       background: #f7f4ef;
@@ -23,7 +25,8 @@
 
     h2 { font-size: 1.2rem; font-weight: normal; margin-bottom: 6px; }
 
-    /* Textes encadrés — introduction et notes analytiques */
+    /* Blocs de l'introduction et passages explicatifs  */
+    
     .intro, .note {
       font-size: 0.82rem;
       color: #777;
@@ -39,10 +42,7 @@
     .section h3 { font-size: 0.95rem; font-weight: normal; margin-bottom: 4px; color: #444; }
     .section .sous-titre { font-size: 0.72rem; color: #aaa; font-family: monospace; margin-bottom: 14px; }
 
-    /* -----------------------------------------------------------------
-       Boutons de filtre par cadence
-       Chaque cadence a sa propre couleur d'activation
-    ----------------------------------------------------------------- */
+    /* Boutons de filtre par cadence (1 couleur par cadence) */
     .controles { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
 
     .bouton {
@@ -63,26 +63,22 @@
     .bouton.actif[data-cadence="rapid"]  { border-color: #1a5f40; color: #1a5f40; background: rgba(26,95,64,.06);  }
     .bouton.actif[data-cadence="tout"]   { border-color: #555;    color: #333;    background: rgba(42,42,42,.05);  }
 
-    /* -----------------------------------------------------------------
-       Layout : graphique à gauche, panneau à droite
-    ----------------------------------------------------------------- */
+    /* Disposition graphique */
     .disposition { display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap; }
     .graphique-wrap { flex-shrink: 0; }
 
-    /* Style des axes D3 */
+    /* Style des axes */
     .axe path, .axe line { stroke: #ddd; shape-rendering: crispEdges; }
     .axe text { font-family: monospace; font-size: 0.62rem; fill: #aaa; }
 
-    /* Grille horizontale en pointillés légers */
+    /* Grille horizontale en pointillés */
     .grille line { stroke: #e8e3dc; stroke-dasharray: 2,3; shape-rendering: crispEdges; }
     .grille path { stroke: none; }
 
-    /* Séparateurs verticaux par année */
+    /* Grille verticale par année en trait plein */
     .trait-annee { stroke: #ddd; stroke-width: 1; }
 
-    /* -----------------------------------------------------------------
-       Panneau latéral — cartes d'information
-    ----------------------------------------------------------------- */
+    /* Bloc latéral (droite des graphiques) */
     .panneau { flex: 1; min-width: 170px; display: flex; flex-direction: column; gap: 12px; }
 
     .carte {
@@ -101,7 +97,7 @@
       margin-bottom: 10px;
     }
 
-    /* Légende : swatch coloré + nom de cadence + dernière valeur */
+    /* Légende */
     .liste-legende { list-style: none; }
     .liste-legende li {
       display: flex;
@@ -117,7 +113,7 @@
     .swatch-couleur { width: 18px; height: 2px; border-radius: 1px; flex-shrink: 0; }
     .valeur-legende { margin-left: auto; font-weight: bold; color: #333; }
 
-    /* Carte "Moyenne globale" avec barre proportionnelle */
+    /* Bloc "Moyenne globale" avec barre associé */
     .ligne-moyenne {
       display: flex;
       align-items: center;
@@ -134,9 +130,8 @@
     .piste-barre { width: 100%; height: 3px; background: #f0ebe3; border-radius: 2px; overflow: hidden; margin-top: 2px; }
     .remplissage-barre { height: 100%; border-radius: 2px; }
 
-    /* -----------------------------------------------------------------
-       Infobulle au survol
-    ----------------------------------------------------------------- */
+    /* Infobulle pour survoler le graphique  */
+    
     #infobulle {
       position: fixed;
       background: #fff;
@@ -153,8 +148,6 @@
       line-height: 1.7;
       z-index: 100;
     }
-
-    /* Statut de chargement */
     #statut {
       font-size: 0.62rem;
       color: #bbb;
@@ -176,11 +169,7 @@
     (pour toutes cadences) de 2018 à aujourd'hui.
   </p>
 
-  <!-- ==================================================================
-       SECTION 1 — CLASSEMENT ELO
-       Série mensuelle avec report de la dernière valeur connue
-       sur les périodes sans parties (forward-fill)
-  ================================================================== -->
+  <!-- Evolution du classement elo -->
   <div class="section">
     <h3>Évolution du classement Elo</h3>
     <p class="sous-titre">Dernier Elo enregistré chaque mois · 2018 – 2026</p>
@@ -200,7 +189,7 @@
     </div>
   </div>
 
-  <!-- Analyse entre les deux graphiques -->
+  <!-- Texte d'analyse entre les deux graphiques -->
   <p class="note">
     Nous observons grâce à ces trois courbes une progression conséquente dans toutes les cadences. En blitz,
     la cadence la plus jouée (2 948 parties), mon classement est passé de moins de 800 points en 2018 à 1 910 en 2026.
@@ -213,10 +202,7 @@
     moyenne. La précision mesure la proportion de « meilleurs coups » joués selon l'ordinateur.
   </p>
 
-  <!-- ==================================================================
-       SECTION 2 — PRÉCISION PAR TRIMESTRE
-       Moyenne trimestrielle par cadence
-  ================================================================== -->
+  <!-- Précision moyenne par trimestre et par cadence -->
   <div class="section">
     <h3>Précision moyenne par trimestre</h3>
     <p class="sous-titre">Moyenne par trimestre des précisions obtenues par analyses Chess.com · n ≥ 5 parties</p>
@@ -253,54 +239,47 @@
   <div id="infobulle"></div>
 
 
-  <!-- =================================================================
-       SCRIPT — Traitement des données et rendu des graphiques
-  ================================================================= -->
+<!-- -----------------------------------------------------------------
+      SECTION 2 : SCRIPT ET TRAITEMENT DES DONNÉES
+    ----------------------------------------------------------------- -->
+  
   <script>
 
-  // ── Palette et labels des cadences ───────────────────────────────────
-  // Chaque cadence a une couleur fixe réutilisée partout : courbe, bouton,
-  // légende et infobulle. Les labels longs servent au panneau, les courts
-  // à l'infobulle pour ne pas surcharger l'affichage.
-  var COULEURS = {
+  // Palette et labels des cadences 
+
+  var Couleurs = {
     blitz  : '#7a4f00',
     bullet : '#922518',
     rapid  : '#1a5f40'
   };
 
-  var LABELS_LONGS = {
+  var Labels_Longs = {
     blitz  : 'Blitz (5 min)',
     bullet : 'Bullet (1–2 min)',
     rapid  : 'Rapide (10–15 min)'
   };
 
-  var LABELS_COURTS = {
+  var Labels_Courts = {
     blitz  : 'Blitz',
     bullet : 'Bullet',
     rapid  : 'Rapide'
   };
 
 
-  // ── Dimensions communes aux deux graphiques ───────────────────────────
-  // On fixe les mêmes dimensions pour aligner les axes horizontaux.
-  var LARGEUR  = 610;
-  var HAUTEUR  = 340;
+  //  Dimensions (communes aux deux graphiques) 
+  var Largeur = 610;
+  var Hauteur  = 340;
   var marges   = { haut: 16, droite: 64, bas: 34, gauche: 50 };
-  var larg_int = LARGEUR  - marges.gauche - marges.droite;   // zone de tracé
-  var haut_int = HAUTEUR  - marges.haut   - marges.bas;
+  var larg_int = Largeur  - marges.gauche - marges.droite;   // zone de tracé
+  var haut_int = Hauteur  - marges.haut   - marges.bas;
 
-  // Domaine temporel commun (mi-2018 → début 2026)
+  // étdendu temporel commun (mi-2018 → début 2026)
   var dateMin   = new Date(2018, 5, 1);
   var dateMax   = new Date(2026, 2, 1);
   var echelleX  = d3.scaleTime().domain([dateMin, dateMax]).range([0, larg_int]);
 
 
-  // ── Structures de données ─────────────────────────────────────────────
-  // Alimentées ligne par ligne au chargement du CSV, rien n'est codé en dur.
-  //
-  // donneesElo[cadence]       → { map: Map<"YYYY-MM" → elo>, premiere: Date }
-  // donneesPrecision[cadence] → [ { date, valeur, label } ] trié par date
-  // moyennesGlobales[cadence] → précision moyenne sur toute la période
+  // Structures de données alimentées ligne par ligne au chargement du CSV
   var donneesElo       = { blitz: null, bullet: null, rapid: null };
   var donneesPrecision = { blitz: [],   bullet: [],   rapid: []   };
   var moyennesGlobales = { blitz: 0,    bullet: 0,    rapid: 0    };
@@ -310,15 +289,13 @@
   var cadencePrecision = 'blitz';
 
 
-  // ── Utilitaires de date ───────────────────────────────────────────────
-
-  // "YYYY-MM" → 1er du mois correspondant
+  // Date "YYYY-MM" → 1er du mois correspondant
   function parseMoisAnnee(s) {
     var parties = s.split('-');
     return new Date(+parties[0], +parties[1] - 1, 1);
   }
 
-  // "YYYYQn" → milieu du trimestre (2e mois), pour centrer le point sur l'axe
+  // "YYYYQn" → milieu du trimestre (2e mois)
   function parseTrimestre(s) {
     var annee = +s.slice(0, 4);
     var trim  = +s.slice(5);
@@ -331,9 +308,7 @@
   }
 
 
-  // ── Série Elo continue (forward-fill) ────────────────────────────────
-  // Sur les mois sans partie, on conserve le dernier Elo connu (reel=false)
-  // afin que la courbe reste continue visuellement.
+  // Série Elo continue : sur les mois sans partie, on conserve le dernier Elo connu afin que la courbe reste continue visuellement.
   function serieEloComplete(cadence) {
     var entree = donneesElo[cadence];
     if (!entree) return [];
@@ -359,10 +334,7 @@
     return resultat;
   }
 
-
-  // ── Helpers de rendu partagés ─────────────────────────────────────────
-
-  // Dessine la grille horizontale, les traits verticaux annuels et les deux axes
+  // Dessiner la grille horizontale et vertticale et les deux axes
   function ajouterGrilleEtAxes(g, echelleY, formatY) {
     // Grille horizontale en pointillés
     g.append('g').attr('class', 'grille')
@@ -377,7 +349,7 @@
         .attr('y1', 0).attr('y2', haut_int);
     });
 
-    // Axe horizontal : une marque par an
+    // Axe horizontal 
     g.append('g').attr('class', 'axe')
       .attr('transform', 'translate(0,' + haut_int + ')')
       .call(d3.axisBottom(echelleX)
@@ -389,9 +361,7 @@
       .call(d3.axisLeft(echelleY).ticks(5).tickFormat(formatY));
   }
 
-  // Zone de capture souris avec ligne verticale et infobulle
-  // obtenirSerie(cadence) → tableau de points
-  // formaterLigne(point, cadence) → HTML d'une ligne dans l'infobulle
+  // Infobulle
   function ajouterSurvol(g, cadences, obtenirSerie, formaterLigne) {
     var ligneCurseur = g.append('line')
       .attr('y1', 0).attr('y2', haut_int)
@@ -410,8 +380,6 @@
         var mx          = d3.pointer(evenement)[0];
         var dateCurseur = echelleX.invert(mx);
         ligneCurseur.attr('x1', mx).attr('x2', mx).attr('opacity', 1);
-
-        // Pour chaque cadence affichée, trouver le point le plus proche
         var lignes = cadences.map(function(c) {
           var pts = obtenirSerie(c).filter(function(d) { return d.valeur !== null; });
           if (!pts.length) return null;
@@ -434,9 +402,9 @@
       });
   }
 
-  // Trace une courbe avec son aire de fond semi-transparente
+  // Trace la courbe
   function tracerCourbe(g, points, couleur, epaisseur, generateurLigne, generateurAire) {
-    // Aire de fond
+    // Fond
     g.append('path').datum(points)
       .attr('fill', couleur).attr('fill-opacity', 0.06)
       .attr('d', generateurAire);
@@ -450,7 +418,7 @@
       .attr('d', generateurLigne);
   }
 
-  // Affiche la valeur du dernier point à droite de la courbe
+  // Affiche la valeur du dernier elo à droite de la courbe 
   function etiquetteDernierPoint(g, points, couleur, fnX, fnY, formater) {
     var dernier = points[points.length - 1];
     if (!dernier) return;
@@ -465,11 +433,11 @@
   }
 
 
-  // ── Graphique Elo ─────────────────────────────────────────────────────
+  // Graphique Elo 
   function dessinerElo(cadence) {
     cadenceElo = cadence;
 
-    var svgEl = d3.select('#graphique-elo').attr('width', LARGEUR).attr('height', HAUTEUR);
+    var svgEl = d3.select('#graphique-elo').attr('width', Largeur).attr('height', Hauteur);
     svgEl.selectAll('*').remove();
     var g = svgEl.append('g')
       .attr('transform', 'translate(' + marges.gauche + ',' + marges.haut + ')');
@@ -479,7 +447,7 @@
     var series   = {};
     cadences.forEach(function(c) { series[c] = serieEloComplete(c); });
 
-    // Plage Y calculée uniquement sur les points réellement joués
+    // Plage Y 
     var toutesValeurs = cadences.reduce(function(acc, c) {
       return acc.concat(series[c].filter(function(d) { return d.reel; }).map(function(d) { return d.valeur; }));
     }, []);
@@ -491,8 +459,6 @@
       .range([haut_int, 0]);
 
     ajouterGrilleEtAxes(g, echelleY, function(v) { return v; });
-
-    // Générateurs de forme
     var generateurLigne = d3.line()
       .x(function(d) { return echelleX(d.date); })
       .y(function(d) { return echelleY(d.valeur); })
@@ -508,13 +474,14 @@
 
     cadences.forEach(function(c) {
       var epaisseur = (cadence === 'tout') ? 1.6 : 2;
-      // On filtre les null mais on conserve les points "maintenus" (forward-fill)
+      
+      // On filtre les null mais on conserve les points "maintenus" 
       tracerCourbe(g,
         series[c].filter(function(d) { return d.valeur !== null; }),
         COULEURS[c], epaisseur, generateurLigne, generateurAire
       );
 
-      // Étiquette sur le dernier point réel (pas forward-fill)
+      // Étiquette sur le dernier point réel 
       var dernierReel = null;
       for (var i = series[c].length - 1; i >= 0; i--) {
         if (series[c][i].reel) { dernierReel = series[c][i]; break; }
@@ -540,7 +507,7 @@
   }
 
 
-  // ── Graphique Précision ───────────────────────────────────────────────
+  // Graphique précision moyenne
   function dessinerPrecision(cadence) {
     cadencePrecision = cadence;
 
@@ -564,7 +531,7 @@
 
     ajouterGrilleEtAxes(g, echelleY, function(v) { return v + '%'; });
 
-    // Ligne de référence : moyenne globale (uniquement en mode cadence unique)
+    // Ligne de référence : moyenne globale (uniquement présente en mode cadence unique) 
     if (cadence !== 'tout') {
       var yMoyenne = echelleY(moyennesGlobales[cadence]);
       g.append('line')
@@ -609,7 +576,8 @@
       }
     );
 
-    // Carte "Moyenne globale" — toujours visible quelle que soit la sélection
+    // Carte "Moyenne globale" 
+    
     var maxMoyenne = Math.max(moyennesGlobales.blitz, moyennesGlobales.bullet, moyennesGlobales.rapid);
     document.getElementById('moyennes-globales').innerHTML =
       ['blitz', 'bullet', 'rapid'].map(function(c) {
@@ -628,7 +596,8 @@
   }
 
 
-  // ── Boutons de sélection ──────────────────────────────────────────────
+  // Boutons de sélection 
+    
   document.getElementById('controles-elo').addEventListener('click', function(e) {
     var btn = e.target.closest('.bouton');
     if (!btn) return;
@@ -648,21 +617,20 @@
   });
 
 
-  // ── Chargement du CSV ─────────────────────────────────────────────────
+  // Chargement du CSV 
   d3.dsv(';', 'data/games.csv').then(function(lignes) {
 
-    /* Étape 1 : déclaration des structures temporaires
-       On accumule les valeurs ligne par ligne avant d'agréger. */
+    /*  */
     var cartesElo      = { blitz: new Map(), bullet: new Map(), rapid: new Map() };
     var premiereDates  = { blitz: null,      bullet: null,      rapid: null      };
     var bucketsPrecis  = { blitz: new Map(), bullet: new Map(), rapid: new Map() };
     var sommePrecis    = { blitz: 0,         bullet: 0,         rapid: 0         };
     var comptePrecis   = { blitz: 0,         bullet: 0,         rapid: 0         };
 
-    /* Étape 2 : lecture ligne par ligne */
+    /*  */
     lignes.forEach(function(ligne) {
       var cadence = ligne.timeClass;
-      if (!cartesElo[cadence]) return;   // ignorer "daily" et autres
+      if (!cartesElo[cadence]) return;   
 
       var date   = ligne.date ? ligne.date.trim() : '';
       var parties = date.split('.');
@@ -672,7 +640,6 @@
       var dt    = new Date(annee, mois - 1, jour);
 
       // Elo mensuel : la dernière valeur du mois remplace les précédentes
-      // (le CSV étant trié par date, c'est bien la valeur de fin de mois)
       var elo = parseInt(ligne.userRating, 10);
       if (!isNaN(elo)) {
         var cle_mois = annee + '-' + String(mois).padStart(2, '0');
@@ -680,7 +647,7 @@
         if (!premiereDates[cadence] || dt < premiereDates[cadence]) premiereDates[cadence] = dt;
       }
 
-      // Précision trimestrielle : on cumule pour calculer la moyenne
+      // Précision trimestrielle : on calcule la moyenne
       var precision   = parseFloat(ligne.userAccuracy);
       var heureDebut  = ligne.startTime ? ligne.startTime.trim() : '';
       if (!isNaN(precision) && precision > 0 && heureDebut.match(/^\d{2}:\d{2}:\d{2}$/)) {
@@ -695,13 +662,12 @@
       }
     });
 
-    /* Étape 3 : finalisation des données Elo */
+    /* Données Elo */
     ['blitz', 'bullet', 'rapid'].forEach(function(c) {
       donneesElo[c] = { map: cartesElo[c], premiere: premiereDates[c] || dateMin };
     });
 
-    /* Étape 4 : finalisation des données de précision
-       On ne conserve que les trimestres avec au moins 5 parties. */
+    /* Données de précision, ici on ne conserve (abritrairement) que les trimestres avec au moins 5 parties. */
     ['blitz', 'bullet', 'rapid'].forEach(function(c) {
       var tableau = [];
       bucketsPrecis[c].forEach(function(seau, cle_trim) {
@@ -719,7 +685,7 @@
         ? Math.round(sommePrecis[c] / comptePrecis[c] * 10) / 10 : 0;
     });
 
-    /* Étape 5 : affichage */
+    /* Affichage */
     document.getElementById('statut').textContent =
       lignes.length.toLocaleString() + ' parties chargées';
 
