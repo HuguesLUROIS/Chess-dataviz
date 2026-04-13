@@ -7,10 +7,10 @@
   <!--  -----------------------------------------------------------------
                   Structure et visualisation de la page
     ----------------------------------------------------------------- -->
-  
-  <!-- Style et police : choix d'un design simple et lisible -->
+
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       font-family: Georgia, serif;
       background: #f7f4ef;
@@ -39,38 +39,24 @@
     }
 
     .nav-titre {
-      font-family: Georgia, serif;
       font-size: 0.9rem;
-      color: #2a2a2a;
-      text-decoration: none;
       cursor: pointer;
     }
 
-    .nav-titre:hover { color: #7a4f00; }
-
-    .nav-liens { display: flex; gap: 4px; }
+    .nav-liens { display: flex; gap: 6px; }
 
     .nav-lien {
-      padding: 5px 12px;
-      border-radius: 4px;
       font-family: monospace;
       font-size: 0.72rem;
       color: #aaa;
-      cursor: pointer;
       border: none;
       background: transparent;
-      transition: background 0.15s, color 0.15s;
+      cursor: pointer;
     }
 
-    .nav-lien:hover { background: #f0ebe3; color: #555; }
-    .nav-lien.actif { background: #f0ebe3; color: #2a2a2a; font-weight: bold; }
+    .nav-lien:hover { color: #333; }
 
-    /* Contenu : page d'accueil ou iframe*/
-    #contenu-accueil {
-      display: block;
-      padding-top: 48px;
-    }
-
+    /* iframe viz */
     #iframe-viz {
       display: none;
       position: fixed;
@@ -80,241 +66,219 @@
       border: none;
     }
 
-    /* Page d'accueil */
+    /* HOME */
+    #contenu-accueil {
+      padding-top: 48px;
+    }
+
     .hero {
-      padding: 80px 28px 64px;
       max-width: 960px;
       margin: 0 auto;
+      padding: 80px 28px 40px;
       display: flex;
-      gap: 40px;
+      gap: 28px;
       align-items: center;
     }
 
-    .hero img {
-      width: 160px;
-      height: 160px;
-      object-fit: cover;
+    .hero-img {
+      width: 140px;
+      height: 140px;
       border-radius: 10px;
+      object-fit: cover;
       border: 1px solid #e0dbd4;
+    }
+
+    .hero-titre {
+      font-size: 2rem;
+      margin-bottom: 10px;
     }
 
     .hero-eyebrow {
       font-family: monospace;
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: #aaa;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      margin-bottom: 16px;
-    }
-
-    .hero-titre {
-      font-size: clamp(1.6rem, 3vw, 2.2rem);
-      font-weight: normal;
-      line-height: 1.25;
-      margin-bottom: 18px;
+      margin-bottom: 10px;
     }
 
     .hero-desc {
-      font-size: 0.92rem;
-      color: #666;
-      line-height: 1.8;
-      max-width: 640px;
+      font-size: 0.95rem;
+      line-height: 1.7;
+      color: #555;
       border-left: 2px solid #ddd;
       padding-left: 14px;
     }
 
-    /* Grille des visualisations */
+    /* VIZ GRID */
     .section-titre {
       max-width: 960px;
-      margin: 40px auto 20px;
-      padding: 0 28px;
-      font-size: 0.72rem;
+      margin: 0 auto;
+      padding: 0 28px 20px;
       font-family: monospace;
+      font-size: 0.72rem;
       color: #aaa;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
     }
 
     .grille-viz {
       max-width: 960px;
       margin: 0 auto;
-      padding: 0 28px 64px;
+      padding: 0 28px 60px;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 16px;
     }
 
     .carte-viz {
       background: #fff;
       border: 1px solid #e0dbd4;
-      border-radius: 8px;
-      padding: 20px;
+      border-radius: 10px;
+      overflow: hidden;
       cursor: pointer;
-      transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+      transition: 0.2s;
     }
 
     .carte-viz:hover {
-      box-shadow: 0 4px 16px rgba(0,0,0,0.07);
-      transform: translateY(-2px);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.08);
     }
 
-    .carte-viz[data-viz="progression"]:hover  { border-color: #7a4f00; }
-    .carte-viz[data-viz="distribution"]:hover { border-color: #922518; }
-    .carte-viz[data-viz="heatmap"]:hover      { border-color: #1a5f40; }
-    .carte-viz[data-viz="explorateur"]:hover  { border-color: #4a3580; }
+    .viz-img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+    }
 
-    .viz-numero {
-      font-family: monospace;
-      font-size: 0.65rem;
-      color: #ccc;
-      margin-bottom: 10px;
+    .viz-content {
+      padding: 14px;
     }
 
     .viz-nom {
       font-size: 0.95rem;
-      color: #2a2a2a;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .viz-desc {
+      font-size: 0.7rem;
+      color: #777;
       font-family: monospace;
-      font-size: 0.67rem;
-      color: #999;
-      line-height: 1.6;
+      line-height: 1.5;
     }
 
-    /* Pied de page */
     .pied {
-      border-top: 1px solid #e0dbd4;
-      padding: 20px 28px;
-      max-width: 960px;
-      margin: 0 auto;
+      text-align: center;
       font-family: monospace;
       font-size: 0.65rem;
       color: #bbb;
-      display: flex;
-      justify-content: space-between;
+      padding: 20px;
     }
   </style>
 </head>
 
 <body>
 
-  <!-- Navigation -->
-  <nav class="nav-principale">
-    <div class="nav-interieur">
-      <span class="nav-titre" onclick="afficherAccueil()">♟ Chess Dataviz</span>
-      <div class="nav-liens">
-        <button class="nav-lien" data-viz="progression"  onclick="afficherViz(this)">Progression</button>
-        <button class="nav-lien" data-viz="distribution" onclick="afficherViz(this)">Distribution</button>
-        <button class="nav-lien" data-viz="heatmap"      onclick="afficherViz(this)">Heatmap</button>
-        <button class="nav-lien" data-viz="explorateur"  onclick="afficherViz(this)">Explorateur</button>
+<!-- NAV -->
+<nav class="nav-principale">
+  <div class="nav-interieur">
+    <span class="nav-titre" onclick="afficherAccueil()">♟ Chess Dataviz</span>
+    <div class="nav-liens">
+      <button class="nav-lien" onclick="afficherViz('progression')">Progression</button>
+      <button class="nav-lien" onclick="afficherViz('distribution')">Distribution</button>
+      <button class="nav-lien" onclick="afficherViz('heatmap')">Heatmap</button>
+      <button class="nav-lien" onclick="afficherViz('explorateur')">Explorateur</button>
+    </div>
+  </div>
+</nav>
+
+<!-- IFRAME -->
+<iframe id="iframe-viz"></iframe>
+
+<!-- HOME -->
+<div id="contenu-accueil">
+
+  <div class="hero">
+    <img class="hero-img" src="images/Tactique.png">
+
+    <div>
+      <div class="hero-eyebrow">Chess.com · 2018–2026 · Data storytelling</div>
+
+      <h1 class="hero-titre">
+        Analyse d’un style de jeu et de sa progression
+      </h1>
+
+      <p class="hero-desc">
+        Ce projet vise à comprendre mon style de jeu à partir de 4 966 parties jouées sur Chess.com.
+        L’objectif est d’analyser la progression du niveau, les choix d’ouvertures et les patterns de jeu
+        afin de transformer un historique brut en visualisations interprétables.
+      </p>
+    </div>
+  </div>
+
+  <p class="section-titre">Visualisations</p>
+
+  <div class="grille-viz">
+
+    <div class="carte-viz" onclick="afficherViz('progression')">
+      <img class="viz-img" src="images/progression.png">
+      <div class="viz-content">
+        <div class="viz-nom">Progression Elo</div>
+        <div class="viz-desc">Évolution du niveau et précision dans le temps.</div>
       </div>
     </div>
-  </nav>
 
-  <!-- iframe (chargée dynamiquement) -->
-  <iframe id="iframe-viz" title="Visualisation"></iframe>
-
-  <!-- Page d'accueil -->
-  <div id="contenu-accueil">
-
-    <div class="hero">
-
-      <!-- Image personnelle / profil -->
-      <img src="assets/me.png" alt="profil">
-
-      <div>
-
-        <p class="hero-eyebrow">
-          Chess.com · 2018 – 2026 · Data storytelling
-        </p>
-
-        <h1 class="hero-titre">
-          Comprendre un style de jeu à travers 4 966 parties
-        </h1>
-
-        <p class="hero-desc">
-          Ce projet vise à analyser huit années de parties jouées sur Chess.com afin de
-          comprendre l’évolution d’un style de jeu personnel.  
-          L’objectif est triple : étudier la progression du niveau, mettre en évidence les
-          structures d’ouvertures récurrentes et analyser les schémas décisionnels à l’échiquier.  
-          Chaque visualisation s’appuie directement sur les données brutes exportées de Chess.com,
-          sans transformation artificielle des résultats.
-        </p>
-
-      </div>
-    </div>
-
-    <p class="section-titre">Les visualisations</p>
-
-    <div class="grille-viz">
-
-      <div class="carte-viz" data-viz="progression"
-        onclick="afficherViz(document.querySelector('[data-viz=progression].nav-lien'))">
-        <div class="viz-numero">01</div>
-        <div class="viz-nom">Progression Elo & performance</div>
-        <div class="viz-desc">Évolution du niveau et des performances dans le temps.</div>
-      </div>
-
-      <div class="carte-viz" data-viz="distribution"
-        onclick="afficherViz(document.querySelector('[data-viz=distribution].nav-lien'))">
-        <div class="viz-numero">02</div>
+    <div class="carte-viz" onclick="afficherViz('distribution')">
+      <img class="viz-img" src="images/distribution.png">
+      <div class="viz-content">
         <div class="viz-nom">Distribution des coups</div>
-        <div class="viz-desc">Analyse statistique de la durée des parties.</div>
+        <div class="viz-desc">Structure des parties selon les résultats.</div>
       </div>
-
-      <div class="carte-viz" data-viz="heatmap"
-        onclick="afficherViz(document.querySelector('[data-viz=heatmap].nav-lien'))">
-        <div class="viz-numero">03</div>
-        <div class="viz-nom">Heatmap des déplacements</div>
-        <div class="viz-desc">Cartographie des cases les plus utilisées.</div>
-      </div>
-
-      <div class="carte-viz" data-viz="explorateur"
-        onclick="afficherViz(document.querySelector('[data-viz=explorateur].nav-lien'))">
-        <div class="viz-numero">04</div>
-        <div class="viz-nom">Explorateur d’ouvertures</div>
-        <div class="viz-desc">Analyse structurelle des débuts de partie.</div>
-      </div>
-
     </div>
 
-    <div class="pied">
-      <span>Chess Dataviz · Linxxx54 · Chess.com</span>
-      <span>4 966 parties · 2018 – 2026 · D3.js v7</span>
+    <div class="carte-viz" onclick="afficherViz('heatmap')">
+      <img class="viz-img" src="images/heatmap_deplacements.png">
+      <div class="viz-content">
+        <div class="viz-nom">Heatmap des déplacements</div>
+        <div class="viz-desc">Zones du plateau les plus utilisées.</div>
+      </div>
+    </div>
+
+    <div class="carte-viz" onclick="afficherViz('explorateur')">
+      <img class="viz-img" src="images/ouvertures.png">
+      <div class="viz-content">
+        <div class="viz-nom">Explorateur d’ouvertures</div>
+        <div class="viz-desc">Répertoire et tendances d’ouvertures.</div>
+      </div>
     </div>
 
   </div>
 
-  <script>
-    // Correspondance nom court → chemin du fichier HTML
-    var CHEMINS = {
-      progression  : 'Visualisations/progression.html',
-      distribution : 'Visualisations/distribution_coups.html',
-      heatmap      : 'Visualisations/heatmap_deplacements.html',
-      explorateur  : 'Visualisations/explorateur_ouvertures.html'
-    };
+  <div class="pied">
+    Chess Dataviz · 4 966 parties · 2018–2026
+  </div>
 
-    function afficherViz(btn) {
-      var viz = btn.dataset.viz;
+</div>
 
-      document.querySelectorAll('.nav-lien').forEach(function(b){ b.classList.remove('actif'); });
-      document.querySelector('.nav-lien[data-viz="'+viz+'"]').classList.add('actif');
+<script>
 
-      document.getElementById('contenu-accueil').style.display = 'none';
+const CHEMINS = {
+  progression: "Visualisations/progression.html",
+  distribution: "Visualisations/distribution_coups.html",
+  heatmap: "Visualisations/heatmap_deplacements.html",
+  explorateur: "Visualisations/explorateur_ouvertures.html"
+};
 
-      var iframe = document.getElementById('iframe-viz');
-      iframe.src = CHEMINS[viz];
-      iframe.style.display = 'block';
-    }
+function afficherViz(viz) {
+  document.getElementById("contenu-accueil").style.display = "none";
+  const iframe = document.getElementById("iframe-viz");
+  iframe.style.display = "block";
+  iframe.src = CHEMINS[viz];
+}
 
-    function afficherAccueil() {
-      document.querySelectorAll('.nav-lien').forEach(function(b){ b.classList.remove('actif'); });
-      document.getElementById('iframe-viz').style.display = 'none';
-      document.getElementById('contenu-accueil').style.display = 'block';
-    }
-  </script>
+function afficherAccueil() {
+  document.getElementById("iframe-viz").style.display = "none";
+  document.getElementById("contenu-accueil").style.display = "block";
+}
+
+</script>
 
 </body>
 </html>
