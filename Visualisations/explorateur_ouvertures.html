@@ -314,7 +314,8 @@ Cela mène majoritairement à des ouvertures comme le gambit Benko ou la Benoni.
     arr     : null,    
     arbre   : null,    
     labels  : null,   
-    bar     : null     
+    bar     : null,   
+    selection : null 
   };
 
 
@@ -454,6 +455,12 @@ Cela mène majoritairement à des ouvertures comme le gambit Benko ou la Benoni.
     return false;
   }
 
+// Sélection d'une pièce
+function selectionnerPiece(caseStr) {
+  etat.selection = caseStr;
+  afficher();
+}
+    
   function jouerCoup(plateau, san, trait) {
     /* Applique un coup sur le plateau */
     var p  = Object.assign({}, plateau);
@@ -572,18 +579,31 @@ Cela mène majoritairement à des ouvertures comme le gambit Benko ou la Benoni.
   }
 
   function renderPieces() {
-    calquePieces.selectAll('*').remove();
-    var p = etat.plateau;
-    Object.keys(p).forEach(function(cs) {
-      var pc = p[cs]; if (!pc) return;
-      var coord = coordCase(cs);
-      calquePieces.append('text')
-        .attr('class','piece')
-        .attr('x', coord.c*TAILLE + TAILLE/2)
-        .attr('y', (7-coord.r)*TAILLE + TAILLE/2 + 2)
-        .text(GLYPHES[pc[0]][pc[1]] || '?');
-    });
-  }
+  calquePieces.selectAll('*').remove();
+
+  var p = etat.plateau;
+
+  Object.keys(p).forEach(function(cs) {
+    var pc = p[cs];
+    if (!pc) return;
+
+    var coord = coordCase(cs);
+    var estSelectionnee = (etat.selection === cs);
+
+calquePieces.append('text')
+  .attr('class','piece')
+  .attr('x', coord.c*TAILLE + TAILLE/2)
+  .attr('y', (7-coord.r)*TAILLE + TAILLE/2 + 2)
+  .style('opacity', estSelectionnee ? 1 : 0.95)
+  .style('filter', estSelectionnee ? 'drop-shadow(0px 0px 6px rgba(0,0,0,0.35))' : 'none')
+  .style('transform', estSelectionnee ? 'scale(1.25)' : 'scale(1)')
+  .style('transform-origin', 'center')
+  .text(GLYPHES[pc[0]][pc[1]] || '?')
+  .style('cursor', 'pointer')
+  .on('click', function() {
+    selectionnerPiece(cs);
+  });
+}
 
   function renderFleches() {
     calqueFleches.selectAll('*').remove();
