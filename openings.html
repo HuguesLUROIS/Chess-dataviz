@@ -432,13 +432,20 @@ Cela mène majoritairement à des ouvertures comme le gambit Benko ou la Benoni.
       return true;
     }
 
-    if (tp === 'Q') {
-      /* La dame combine les déplacements horizontaux, verticaux et en diagonal */
-      var f = {}; f[dep] = ['w','B'];
-      var r2 = {}; r2[dep] = ['w','R'];
-      return peut_aller(Object.assign({}, plateau, f), dep, arr, trait, estCapture) ||
-             peut_aller(Object.assign({}, plateau, r2), dep, arr, trait, estCapture);
-    }
+   if (tp === 'Q') {
+  // La dame combine les mouvements du fou et de la tour
+  var estDiag = Math.abs(dc) === Math.abs(dr) && dc !== 0;
+  var estLigne = (dc === 0 || dr === 0) && (dc !== 0 || dr !== 0);
+  if (!estDiag && !estLigne) return false;
+  var stepC = dc === 0 ? 0 : (dc > 0 ? 1 : -1);
+  var stepR = dr === 0 ? 0 : (dr > 0 ? 1 : -1);
+  var c = d.c + stepC, r = d.r + stepR;
+  while (c !== a.c || r !== a.r) {
+    if (plateau[COLS[c] + (r + 1)]) return false;
+    c += stepC; r += stepR;
+  }
+  return true;
+}
 
     if (tp === 'K') {
       return Math.abs(dc) <= 1 && Math.abs(dr) <= 1 && (dc !== 0 || dr !== 0);
@@ -448,13 +455,12 @@ Cela mène majoritairement à des ouvertures comme le gambit Benko ou la Benoni.
   }
 
   function jouerCoup(plateau, san, trait) {
-    /* Applique un coup sur le plateau.
-       Retourne { plateau, dep, arr } — le plateau d'entrée n'est pas modifié. */
+    /* Applique un coup sur le plateau */
     var p  = Object.assign({}, plateau);
     var m  = san.replace(/[+#!?]/g, '');
     var rr = (trait === 'w') ? '1' : '8';
 
-    // Roque
+    // Cas spécifique : Petit et grand roque
     if (m === 'O-O') {
       var d='e'+rr, a='g'+rr;
       p[a]=p[d]; delete p[d]; p['f'+rr]=p['h'+rr]; delete p['h'+rr];
