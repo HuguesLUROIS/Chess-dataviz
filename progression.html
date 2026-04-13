@@ -576,23 +576,21 @@
       }
     );
 
-    // Carte "Moyenne globale" 
-    
-    var maxMoyenne = Math.max(moyennesGlobales.blitz, moyennesGlobales.bullet, moyennesGlobales.rapid);
-    document.getElementById('moyennes-globales').innerHTML =
-      ['blitz', 'bullet', 'rapid'].map(function(c) {
-        var pct = ((moyennesGlobales[c] / maxMoyenne) * 100).toFixed(1);
-        return '<div class="ligne-moyenne">'
-          + '<span class="point-couleur" style="background:' + COULEURS[c] + '"></span>'
-          + '<span style="color:' + COULEURS[c] + '">' + LABELS_COURTS[c] + '</span>'
-          + '<span class="valeur-moyenne" style="color:' + COULEURS[c] + '">' + moyennesGlobales[c] + '%</span>'
-          + '</div>'
-          + '<div style="padding:0 0 6px 0;border-bottom:1px solid #f0ebe3">'
-          +   '<div class="piste-barre">'
-          +     '<div class="remplissage-barre" style="width:' + pct + '%;background:' + COULEURS[c] + ';opacity:0.4"></div>'
-          +   '</div>'
-          + '</div>';
-      }).join('');
+    // Bloc "Moyenne globale" 
+ document.getElementById('moyennes-globales').innerHTML =
+  ['blitz', 'bullet', 'rapid'].map(function(c) {
+    var pct = moyennesGlobales[c].toFixed(1);
+    return '<div class="ligne-moyenne">'
+      + '<span class="point-couleur" style="background:' + COULEURS[c] + '"></span>'
+      + '<span style="color:' + COULEURS[c] + '">' + LABELS_COURTS[c] + '</span>'
+      + '<span class="valeur-moyenne" style="color:' + COULEURS[c] + '">' + moyennesGlobales[c] + '%</span>'
+      + '</div>'
+      + '<div style="padding:0 0 6px 0;border-bottom:1px solid #f0ebe3">'
+      +   '<div class="piste-barre">'
+      +     '<div class="remplissage-barre" style="width:' + pct + '%;background:' + COULEURS[c] + ';opacity:0.4"></div>'
+      +   '</div>'
+      + '</div>';
+  }).join('');
   }
 
 
