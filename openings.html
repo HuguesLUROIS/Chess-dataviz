@@ -6,10 +6,11 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 
   <!--  -----------------------------------------------------------------
-        Mise en page et styles
-        Même charte graphique que les autres visualisations du projet
-        (fond #f7f4ef, Georgia, monospace, cartes blanches bordées)
-  ----------------------------------------------------------------- -->
+       Section 1 : Structure et visualisation de la page
+    ----------------------------------------------------------------- -->
+  
+  <!-- Style et police : choix d'un design simple et lisible -->
+  
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -24,7 +25,8 @@
 
     h2 { font-size: 1.2rem; font-weight: normal; margin-bottom: 6px; }
 
-    /* Textes encadrés (introduction, note de conclusion) */
+    /* Textes encadrés (introduction, conclusion) */
+    
     .intro, .note {
       font-size: 0.82rem; color: #777; line-height: 1.7;
       border-left: 2px solid #ddd; padding-left: 12px;
@@ -36,7 +38,7 @@
     .section h3 { font-size: 0.95rem; font-weight: normal; margin-bottom: 4px; color: #444; }
     .sous-titre { font-size: 0.72rem; color: #aaa; font-family: monospace; margin-bottom: 14px; }
 
-    /* Style des axes D3 */
+    /* Style des axes */
     .axis path, .axis line { stroke: #ddd; }
     .axis text { fill: #aaa; font-size: 10px; font-family: monospace; }
 
@@ -48,9 +50,7 @@
       opacity: 0; transition: opacity .1s; white-space: nowrap; z-index: 100;
     }
 
-    /* -----------------------------------------------------------------
-       Boutons Blancs / Noirs
-    ----------------------------------------------------------------- */
+    /* Boutons Blancs / Noirs */
     .controles { display: flex; gap: 8px; margin-bottom: 16px; }
     .bouton {
       padding: 6px 16px; border: 1px solid #e0dbd4; border-radius: 4px;
@@ -62,9 +62,7 @@
     .bouton.actif[data-camp="w"] { border-color:#5a5020; color:#5a5020; background:rgba(90,80,32,.07); }
     .bouton.actif[data-camp="b"] { border-color:#2a2a2a; color:#2a2a2a; background:rgba(42,42,42,.07); }
 
-    /* -----------------------------------------------------------------
-       Layout échiquier + panneau
-    ----------------------------------------------------------------- */
+    /* Disposition Échiquier */
     .disposition { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
     .echiquier-ext { flex-shrink: 0; }
 
@@ -87,9 +85,7 @@
     .piece { font-size: 34px; dominant-baseline: central; text-anchor: middle;
              pointer-events: none; user-select: none; }
 
-    /* -----------------------------------------------------------------
-       Panneau latéral
-    ----------------------------------------------------------------- */
+    /* Etiquettes */
     .panneau { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 10px; }
 
     .carte {
@@ -105,7 +101,7 @@
     #nom-ouverture { font-family: Georgia, serif; font-style: italic;
                      font-size: .85rem; color: #555; line-height: 1.5; min-height: 1.5em; }
 
-    /* Fil d'Ariane */
+    /* Séquence de coups */
     #fil-coups { font-family: monospace; font-size: .72rem; color: #555;
                  line-height: 1.9; min-height: 1.9em; }
     .jeton-coup {
@@ -115,7 +111,7 @@
     }
     .jeton-coup:hover { background: #e0dbd4; }
 
-    /* Bouton retour */
+    /* Bouton retour pour faciliter la navigation */
     #btn-retour {
       padding: 5px 12px; border: 1px solid #e0dbd4; border-radius: 4px;
       background: transparent; font-family: monospace; font-size: .7rem;
@@ -140,7 +136,7 @@
     .barre-fill { height: 100%; border-radius: 2px; }
     .pct-wr     { flex: 0 0 38px; text-align: right; font-size: .68rem; }
 
-    /* Légende épaisseur + couleur */
+    /* Légende épaisseur de la fléche + dégradé de couleur */
     .legende-grille { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 4px; }
     .legende-ligne  { display: flex; align-items: center; gap: 10px;
                       font-size: .63rem; font-family: monospace; color: #777; }
@@ -149,9 +145,7 @@
     .exemples-ep    { display: flex; align-items: center; gap: 12px; }
     .ex-ep          { display: flex; align-items: center; gap: 5px; }
 
-    /* -----------------------------------------------------------------
-       Bar charts
-    ----------------------------------------------------------------- */
+    /* Bar charts*/
     .rangee-graphiques { display: flex; gap: 32px; flex-wrap: wrap; }
     .bloc-graphique    { flex: 1; min-width: 240px; }
     .bloc-graphique h4 {
@@ -168,7 +162,7 @@
     .remplissage  { height: 100%; border-radius: 3px; }
     .val-barre    { flex: 0 0 88px; color: #888; text-align: right; }
 
-    /* Statut */
+  
     #statut { font-size: .62rem; color: #bbb; margin-top: 6px; font-family: monospace; }
   </style>
 </head>
@@ -177,18 +171,13 @@
   <h2>Explorateur d'ouvertures</h2>
 
   <p class="intro">
-    Cliquez sur une case de destination ou sur un coup dans la liste pour avancer dans la position.
-    Les flèches partent de la case réelle de chaque pièce. Les cavaliers tracent leur
-    déplacement en L (deux segments). L'épaisseur reflète la fréquence ; la couleur encode
-    le winrate du rouge (défavorable) au vert (favorable). Seuil : 8 parties minimum.
+    Les ouvertures maitrisées par un joueur contribuent grandement à la définition de son style de jeu. Pour s'en rendre compte, il est intéressant de se pencher sur l'explorateur d'ouvertures ci-dessous. Jouez un coup pour voir les suites possibles et les winrate associés à chaque séquence de coups.
   </p>
 
-  <!-- ==================================================================
-       SECTION 1 : ÉCHIQUIER INTERACTIF
-  ================================================================== -->
+  <!-- Titre et en têtes de l'échiquier  -->
   <div class="section">
-    <h3>Coups et réponses</h3>
-    <p class="sous-titre">Profondeur 8 demi-coups · toutes cadences · 4 960 parties</p>
+    <h3>Echiquier interactif</h3>
+    <p class="sous-titre">Profondeur 8 demi-coups · Toutes cadences · 4 960 parties</p>
 
     <div class="controles" id="controles-camp">
       <button class="bouton actif" data-camp="w">♙ Blancs</button>
@@ -197,7 +186,7 @@
 
     <div class="disposition">
 
-      <!-- Échiquier -->
+      <!-- Visualisation échiquier -->
       <div class="echiquier-ext">
         <div class="coord-ligne">
           <div class="labels-rangs"  id="labels-rangs"></div>
@@ -207,7 +196,7 @@
         <p id="statut">Chargement…</p>
       </div>
 
-      <!-- Panneau -->
+      <!-- Étiquettes ouvertures, coups joués -->
       <div class="panneau">
 
         <div class="carte">
@@ -216,14 +205,14 @@
         </div>
 
         <div class="carte">
-          <h4>Coups joués</h4>
+          <h4>Séquence jouée</h4>
           <div id="fil-coups">—</div>
         </div>
 
         <button id="btn-retour">← Retour</button>
 
         <div class="carte">
-          <h4>Coups suivants</h4>
+          <h4>Coups suivants : Fréquence et winrate</h4>
           <ul id="liste-coups">
             <li style="color:#bbb;cursor:default;font-size:.7rem;border:none">En attente…</li>
           </ul>
@@ -271,22 +260,6 @@
               </div>
             </div>
 
-            <!-- Cavalier -->
-            <div class="legende-ligne" style="margin-top:4px">
-              <span style="flex:0 0 60px">Cavalier</span>
-              <svg width="48" height="28">
-                <defs>
-                  <marker id="mk-leg" markerWidth="5" markerHeight="5" refX="4.5" refY="2.5" orient="auto">
-                    <polygon points="0 0.5,5 2.5,0 4.5" fill="#888"/>
-                  </marker>
-                </defs>
-                <!-- Flèche en L illustrative -->
-                <line x1="4" y1="24" x2="38" y2="24" stroke="#888" stroke-width="1.8" stroke-linecap="round"/>
-                <line x1="38" y1="24" x2="38" y2="6"  stroke="#888" stroke-width="1.8" stroke-linecap="round" marker-end="url(#mk-leg)"/>
-              </svg>
-              <span style="color:#bbb">saut en L</span>
-            </div>
-
           </div>
         </div>
 
@@ -294,12 +267,9 @@
     </div>
   </div>
 
-  <!-- ==================================================================
-       SECTION 2 : BAR CHARTS
-  ================================================================== -->
+  <!--Bar charts ouvertures les plus jouées-->
   <div class="section">
     <h3>Ouvertures les plus jouées</h3>
-    <p class="sous-titre">Regroupements par famille · n ≥ 8 parties</p>
 
     <div class="rangee-graphiques">
       <div class="bloc-graphique">
@@ -314,45 +284,41 @@
   </div>
 
   <p class="note">
-    L'arbre révèle une stratégie cohérente : 1.e4 dans quasiment toutes les parties blanches,
-    suivi d'une nette préférence pour les lignes Écossaises et l'Alapin sicilienne.
-    Côté noir, la Caro-Kann domine très largement (34 % des parties), complétée par la Scandinave
-    et le Benoni — un répertoire offensif qui se confirme dans les statistiques de winrate.
-  </p>
-
-  <div id="infobulle"></div>
+En observant mes ouvertures, ce qui frappe d'emblée est l'étroitesse de mon répertoire. Avec les blancs, 1.e4 est joué dans plus de 97 % des parties. Cela mène régulièrement à l'Écossaise, ligne choisie contre 1.e5, et à l'alapine face à la Sicilienne (1…c5 2.c3) afin d'éviter les grandes lignes théoriques.
+Côté noir, le répertoire est tout aussi restreint. Face à 1.e4, la Caro-Kann s'impose comme la réponse de loin la plus jouée. C'est une défense solide, moins théorique que la Française ou la Sicilienne, qui convient à un style positionnel comme le mien. Face à 1.d4, c5 est le coup choisi.
+Cela mène majoritairement à des ouvertures comme le gambit Benko ou la Benoni. Un répertoire restreint donc, mais bien maitrisé. Cela permet de concentrer son apprentissage sur la tactique, la stratégie ou les finales plutôt qu'à l'apprentissage de nombreuses lignes théoriques. 
 
 
-  <!-- =================================================================
-       SECTION SCRIPT — Traitement des données et rendu
-  ================================================================= -->
+  <!-- -----------------------------------------------------------------
+      SECTION 2 : SCRIPT ET TRAITEMENT DES DONNÉES
+    ----------------------------------------------------------------- -->
   <script>
 
-  // ── Constantes de l'échiquier ─────────────────────────────────────────
-  var TAILLE  = 56;                            // pixels par case
+  // Labels de l'échiquier 
+  var TAILLE  = 56;                            
   var COLS    = ['a','b','c','d','e','f','g','h'];
   var RANGS   = ['1','2','3','4','5','6','7','8'];
 
-  // Glyphes Unicode des pièces, indexés par [couleur][type SAN]
+  // Les pièces
   var GLYPHES = {
     w: { P:'♙', N:'♘', B:'♗', R:'♖', Q:'♕', K:'♔' },
     b: { P:'♟', N:'♞', B:'♝', R:'♜', Q:'♛', K:'♚' }
   };
 
-  // ── État global de l'application ──────────────────────────────────────
+  //
   var etat = {
-    camp    : 'w',     // 'w' = blancs, 'b' = noirs
-    coups   : [],      // séquence des coups joués depuis la position initiale
-    plateau : null,    // position courante { 'e4': ['w','P'], ... }
-    dep     : null,    // case de départ du dernier coup (surbrillance)
-    arr     : null,    // case d'arrivée du dernier coup
-    arbre   : null,    // arbre des coups chargé depuis le CSV
-    labels  : null,    // noms d'ouvertures par clé de position
-    bar     : null     // données des bar charts
+    camp    : 'w',     
+    coups   : [],      
+    plateau : null,    
+    dep     : null,    
+    arr     : null,    
+    arbre   : null,    
+    labels  : null,   
+    bar     : null     
   };
 
 
-  // ── Construction de l'échiquier SVG ──────────────────────────────────
+  // Construction de l'échiquier SVG 
 
   // Labels de rangs (8 → 1)
   var contRangs = document.getElementById('labels-rangs');
@@ -372,7 +338,7 @@
 
   // Calque cases
   var calqueCases = svg.append('g').attr('id','g-cases');
-  var carteCases  = {};   // clé "col-rang" → sélection D3
+  var carteCases  = {};   
 
   for (var rang = 0; rang < 8; rang++) {
     for (var col = 0; col < 8; col++) {
@@ -390,32 +356,29 @@
   var calqueClics   = svg.append('g').attr('id','g-clics');    // zone de clic
 
 
-  // ── Moteur d'échecs — validation légale des mouvements ───────────────
+
   /* Chaque pièce est stockée dans le plateau sous la forme ['couleur','TYPE_SAN']
      où TYPE_SAN ∈ { P, N, B, R, Q, K }.
-     La fonction peut_aller() vérifie la légalité géométrique (sans tenir compte
-     des échecs, ce qui est suffisant pour l'explorateur d'ouvertures). */
+     La fonction peut_aller() vérifie la légalité cu coup (afin de s'assurer que le bon cavalier fasse le coup par exemple). */
 
   function initPlateau() {
     var p = {};
     var rangee_arr = ['R','N','B','Q','K','B','N','R'];
     for (var i = 0; i < 8; i++) {
-      p[COLS[i]+'1'] = ['w', rangee_arr[i]];   // grande pièces blanches
-      p[COLS[i]+'2'] = ['w', 'P'];             // pions blancs
-      p[COLS[i]+'7'] = ['b', 'P'];             // pions noirs
-      p[COLS[i]+'8'] = ['b', rangee_arr[i]];   // grandes pièces noires
+      p[COLS[i]+'1'] = ['w', rangee_arr[i]];   
+      p[COLS[i]+'2'] = ['w', 'P'];             
+      p[COLS[i]+'7'] = ['b', 'P'];            
+      p[COLS[i]+'8'] = ['b', rangee_arr[i]];   
     }
     return p;
   }
 
   function coordCase(caseStr) {
-    /* "e4" → { c: 4, r: 3 } (0-indexé depuis a1) */
     return { c: COLS.indexOf(caseStr[0]), r: parseInt(caseStr[1]) - 1 };
   }
 
   function peut_aller(plateau, dep, arr, trait, estCapture) {
-    /* Retourne true si la pièce sur `dep` peut légalement aller sur `arr`
-       selon les règles de déplacement (validation géométrique). */
+    /* Retourne true si la pièce sur la case de départ peut légalement aller sur la case d'arrivée*/
     if (!plateau[dep]) return false;
     var coul = plateau[dep][0], tp = plateau[dep][1];
     if (coul !== trait) return false;
@@ -425,7 +388,7 @@
 
     if (tp === 'P') {
       var dir     = (coul === 'w') ? 1 : -1;
-      var rangDep = (coul === 'w') ? 1 : 6;    // rang de départ des pions
+      var rangDep = (coul === 'w') ? 1 : 6;    
       if (estCapture) return Math.abs(dc) === 1 && dr === dir;
       if (dc !== 0) return false;
       // Avance d'une case
@@ -437,13 +400,13 @@
     }
 
     if (tp === 'N') {
-      /* Le cavalier saute en L : (1,2) ou (2,1) dans les deux directions */
+      /* Le cavalier se déplace en L : (1,2) ou (2,1) dans les deux directions */
       return (Math.abs(dc) === 1 && Math.abs(dr) === 2) ||
              (Math.abs(dc) === 2 && Math.abs(dr) === 1);
     }
 
     if (tp === 'B') {
-      /* Le fou se déplace en diagonale, chemin libre */
+      /* Le fou se déplace en diagonale */
       if (Math.abs(dc) !== Math.abs(dr) || dc === 0) return false;
       var sc = dc > 0 ? 1 : -1, sr = dr > 0 ? 1 : -1;
       var c = d.c + sc, r = d.r + sr;
@@ -455,7 +418,7 @@
     }
 
     if (tp === 'R') {
-      /* La tour se déplace en ligne droite, chemin libre */
+      /* La tour se déplace en ligne droite */
       if (dc !== 0 && dr !== 0) return false;
       if (dc === 0) {
         var s = dr > 0 ? 1 : -1;
@@ -470,7 +433,7 @@
     }
 
     if (tp === 'Q') {
-      /* La dame combine fou et tour */
+      /* La dame combine les déplacements horizontaux, verticaux et en diagonal */
       var f = {}; f[dep] = ['w','B'];
       var r2 = {}; r2[dep] = ['w','R'];
       return peut_aller(Object.assign({}, plateau, f), dep, arr, trait, estCapture) ||
@@ -485,7 +448,7 @@
   }
 
   function jouerCoup(plateau, san, trait) {
-    /* Applique un coup SAN sur le plateau.
+    /* Applique un coup sur le plateau.
        Retourne { plateau, dep, arr } — le plateau d'entrée n'est pas modifié. */
     var p  = Object.assign({}, plateau);
     var m  = san.replace(/[+#!?]/g, '');
@@ -512,7 +475,6 @@
     var estCapture = m.indexOf('x') !== -1;
     var mc = m.replace('x','');
 
-    // Type de pièce et désambiguïsation
     var typePiece, disamb;
     if (mc[0] === mc[0].toUpperCase() && /[A-Z]/.test(mc[0])) {
       typePiece = mc[0]; disamb = mc.slice(1, -2);
@@ -526,7 +488,7 @@
     for (var ki = 0; ki < cases.length; ki++) {
       var cs = cases[ki];
       if (!p[cs] || p[cs][0] !== trait || p[cs][1] !== typePiece) continue;
-      // Appliquer la désambiguïsation si présente
+      // Traite le cas où deux pieces identiques (ex:fous) peuvent aller sur la même case
       if (disamb.length === 2) { if (cs !== disamb) continue; }
       else if (disamb.length === 1) {
         if (COLS.indexOf(disamb) !== -1) { if (cs[0] !== disamb) continue; }
@@ -542,7 +504,7 @@
       p[dest] = p[caseDep];
       if (promo) p[dest] = [trait, promo];
       delete p[caseDep];
-      // En passant : retirer le pion capturé
+      // Prise en passant : retirer le pion capturé
       if (typePiece === 'P' && estCapture && !plateau[dest]) {
         var rangEP = parseInt(dest[1]) + (trait === 'w' ? -1 : 1);
         delete p[dest[0] + rangEP];
@@ -564,15 +526,12 @@
   }
 
 
-  // ── Utilitaires de coordonnées ────────────────────────────────────────
+  //  Coordonnées pixel du centre d'une case et couleur HSL associée au winrate (rouge → vert)
 
   function pixelCentre(col, rang) {
-    /* Centre en pixels de la case (col, rang), rangée 8 = haut SVG. */
     return { x: col*TAILLE + TAILLE/2, y: (7-rang)*TAILLE + TAILLE/2 };
   }
-
   function couleurWR(wr) {
-    /* Interpolation HSL continue : rouge 0% → jaune 50% → vert 100% */
     var t   = Math.max(0, Math.min(1, wr / 100));
     var hue = t * 120;
     var sat = 70 + Math.abs(t - 0.5) * 30;
@@ -581,7 +540,7 @@
   }
 
 
-  // ── Rendu principal ───────────────────────────────────────────────────
+  // Rendu principal 
 
   function afficher() {
     var pos      = reconstruire(etat.coups);
@@ -636,7 +595,7 @@
       var dest = san.replace(/[x+#!=?]/g,'').replace(/=[NBRQ]/,'').slice(-2);
       if (!/^[a-h][1-8]$/.test(dest)) return;
 
-      // Case de départ : issue du moteur (case réelle sur le plateau)
+      // Case de départ 
       var caseDep = s.de;
       if (!caseDep || !/^[a-h][1-8]$/.test(caseDep)) return;
 
@@ -644,7 +603,6 @@
       var ep      = 1.2 + (s.n / maxN) * 3.6;   // épaisseur 1.2 → 4.8 px
       var idMk    = 'mk_' + san.replace(/[^a-zA-Z0-9]/g,'_');
 
-      // Marqueur de pointe
       defs.append('marker')
         .attr('id', idMk)
         .attr('markerWidth', 5).attr('markerHeight', 5)
@@ -659,7 +617,7 @@
       var pdep = pixelCentre(cdep.c, cdep.r);
       var parr = pixelCentre(carr.c, carr.r);
 
-      // Vérifier si c'est un cavalier sur la case de départ
+      // Vérifier si c'est un cavalier sur la case de départ (mouvement en L donc fléche distincte)
       var estCavalier = etat.plateau[caseDep] && etat.plateau[caseDep][1] === 'N';
 
       if (estCavalier) {
@@ -680,8 +638,6 @@
     var len = Math.sqrt(dx*dx + dy*dy);
     if (len < 1) return;
     var nx = dx/len, ny = dy/len;
-
-    // Raccourcir les extrémités pour rester dans les cases
     var recDep = TAILLE * 0.30;
     var recArr = TAILLE * 0.28;
 
@@ -696,20 +652,19 @@
   }
 
   function tracerFlecheL(g, dep, arr, coul, ep, idMk, san, s) {
-    /* Déplacement en L d'un cavalier : segment horizontal puis vertical.
-       Le coude est au coin (même colonne que l'arrivée, même rang que le départ). */
+    /* Déplacement en L d'un cavalier */
     var coude = { x: arr.x, y: dep.y };
 
     // Longueur de chaque segment
     var lenH = Math.abs(arr.x - dep.x);
     var lenV = Math.abs(arr.y - dep.y);
 
-    // Direction horizontale (segment 1)
+    // Direction horizontale 
     var signH = (arr.x > dep.x) ? 1 : -1;
     var recDep = Math.min(TAILLE * 0.28, lenH * 0.25);
     var x1s = dep.x + signH * recDep;
 
-    // Direction verticale (segment 2 + pointe)
+    // Direction verticale 
     var signV = (arr.y > dep.y) ? 1 : -1;
     var recArr = TAILLE * 0.26;
     var y2e = arr.y - signV * recArr;
@@ -723,7 +678,7 @@
       .on('mouseover', function(e){ montrerInfo(e, san+'  ·  '+s.n+' parties  ·  WR '+s.wr+'%'); })
       .on('mouseleave', cacherInfo);
 
-    // Segment 2 : du coude à l'arrivée (avec pointe de flèche)
+    // Segment 2 : du coude à la case d'arrivée 
     g.append('line')
       .attr('x1', coude.x).attr('y1', coude.y)
       .attr('x2', coude.x).attr('y2', y2e)
@@ -741,7 +696,7 @@
     document.getElementById('nom-ouverture').textContent =
       (labels && labels[cle]) || (etat.coups.length ? '—' : 'Position initiale');
 
-    // Fil d'Ariane
+    // Séquence de coups
     var filEl = document.getElementById('fil-coups');
     if (!etat.coups.length) {
       filEl.textContent = '—';
@@ -781,7 +736,6 @@
   }
 
   function renderClics() {
-    /* Rectangles transparents sur les cases cibles des coups disponibles */
     calqueClics.selectAll('*').remove();
     var dispos = getCoupsDispos();
     var carteDest = {};
@@ -806,7 +760,7 @@
   }
 
 
-  // ── Interactions ──────────────────────────────────────────────────────
+  // Interactivité
 
   function getCoupsDispos() {
     if (!etat.arbre) return {};
@@ -837,7 +791,7 @@
   });
 
 
-  // ── Infobulle ─────────────────────────────────────────────────────────
+  // Infobulle 
   var infobulleEl = document.getElementById('infobulle');
   function montrerInfo(event, texte) {
     infobulleEl.innerHTML = texte;
@@ -848,7 +802,7 @@
   function cacherInfo() { infobulleEl.style.opacity = 0; }
 
 
-  // ── Bar charts ────────────────────────────────────────────────────────
+  // Bar charts des ouvertures les plus jouées
   function afficherBarCharts() {
     if (!etat.bar) return;
     var couleurs = { w:'#7a4f00', b:'#2a2a2a' };
@@ -868,15 +822,12 @@
   }
 
 
-  // ── Chargement du CSV ─────────────────────────────────────────────────
-  /* On lit le CSV et on construit :
-     1. L'arbre des coups avec validation légale des origines
-     2. Les votes de noms d'ouvertures par position
-     3. Les compteurs pour les bar charts par famille */
+  // Chargement du CSV 
+ 
 
   d3.dsv(';', 'data/games.csv').then(function(lignes) {
 
-    var SEUIL_MIN = 8;
+    var SEUIL_MIN = 10;
 
     var arbreBrut = { w:{}, b:{} };
     var votesOuv  = { w:{}, b:{} };
@@ -910,27 +861,27 @@
 
       totaux[camp]++;
 
-      // Comptage par famille d'ouvertures
+      // Comptage par ouverture
       groupes[camp].forEach(function(g) {
         if (g[1].some(function(k){ return ouv.indexOf(k)!==-1; })) comptOuv[camp][g[0]]++;
       });
 
-      // Nom court (avant la variante chiffrée, 4 mots max)
+      // Nom court (pour regrouper l'ensemble des caro kann par exemple)
       var nomCourt = ouv.replace(/\s+\d.*/,'').split(' ').slice(0,4).join(' ');
 
-      // Parcourir les 8 premiers demi-coups
+      // Parcourir les 15 premiers demi-coups
       var plateau = initPlateau(), trait = 'w';
 
-      for (var prof = 0; prof < Math.min(8, coups.length); prof++) {
+      for (var prof = 0; prof < Math.min(20, coups.length); prof++) {
         var cle = coups.slice(0, prof).join('|');
         var mv  = coups[prof];
 
-        // Appliquer le coup (moteur avec validation légale)
+        // Appliquer le coup (Avec validation légale)
         var res  = jouerCoup(plateau, mv, trait);
         plateau  = res.plateau;
         var dep  = res.dep;
 
-        // Mettre à jour l'arbre brut
+        // Mettre à jour l'arbre 
         if (!arbreBrut[camp][cle]) arbreBrut[camp][cle] = {};
         if (!arbreBrut[camp][cle][mv])
           arbreBrut[camp][cle][mv] = { n:0, v:0, origines:{} };
@@ -941,7 +892,7 @@
           orig[dep] = (orig[dep]||0) + 1;
         }
 
-        // Vote pour le nom d'ouverture après ce coup
+        // Nom d'ouverture après ce coup
         var cleAp = coups.slice(0, prof+1).join('|');
         if (!votesOuv[camp][cleAp]) votesOuv[camp][cleAp] = {};
         votesOuv[camp][cleAp][nomCourt] = (votesOuv[camp][cleAp][nomCourt]||0) + 1;
@@ -950,7 +901,7 @@
       }
     });
 
-    // Étape 2 : filtrage (n ≥ SEUIL_MIN) et calcul des cases d'origine majoritaires
+    // Étape 2 : filtrage (n ≥ SEUIL_MIN) 
     var arbreFiltre = { w:{}, b:{} };
     ['w','b'].forEach(function(camp) {
       Object.keys(arbreBrut[camp]).forEach(function(cle) {
@@ -967,7 +918,7 @@
       });
     });
 
-    // Étape 3 : labels d'ouvertures (nom majoritaire par position)
+    // Étape 3 : labels d'ouvertures 
     var labelsOuv = { w:{}, b:{} };
     ['w','b'].forEach(function(camp) {
       var clesValides = new Set(Object.keys(arbreFiltre[camp]));
@@ -978,7 +929,7 @@
       });
     });
 
-    // Étape 4 : données des bar charts
+    // Étape 4 : Création des bar charts
     var donneesBar = { w:[], b:[] };
     ['w','b'].forEach(function(camp) {
       groupes[camp].forEach(function(g) {
@@ -989,7 +940,6 @@
       donneesBar[camp].sort(function(a,b){ return b.n-a.n; });
     });
 
-    // Étape 5 : stocker et lancer le rendu
     etat.arbre  = arbreFiltre;
     etat.labels = labelsOuv;
     etat.bar    = donneesBar;
