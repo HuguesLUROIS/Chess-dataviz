@@ -627,7 +627,7 @@ item.append('span').style('font-size', '0.58rem').style('color', '#bbb').style('
 
 
   // ── Chargement des données ────────────────────────────────────────────────
-  d3.dsv(';', 'data/games.csv').then(function(rows) {
+d3.dsv(';', '../data/games.csv').then(function(rows) {
 
     rows.forEach(function(row) {
       if (!row.pgn) return;
