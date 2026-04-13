@@ -831,7 +831,7 @@ Cela mène majoritairement à des ouvertures comme le gambit Benko ou la Benoni.
   // Chargement du CSV 
  
 
-  d3.dsv(';', 'data/games.csv').then(function(lignes) {
+d3.dsv(';', '../data/games.csv').then(function(lignes) {
 
       // Fixation arbitraire du seuil minimal du nombre de parties jouées pour affichage  
     var SEUIL_MIN = 10;
