@@ -197,12 +197,6 @@
         <svg id="graphique-elo"></svg>
         <p id="statut">Chargement des données…</p>
       </div>
-      <div class="panneau">
-        <div class="carte">
-          <h4>Cadences affichées</h4>
-          <ul class="liste-legende" id="legende-elo"></ul>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -239,10 +233,6 @@
         <svg id="graphique-precision"></svg>
       </div>
       <div class="panneau">
-        <div class="carte">
-          <h4>Cadences affichées</h4>
-          <ul class="liste-legende" id="legende-precision"></ul>
-        </div>
         <div class="carte">
           <h4>Moyenne globale</h4>
           <div id="moyennes-globales"></div>
@@ -547,18 +537,6 @@
       }
     );
 
-    // Mise à jour de la légende
-    document.getElementById('legende-elo').innerHTML = cadences.map(function(c) {
-      var dernierReel = null;
-      for (var i = series[c].length - 1; i >= 0; i--) {
-        if (series[c][i].reel) { dernierReel = series[c][i]; break; }
-      }
-      return '<li>'
-        + '<span class="swatch-couleur" style="background:' + COULEURS[c] + '"></span>'
-        + LABELS_LONGS[c]
-        + '<span class="valeur-legende">' + (dernierReel ? dernierReel.valeur : '—') + '</span>'
-        + '</li>';
-    }).join('');
   }
 
 
@@ -630,17 +608,6 @@
           + '<span style="color:#aaa">(' + d.label + ')</span></span>';
       }
     );
-
-    // Légende
-    document.getElementById('legende-precision').innerHTML = cadences.map(function(c) {
-      var pts     = series[c];
-      var dernier = pts[pts.length - 1];
-      return '<li>'
-        + '<span class="swatch-couleur" style="background:' + COULEURS[c] + '"></span>'
-        + LABELS_LONGS[c]
-        + '<span class="valeur-legende">' + (dernier ? dernier.valeur + '%' : '—') + '</span>'
-        + '</li>';
-    }).join('');
 
     // Carte "Moyenne globale" — toujours visible quelle que soit la sélection
     var maxMoyenne = Math.max(moyennesGlobales.blitz, moyennesGlobales.bullet, moyennesGlobales.rapid);
