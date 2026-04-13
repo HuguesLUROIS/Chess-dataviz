@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Progression Elo & Accuracy</title>
+  <title>Ma progression de 2018 à 2026</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 
   <style>
@@ -187,14 +187,11 @@
 </head>
 <body>
 
-  <h2>Progression Elo & précision de jeu</h2>
+  <h2>Ma progression de 2018 à 2026</h2>
 
   <p class="intro">
-    Deux lectures d'une même trajectoire : le classement Elo, qui mesure le niveau relatif face à la
-    communauté, et l'accuracy, estimée par l'analyse automatique de chaque partie. L'Elo monte quand
-    on bat des adversaires mieux classés ; l'accuracy reflète la qualité intrinsèque des coups,
-    indépendamment du résultat. Comparer les deux révèle si la progression est due à un meilleur jeu
-    ou à d'autres facteurs.
+    Pour évaluer la progression d'un joueur, deux indicateurs présents dans le jeu de données peuvent être exploités. L'évolution dans le temps du classement Elo en fonction des cadences semble être la première information naturelle à observer pour tout joueur d'échecs. Le classement Elo mesure le niveau relatif face à la
+    communauté échiquéenne. Lorsque l'on affronte et bat un adversaire, notre score elo va augmenter d'un nombre de points qui dépend du différentiel elo avec notre adversaire. Voici, ci-dessous, les séries temporelles illustrant ma progression elo (pour toutes cadences) de 2008 à aujourd'hui. 
   </p>
 
   <!-- ==================================================================
@@ -202,7 +199,7 @@
        Série mensuelle avec forward-fill sur les périodes inactives
   ================================================================== -->
   <div class="section">
-    <h3>Classement Elo mensuel</h3>
+    <h3>Évolution du classement Elo</h3>
     <p class="sub">Dernier Elo enregistré chaque mois · 2018 – 2026</p>
 
     <div class="controls" id="elo-controls">
@@ -228,21 +225,15 @@
 
   <!-- Texte analytique placé entre les deux graphiques -->
   <p class="note">
-    La progression Elo illustre une trajectoire d'apprentissage sur huit ans, ponctuée de longues
-    périodes d'inactivité. Le blitz, cadence la plus jouée (2 948 parties), affiche la montée la
-    plus régulière : de 776 points en 2018 à 1 910 fin 2025. Le rapide, pratiqué plus tardivement,
-    a franchi le cap des 2 000 points dès fin 2023 — seuil symbolique témoignant d'une maîtrise
-    technique solide. Le bullet, cadence la plus exigeante en réflexes, reste plus volatil : les
-    sauts entre périodes actives reflètent des sessions intensives plutôt qu'une progression continue.
-  </p>
-
-  <!-- ==================================================================
+    Nous observons grâce à ces trois courbes une progression conséquente dans toutes les cadences. En blitz, la cadence la plus jouée (2943 parties), mon classement est passé de moins de 800 elos en 2018 à 1910 en 2026. En rapide l'évolution est conséquente avec une augmentation de près de 1000 points. Ce qui est marquant en combinant les 3 courbes, c'est d'observer les périodes à forte progression et les périodes de stagnation et d'inactivité. Nous observons par exemple que l'année 2022 a été marquée par une explosion des classements dans toutes les cadences avec une augmentation moyenne d'environ 400 points elo. La période 2023-2025 a, quant à elle, était beaucoup plus calme. Cela s'explique par un nombre de parties restreint sur cette période.     
+  Après avoir observé l'évolution Elo au cours du temps, il est intéressant d'observer l'évolution de la précision moyenne. La précision mesure la proportion de "meilleurs coups" joués selon l'ordinateur. Ci-dessous l'évolution de la précision moyenne au cours du temps et selon chacune des cadences. 
+    <!-- ==================================================================
        SECTION 2 — ACCURACY PAR TRIMESTRE
        Moyenne trimestrielle par cadence (blitz, bullet, rapide, les 3)
   ================================================================== -->
   <div class="section">
-    <h3>Accuracy moyenne par trimestre</h3>
-    <p class="sub">Moyenne des analyses automatiques Chess.com · n ≥ 5 parties / trimestre</p>
+    <h3>Précision moyenne par trimestre</h3>
+    <p class="sub">Moyenne par trimestre des précisions obtenues par analyses Chess.com</p> 
 
     <div class="controls" id="acc-controls">
       <button class="cbtn active" data-tc="blitz">Blitz</button>
@@ -261,7 +252,7 @@
           <ul class="legend-list" id="acc-legend"></ul>
         </div>
 
-        <!-- Note de lecture avant les chiffres bruts -->
+        <!-- Note de lecture avant les chiffres bruts 
         <div class="card">
           <h4>Lecture</h4>
           <p style="font-size:0.72rem;color:#777;line-height:1.6;font-family:monospace">
@@ -270,10 +261,10 @@
             mesure de qualité absolue. Le blitz affiche la moyenne la plus basse (72,8 %) :
             la contrainte de temps y génère mécaniquement davantage d'erreurs.
           </p>
-        </div>
+        </div>-->
 
         <div class="card">
-          <h4>Moyenne globale · 4 960 parties</h4>
+          <h4>Moyenne globale</h4>
           <div id="avg-stats"></div>
         </div>
       </div>
@@ -281,12 +272,8 @@
   </div>
 
   <p class="note">
-    Ce qui frappe dans ces deux graphiques, c'est leur relative indépendance. L'Elo suit une
-    progression longue et structurée — presque une courbe d'apprentissage classique. L'accuracy,
-    lissée par trimestre, révèle une hausse progressive de la qualité de jeu, particulièrement
-    visible en rapide dès 2022. Cela rappelle que gagner aux échecs ne suppose pas toujours de
-    jouer les meilleurs coups : la psychologie, la gestion du temps et le choix des ouvertures
-    pèsent autant que la précision pure.
+    Deux faits marquants sont à tirés de ces graphiques. Premièrement, il est intéressant et rassurant d'observer que la précision moyenne est plus importante pour les cadences longues. Plus je dispose de temps, plus je suis capable de trouver les meilleurs coups. 
+    Deuxièmement, les courbes de progression de la précision, bien que plus volatiles, possédent des caractéristiques communes avec celles de l'évolution du classement elo. Nous observons, en moyenne, une augmentation de près de 5 points de pourcentage entre 2022 et 2023 tandis que la période 2023-2025 est marquée par une évolution beaucoup plus fluctuante et où il est difficile d'observer une progression claire. 
   </p>
 
   <div id="tip"></div>
