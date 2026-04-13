@@ -9,7 +9,9 @@
         Section 1 : Structure et visualisation de la page
         Même charte graphique que les autres visualisations du projet
   ----------------------------------------------------------------- -->
- 
+
+   <!-- Style et police : choix d'un design simple et lisible -->
+  
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
  
@@ -24,7 +26,7 @@
  
     h2 { font-size: 1.2rem; font-weight: normal; margin-bottom: 6px; }
  
-    /* Texte d'introduction encadré */
+    /* Texte d'introduction */
     .intro {
       font-size: 0.82rem;
       color: #777;
@@ -34,15 +36,13 @@
       margin-bottom: 24px;
     }
  
-    /* Layout principal : échiquier à gauche, panneau à droite */
+    /* Cponfiguration : échiquier à gauche et blocs à droite */
     .layout {
       display: flex;
       gap: 28px;
       align-items: flex-start;
       flex-wrap: wrap;
     }
- 
-    /* Conteneur de l'échiquier et de ses labels */
     .echiquier-wrap { flex-shrink: 0; }
  
     /* Labels des rangées et colonnes */
@@ -78,7 +78,7 @@
     .case-claire { fill: #f0d9b5; }
     .case-sombre  { fill: #b58863; }
  
-    /* Glyphes des pièces (cliquables) */
+    /* Pièces */
     .piece {
       font-size: 30px;
       dominant-baseline: central;
@@ -87,7 +87,7 @@
       user-select: none;
     }
  
-    /* Panneau latéral */
+    /* Blocs latéraux */
     .panneau {
       flex: 1;
       min-width: 200px;
@@ -95,8 +95,7 @@
       flex-direction: column;
       gap: 12px;
     }
- 
-    /* Carte générique du panneau */
+
     .carte {
       background: #fff;
       border: 1px solid #e0dbd4;
@@ -134,7 +133,7 @@
     .tbtn.actif { background: #2a2520; color: #f7f4ef; }
     .tbtn:hover:not(.actif) { background: #f0ebe3; }
  
-    /* Texte informatif sur la pièce sélectionnée */
+    /* Texte informatif propre à la pièce sélectionnée */
     #info-piece {
       font-size: 0.8rem;
       color: #555;
@@ -189,7 +188,7 @@
       color: #aaa;
     }
  
-    /* Statut de chargement */
+    /* Chargement */
     #statut {
       font-size: 0.62rem;
       color: #bbb;
@@ -197,7 +196,7 @@
       font-family: monospace;
     }
  
-    /* Note de conclusion */
+    /* Conclusion */
     .note {
       font-size: 0.82rem;
       color: #777;
@@ -221,7 +220,7 @@
  
   <div class="layout">
  
-    <!-- Échiquier SVG -->
+    <!-- Échiquier (SVG) -->
     <div class="echiquier-wrap">
       <div style="display:flex">
         <div class="labels-rangs" id="labels-rangs"></div>
@@ -231,7 +230,7 @@
       <p id="statut">Chargement des parties…</p>
     </div>
  
-    <!-- Panneau de contrôle et d'information -->
+    <!-- Blocs d'information -->
     <div class="panneau">
  
       <div class="carte">
@@ -284,12 +283,12 @@
  
   <script>
  
-  // Taille d'une case en pixels et labels de l'échiquier
+  // Taille d'une case et labels de l'échiquier
   var TAILLE   = 56;
   var COLONNES = ['a','b','c','d','e','f','g','h'];
   var RANGS    = ['1','2','3','4','5','6','7','8'];
  
-  // Textes analytiques affichés quand on clique sur un type de pièce
+  // Textes analytiques propres à chaque pièce affichés quand on clique sur un type de pièce
   var NOTES_PIECES = {
     p: 'Les pions dessinent les grandes lignes de la stratégie. Une concentration sur les colonnes centrales (d, e) trahit un jeu offensif ; des pions sur les ailes indiquent des plans plus spécifiques.',
     n: 'Les cavaliers aiment les cases dites "naturelles" — f3, c3, f6, c6. Un cavalier souvent en e5 ou d5 signe un joueur qui cherche les avant-postes.',
@@ -305,7 +304,7 @@
   };
  
   // Disposition initiale des 32 pièces sur l'échiquier
-  // col et row sont en 0-indexé depuis a1 (col 0 = colonne a, row 0 = rangée 1)
+  // col et row sont en 0-indexé depuis a1 (col 0 pour la colonne a, row 0 pour la rangée 1)
   var PIECES = [
     {t:'r',c:'w',g:'♖',col:0,row:0}, {t:'n',c:'w',g:'♘',col:1,row:0},
     {t:'b',c:'w',g:'♗',col:2,row:0}, {t:'q',c:'w',g:'♕',col:3,row:0},
@@ -326,7 +325,7 @@
   ];
  
  
-  // ── Structure de données ──────────────────────────────────────────────────
+  // Structure de données 
   // donneesFrequence[typePiece][couleurPiece][campJoue] = tableau de 64 entiers
   // L'index d'une case dans le tableau : (rang-1)*8 + colonne  →  a1=0 … h8=63
   var donneesFrequence = {};
