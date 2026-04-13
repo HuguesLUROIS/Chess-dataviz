@@ -3,19 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <title>Chess Dataviz</title>
+
+  <!--  -----------------------------------------------------------------
+       Section 1 : Structure et visualisation de la page
+    ----------------------------------------------------------------- -->
+  
+  <!-- Style et police : choix d'un design simple et lisible -->
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: Georgia, serif;
       background: #f7f4ef;
       color: #2a2a2a;
       min-height: 100vh;
     }
-
-    /* -----------------------------------------------------------------
-       Barre de navigation fixe
-    ----------------------------------------------------------------- */
+    /* Barre de navigation fixe */
     .nav-principale {
       position: fixed;
       top: 0; left: 0; right: 0;
@@ -57,9 +59,7 @@
     .nav-lien:hover { background: #f0ebe3; color: #555; }
     .nav-lien.actif { background: #f0ebe3; color: #2a2a2a; font-weight: bold; }
 
-    /* -----------------------------------------------------------------
-       Contenu : page d'accueil ou iframe
-    ----------------------------------------------------------------- */
+    /* Contenu : page d'accueil ou iframe*/
     #contenu-accueil {
       display: block;
       padding-top: 48px;
@@ -74,9 +74,7 @@
       border: none;
     }
 
-    /* -----------------------------------------------------------------
-       Page d'accueil
-    ----------------------------------------------------------------- */
+    /* Page d'accueil */
     .hero {
       padding: 80px 28px 64px;
       max-width: 960px;
@@ -307,7 +305,7 @@
     var CHEMINS = {
       progression  : 'visualisations/progression.html',
       distribution : 'visualisations/distribution_coups.html',
-      heatmap      : 'visualisations/heatmap.html',
+      heatmap      : 'visualisations/heatmap_deplacements.html',
       explorateur  : 'visualisations/explorateur_ouvertures.html'
     };
 
