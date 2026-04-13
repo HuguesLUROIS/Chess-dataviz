@@ -80,6 +80,7 @@
     .case-sombre   { fill: #b58863; }
     .case-hl-dep   { fill: rgba(100,160,100,.42); }
     .case-hl-arr   { fill: rgba(100,160,100,.58); }
+    .case-selectionnee { fill: rgba(90, 130, 200, .45); }
 
     /* Pièces */
     .piece { font-size: 34px; dominant-baseline: central; text-anchor: middle;
@@ -457,7 +458,11 @@ Cela mène majoritairement à des ouvertures comme le gambit Benko ou la Benoni.
 
 // Sélection d'une pièce
 function selectionnerPiece(caseStr) {
-  etat.selection = caseStr;
+  if (etat.selection === caseStr) {
+    etat.selection = null;  // désélectionne au second clic
+  } else {
+    etat.selection = caseStr;
+  }
   afficher();
 }
     
@@ -566,17 +571,18 @@ function selectionnerPiece(caseStr) {
     renderPanneau();
   }
 
-  function renderCases() {
-    Object.keys(carteCases).forEach(function(cle) {
-      var parts = cle.split('-');
-      var col   = +parts[0], rang = +parts[1];
-      var cs    = COLS[col] + RANGS[rang];
-      var cls   = (rang+col)%2===1 ? 'case-claire' : 'case-sombre';
-      if (cs === etat.dep) cls = 'case-hl-dep';
-      if (cs === etat.arr) cls = 'case-hl-arr';
-      carteCases[cle].attr('class', cls);
-    });
-  }
+ function renderCases() {
+  Object.keys(carteCases).forEach(function(cle) {
+    var parts = cle.split('-');
+    var col   = +parts[0], rang = +parts[1];
+    var cs    = COLS[col] + RANGS[rang];
+    var cls   = (rang+col)%2===1 ? 'case-claire' : 'case-sombre';
+    if (cs === etat.dep) cls = 'case-hl-dep';
+    if (cs === etat.arr) cls = 'case-hl-arr';
+    if (cs === etat.selection) cls = 'case-selectionnee';  
+    carteCases[cle].attr('class', cls);
+  });
+}
 
 function renderPieces() {
   calquePieces.selectAll('*').remove();
