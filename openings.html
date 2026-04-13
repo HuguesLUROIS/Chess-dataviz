@@ -833,6 +833,7 @@ Cela mène majoritairement à des ouvertures comme le gambit Benko ou la Benoni.
 
   d3.dsv(';', 'data/games.csv').then(function(lignes) {
 
+      // Fixation arbitraire du seuil minimal du nombre de parties jouées pour affichage  
     var SEUIL_MIN = 10;
 
     var arbreBrut = { w:{}, b:{} };
@@ -875,7 +876,7 @@ Cela mène majoritairement à des ouvertures comme le gambit Benko ou la Benoni.
       // Nom court (pour regrouper l'ensemble des caro kann par exemple)
       var nomCourt = ouv.replace(/\s+\d.*/,'').split(' ').slice(0,4).join(' ');
 
-      // Parcourir les 10 premiers coups
+      // Parcourir les 10 premiers coups (Seuil arbitraire mais + est trop lourd en calcul et moins intéressant) 
       var plateau = initPlateau(), trait = 'w';
 
       for (var prof = 0; prof < Math.min(20, coups.length); prof++) {
