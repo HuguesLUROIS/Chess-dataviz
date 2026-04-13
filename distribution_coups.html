@@ -282,7 +282,7 @@ d3.dsv(';', 'data/games.csv').then(function(rows) {
 
   var r_coups = d3.range(1, max_coups + 1);
   var vt = coups_vic.length;
-  var dT = coups_def.length;
+  var dt = coups_def.length;
 
   // Transformation en pourcentage pour une meilleure comparaison (d vs v)
   var histogramme = r_coups.map(function(m) {
@@ -295,17 +295,17 @@ d3.dsv(';', 'data/games.csv').then(function(rows) {
 
 
   // Étape 4 : Création du graphique principal (histogramme) 
-  var margin = { top: 10, right: 16, bottom: 36, left: 42 };
+  var marges = { top: 10, right: 16, bottom: 36, left: 42 };
   var W = document.getElementById('hist-container').clientWidth || 780;
   var H = 220;
-  var w = W - margin.left - margin.right;
-  var h = H - margin.top  - margin.bottom;
+  var w = W - marges.left - marges.right;
+  var h = H - marges.top  - marges.bottom;
 
   var svg = d3.select('#hist-container').append('svg')
     .attr('width', W).attr('height', H);
 
   var g = svg.append('g')
-    .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+    .attr('transform', 'translate(' + marges.left + ',' + marges.top + ')');
 
   // Axe horizontal : nombre de coups
   var x = d3.scaleBand()
@@ -365,7 +365,7 @@ d3.dsv(';', 'data/games.csv').then(function(rows) {
 
   // Label axe X
   svg.append('text')
-    .attr('x', margin.left + w / 2)
+    .attr('x', marges.left + w / 2)
     .attr('y', H - 4)
     .attr('text-anchor', 'middle')
     .attr('fill', '#bbb')
@@ -385,19 +385,17 @@ d3.dsv(';', 'data/games.csv').then(function(rows) {
 
 
   // Étape 5 : interactivité 
-  // Une ligne verticale suit la souris et affiche les valeurs exactes au survol
+  // Une ligne verticale suit la souris et affiche les valeurs exactes 
 
   var tooltip = d3.select('#tooltip');
 
-  // ligne verticale du curseur (cachée par défaut)
+  // Ligne verticale du curseur 
   var cursor = g.append('line')
     .attr('y1', 0).attr('y2', h)
     .attr('stroke', '#aaa')
     .attr('stroke-width', 1)
     .attr('stroke-dasharray', '3,3')
     .attr('opacity', 0);
-
-  // zone invisible qui capte les événements souris sur tout le graphique
   g.append('rect')
     .attr('width', w).attr('height', h)
     .attr('fill', 'none')
@@ -405,22 +403,19 @@ d3.dsv(';', 'data/games.csv').then(function(rows) {
     .on('mousemove', function(event) {
       var mouseX = d3.pointer(event)[0];
 
-      // retrouver le coup correspondant à la position X
-      var move = Math.round(x.domain()[0] + (mouseX / w) * (MAX_MOVE - 1));
-      move = Math.max(1, Math.min(MAX_MOVE, move));
+      // Position souris → nombre de coups correspondant
+      var move = Math.round(x.domain()[0] + (mouseX / w) * (max_coups - 1));
+      move = Math.max(1, Math.min(max_coups, move));
 
       var d = histogramme[move - 1];
       var xPos = x(move) + x.bandwidth() / 2;
 
-      // déplacer la ligne curseur
       cursor.attr('x1', xPos).attr('x2', xPos).attr('opacity', 1);
-
-      // contenu du tooltip
       var winPct  = d.win.toFixed(2);
       var lossPct = d.loss.toFixed(2);
       tooltip
         .style('opacity', 1)
-        .style('left', (xPos + margin.left + 10) + 'px')
+        .style('left', (xPos + marges.left + 10) + 'px')
         .style('top', '10px')
         .html(
           '<strong>' + move + ' coups</strong><br>' +
@@ -434,17 +429,15 @@ d3.dsv(';', 'data/games.csv').then(function(rows) {
     });
 
 
-  // ── 6. Camemberts ────────────────────────────────────────────────────────
+  // Étape 6 : diagrammes circulaires
   drawPie('pie-win',  'legend-win',  mode_vic,  Couleur_Vic);
   drawPie('pie-loss', 'legend-loss', mode_def, Couleur_Def);
 
 });
 
 
-// ─── Fonction générique pour dessiner un camembert ────────────────────────
+// Fonction pour dessiner le diagramme
 function drawPie(svgId, legendId, counts, colors) {
-
-  // tri par fréquence décroissante
   var data = Object.entries(counts)
     .sort(function(a, b) { return b[1] - a[1]; });
 
@@ -458,7 +451,7 @@ function drawPie(svgId, legendId, counts, colors) {
   var pie = d3.pie().value(function(d) { return d[1]; }).sort(null);
   var arc = d3.arc().innerRadius(0).outerRadius(radius);
 
-  // tranches
+  // Dessin des parts
   g.selectAll('path')
     .data(pie(data))
     .enter().append('path')
@@ -467,7 +460,7 @@ function drawPie(svgId, legendId, counts, colors) {
       .attr('stroke', '#fff')
       .attr('stroke-width', 1.5);
 
-  // légende HTML à côté
+  // Légende à droite
   var legendDiv = d3.select('#' + legendId);
   data.forEach(function(d, i) {
     var pct = Math.round(d[1] / total * 100);
