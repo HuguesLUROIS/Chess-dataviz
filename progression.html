@@ -478,7 +478,7 @@
       // On filtre les null mais on conserve les points "maintenus" 
       tracerCourbe(g,
         series[c].filter(function(d) { return d.valeur !== null; }),
-        COULEURS[c], epaisseur, generateurLigne, generateurAire
+        Couleurs[c], epaisseur, generateurLigne, generateurAire
       );
 
       // Étiquette sur le dernier point réel 
@@ -490,7 +490,7 @@
         g.append('text')
           .attr('x', echelleX(dernierReel.date) + 5)
           .attr('y', echelleY(dernierReel.valeur) + 4)
-          .attr('fill', COULEURS[c])
+          .attr('fill', Couleurs[c])
           .attr('font-family', 'monospace').attr('font-size', '0.63rem').attr('font-weight', 'bold')
           .text(dernierReel.valeur);
       }
@@ -499,8 +499,8 @@
     ajouterSurvol(g, cadences,
       function(c) { return series[c]; },
       function(d, c) {
-        return '<span style="color:' + COULEURS[c] + '">'
-          + LABELS_COURTS[c] + ' : ' + d.valeur + '</span>';
+        return '<span style="color:' + Couleurs[c] + '">'
+          + Labels_Courts[c] + ' : ' + d.valeur + '</span>';
       }
     );
 
@@ -511,7 +511,7 @@
   function dessinerPrecision(cadence) {
     cadencePrecision = cadence;
 
-    var svgEl = d3.select('#graphique-precision').attr('width', LARGEUR).attr('height', HAUTEUR);
+    var svgEl = d3.select('#graphique-precision').attr('width', Largeur).attr('height', Hauteur);
     svgEl.selectAll('*').remove();
     var g = svgEl.append('g')
       .attr('transform', 'translate(' + marges.gauche + ',' + marges.haut + ')');
@@ -537,11 +537,11 @@
       g.append('line')
         .attr('x1', 0).attr('x2', larg_int)
         .attr('y1', yMoyenne).attr('y2', yMoyenne)
-        .attr('stroke', COULEURS[cadence]).attr('stroke-width', 1)
+        .attr('stroke', Couleurs[cadence]).attr('stroke-width', 1)
         .attr('stroke-dasharray', '4,4').attr('opacity', 0.35);
       g.append('text')
         .attr('x', larg_int + 4).attr('y', yMoyenne + 3)
-        .attr('fill', COULEURS[cadence])
+        .attr('fill', Couleurs[cadence])
         .attr('font-family', 'monospace').attr('font-size', '0.58rem').attr('opacity', 0.6)
         .text('moy.');
     }
@@ -559,8 +559,8 @@
 
     cadences.forEach(function(c) {
       var epaisseur = (cadence === 'tout') ? 1.6 : 2;
-      tracerCourbe(g, series[c], COULEURS[c], epaisseur, generateurLigne, generateurAire);
-      etiquetteDernierPoint(g, series[c], COULEURS[c],
+      tracerCourbe(g, series[c], Couleurs[c], epaisseur, generateurLigne, generateurAire);
+      etiquetteDernierPoint(g, series[c], Couleurs[c],
         function(d) { return echelleX(d.date); },
         function(d) { return echelleY(d.valeur); },
         function(d) { return d.valeur + '%'; }
@@ -570,8 +570,8 @@
     ajouterSurvol(g, cadences,
       function(c) { return series[c]; },
       function(d, c) {
-        return '<span style="color:' + COULEURS[c] + '">'
-          + LABELS_COURTS[c] + ' : ' + d.valeur + '% '
+        return '<span style="color:' + Couleurs[c] + '">'
+          + Labels_Courts[c] + ' : ' + d.valeur + '% '
           + '<span style="color:#aaa">(' + d.label + ')</span></span>';
       }
     );
@@ -581,13 +581,13 @@
   ['blitz', 'bullet', 'rapid'].map(function(c) {
     var pct = moyennesGlobales[c].toFixed(1);
     return '<div class="ligne-moyenne">'
-      + '<span class="point-couleur" style="background:' + COULEURS[c] + '"></span>'
-      + '<span style="color:' + COULEURS[c] + '">' + LABELS_COURTS[c] + '</span>'
-      + '<span class="valeur-moyenne" style="color:' + COULEURS[c] + '">' + moyennesGlobales[c] + '%</span>'
+      + '<span class="point-couleur" style="background:' + Couleurs[c] + '"></span>'
+      + '<span style="color:' + Couleurs[c] + '">' + Labels_Courts[c] + '</span>'
+      + '<span class="valeur-moyenne" style="color:' + Couleurs[c] + '">' + moyennesGlobales[c] + '%</span>'
       + '</div>'
       + '<div style="padding:0 0 6px 0;border-bottom:1px solid #f0ebe3">'
       +   '<div class="piste-barre">'
-      +     '<div class="remplissage-barre" style="width:' + pct + '%;background:' + COULEURS[c] + ';opacity:0.4"></div>'
+      +     '<div class="remplissage-barre" style="width:' + pct + '%;background:' + Couleurs[c] + ';opacity:0.4"></div>'
       +   '</div>'
       + '</div>';
   }).join('');
