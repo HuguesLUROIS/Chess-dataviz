@@ -17,6 +17,7 @@
       color: #2a2a2a;
       min-height: 100vh;
     }
+
     /* Barre de navigation fixe */
     .nav-principale {
       position: fixed;
@@ -26,6 +27,7 @@
       z-index: 200;
       height: 48px;
     }
+
     .nav-interieur {
       max-width: 960px;
       margin: 0 auto;
@@ -35,6 +37,7 @@
       align-items: center;
       justify-content: space-between;
     }
+
     .nav-titre {
       font-family: Georgia, serif;
       font-size: 0.9rem;
@@ -42,9 +45,11 @@
       text-decoration: none;
       cursor: pointer;
     }
+
     .nav-titre:hover { color: #7a4f00; }
 
     .nav-liens { display: flex; gap: 4px; }
+
     .nav-lien {
       padding: 5px 12px;
       border-radius: 4px;
@@ -56,6 +61,7 @@
       background: transparent;
       transition: background 0.15s, color 0.15s;
     }
+
     .nav-lien:hover { background: #f0ebe3; color: #555; }
     .nav-lien.actif { background: #f0ebe3; color: #2a2a2a; font-weight: bold; }
 
@@ -79,7 +85,19 @@
       padding: 80px 28px 64px;
       max-width: 960px;
       margin: 0 auto;
+      display: flex;
+      gap: 40px;
+      align-items: center;
     }
+
+    .hero img {
+      width: 160px;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid #e0dbd4;
+    }
+
     .hero-eyebrow {
       font-family: monospace;
       font-size: 0.72rem;
@@ -88,12 +106,14 @@
       text-transform: uppercase;
       margin-bottom: 16px;
     }
+
     .hero-titre {
-      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
       font-weight: normal;
       line-height: 1.25;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
+
     .hero-desc {
       font-size: 0.92rem;
       color: #666;
@@ -103,55 +123,18 @@
       padding-left: 14px;
     }
 
-    /* Statistiques clés */
-    .stats-bande {
-      background: #fff;
-      border-top: 1px solid #e0dbd4;
-      border-bottom: 1px solid #e0dbd4;
-      margin: 48px 0;
-    }
-    .stats-interieur {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 28px;
-      display: flex;
-      flex-wrap: wrap;
-    }
-    .stat-bloc {
-      flex: 1;
-      min-width: 120px;
-      padding: 0 28px;
-      border-right: 1px solid #f0ebe3;
-    }
-    .stat-bloc:first-child { padding-left: 0; }
-    .stat-bloc:last-child  { border-right: none; }
-    .stat-valeur {
-      font-family: monospace;
-      font-size: 1.8rem;
-      color: #2a2a2a;
-      line-height: 1;
-      margin-bottom: 6px;
-    }
-    .stat-label {
-      font-family: monospace;
-      font-size: 0.68rem;
-      color: #aaa;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      line-height: 1.4;
-    }
-
     /* Grille des visualisations */
     .section-titre {
       max-width: 960px;
-      margin: 0 auto;
-      padding: 0 28px 20px;
+      margin: 40px auto 20px;
+      padding: 0 28px;
       font-size: 0.72rem;
       font-family: monospace;
       color: #aaa;
       text-transform: uppercase;
       letter-spacing: 0.12em;
     }
+
     .grille-viz {
       max-width: 960px;
       margin: 0 auto;
@@ -160,6 +143,7 @@
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 16px;
     }
+
     .carte-viz {
       background: #fff;
       border: 1px solid #e0dbd4;
@@ -168,10 +152,12 @@
       cursor: pointer;
       transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
     }
+
     .carte-viz:hover {
       box-shadow: 0 4px 16px rgba(0,0,0,0.07);
       transform: translateY(-2px);
     }
+
     .carte-viz[data-viz="progression"]:hover  { border-color: #7a4f00; }
     .carte-viz[data-viz="distribution"]:hover { border-color: #922518; }
     .carte-viz[data-viz="heatmap"]:hover      { border-color: #1a5f40; }
@@ -183,11 +169,13 @@
       color: #ccc;
       margin-bottom: 10px;
     }
+
     .viz-nom {
       font-size: 0.95rem;
       color: #2a2a2a;
       margin-bottom: 8px;
     }
+
     .viz-desc {
       font-family: monospace;
       font-size: 0.67rem;
@@ -209,6 +197,7 @@
     }
   </style>
 </head>
+
 <body>
 
   <!-- Navigation -->
@@ -231,66 +220,64 @@
   <div id="contenu-accueil">
 
     <div class="hero">
-      <p class="hero-eyebrow">Chess.com · 2018 – 2026 · Analyse de données</p>
-      <h1 class="hero-titre">Huit ans de parties<br>passées au crible</h1>
-      <p class="hero-desc">
-        Ce projet analyse 4 966 parties jouées sur Chess.com entre 2018 et 2026,
-        en blitz, bullet et rapide. L'objectif : transformer un historique de parties
-        brut en visualisations interactives qui révèlent les tendances de progression,
-        les habitudes de jeu et les forces et faiblesses d'un répertoire d'ouvertures.
-        Chaque graphique est construit directement depuis le fichier CSV exporté de Chess.com,
-        sans aucune donnée codée en dur.
-      </p>
-    </div>
 
-    <div class="stats-bande">
-      <div class="stats-interieur">
-        <div class="stat-bloc">
-          <div class="stat-valeur">4 966</div>
-          <div class="stat-label">Parties<br>analysées</div>
-        </div>
-        <div class="stat-bloc">
-          <div class="stat-valeur">8 ans</div>
-          <div class="stat-label">De 2018<br>à 2026</div>
-        </div>
-        <div class="stat-bloc">
-          <div class="stat-valeur">3</div>
-          <div class="stat-label">Cadences<br>Blitz · Bullet · Rapide</div>
-        </div>
-        <div class="stat-bloc">
-          <div class="stat-valeur">1 601</div>
-          <div class="stat-label">Ouvertures<br>distinctes</div>
-        </div>
-        <div class="stat-bloc">
-          <div class="stat-valeur">+1 100</div>
-          <div class="stat-label">Points Elo<br>gagnés en blitz</div>
-        </div>
+      <!-- Image personnelle / profil -->
+      <img src="assets/me.png" alt="profil">
+
+      <div>
+
+        <p class="hero-eyebrow">
+          Chess.com · 2018 – 2026 · Data storytelling
+        </p>
+
+        <h1 class="hero-titre">
+          Comprendre un style de jeu à travers 4 966 parties
+        </h1>
+
+        <p class="hero-desc">
+          Ce projet vise à analyser huit années de parties jouées sur Chess.com afin de
+          comprendre l’évolution d’un style de jeu personnel.  
+          L’objectif est triple : étudier la progression du niveau, mettre en évidence les
+          structures d’ouvertures récurrentes et analyser les schémas décisionnels à l’échiquier.  
+          Chaque visualisation s’appuie directement sur les données brutes exportées de Chess.com,
+          sans transformation artificielle des résultats.
+        </p>
+
       </div>
     </div>
 
     <p class="section-titre">Les visualisations</p>
 
     <div class="grille-viz">
-      <div class="carte-viz" data-viz="progression" onclick="afficherViz(document.querySelector('[data-viz=progression].nav-lien'))">
+
+      <div class="carte-viz" data-viz="progression"
+        onclick="afficherViz(document.querySelector('[data-viz=progression].nav-lien'))">
         <div class="viz-numero">01</div>
-        <div class="viz-nom">Progression Elo & précision</div>
-        <div class="viz-desc">Évolution mensuelle du classement et de la précision moyenne par cadence.</div>
+        <div class="viz-nom">Progression Elo & performance</div>
+        <div class="viz-desc">Évolution du niveau et des performances dans le temps.</div>
       </div>
-      <div class="carte-viz" data-viz="distribution" onclick="afficherViz(document.querySelector('[data-viz=distribution].nav-lien'))">
+
+      <div class="carte-viz" data-viz="distribution"
+        onclick="afficherViz(document.querySelector('[data-viz=distribution].nav-lien'))">
         <div class="viz-numero">02</div>
         <div class="viz-nom">Distribution des coups</div>
-        <div class="viz-desc">Comparaison de la longueur des parties selon le résultat.</div>
+        <div class="viz-desc">Analyse statistique de la durée des parties.</div>
       </div>
-      <div class="carte-viz" data-viz="heatmap" onclick="afficherViz(document.querySelector('[data-viz=heatmap].nav-lien'))">
+
+      <div class="carte-viz" data-viz="heatmap"
+        onclick="afficherViz(document.querySelector('[data-viz=heatmap].nav-lien'))">
         <div class="viz-numero">03</div>
         <div class="viz-nom">Heatmap des déplacements</div>
-        <div class="viz-desc">Fréquence de déplacement de chaque pièce sur chaque case.</div>
+        <div class="viz-desc">Cartographie des cases les plus utilisées.</div>
       </div>
-      <div class="carte-viz" data-viz="explorateur" onclick="afficherViz(document.querySelector('[data-viz=explorateur].nav-lien'))">
+
+      <div class="carte-viz" data-viz="explorateur"
+        onclick="afficherViz(document.querySelector('[data-viz=explorateur].nav-lien'))">
         <div class="viz-numero">04</div>
-        <div class="viz-nom">Explorateur d'ouvertures</div>
-        <div class="viz-desc">Échiquier interactif avec flèches de fréquence et winrate.</div>
+        <div class="viz-nom">Explorateur d’ouvertures</div>
+        <div class="viz-desc">Analyse structurelle des débuts de partie.</div>
       </div>
+
     </div>
 
     <div class="pied">
@@ -312,19 +299,18 @@
     function afficherViz(btn) {
       var viz = btn.dataset.viz;
 
-      // Activer l'onglet, désactiver les autres
-      document.querySelectorAll('.nav-lien').forEach(function(b) { b.classList.remove('actif'); });
-      document.querySelector('.nav-lien[data-viz="' + viz + '"]').classList.add('actif');
+      document.querySelectorAll('.nav-lien').forEach(function(b){ b.classList.remove('actif'); });
+      document.querySelector('.nav-lien[data-viz="'+viz+'"]').classList.add('actif');
 
-      // Masquer l'accueil, afficher l'iframe
       document.getElementById('contenu-accueil').style.display = 'none';
+
       var iframe = document.getElementById('iframe-viz');
       iframe.src = CHEMINS[viz];
       iframe.style.display = 'block';
     }
 
     function afficherAccueil() {
-      document.querySelectorAll('.nav-lien').forEach(function(b) { b.classList.remove('actif'); });
+      document.querySelectorAll('.nav-lien').forEach(function(b){ b.classList.remove('actif'); });
       document.getElementById('iframe-viz').style.display = 'none';
       document.getElementById('contenu-accueil').style.display = 'block';
     }
