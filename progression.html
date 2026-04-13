@@ -78,12 +78,10 @@
     }
     .cbtn:hover:not(.active) { background: #f0ebe3; }
 
-    .cbtn.active[data-tc="blitz"]    { border-color: #7a4f00; color: #7a4f00; background: rgba(122,79,0,.06);   }
-    .cbtn.active[data-tc="bullet"]   { border-color: #922518; color: #922518; background: rgba(146,37,24,.06);  }
-    .cbtn.active[data-tc="rapid"]    { border-color: #1a5f40; color: #1a5f40; background: rgba(26,95,64,.06);   }
-    .cbtn.active[data-tc="all"]      { border-color: #555;    color: #333;    background: rgba(42,42,42,.05);   }
-    /* Bouton "toutes cadences" — violet distinct du gris "Les 3" */
-    .cbtn.active[data-tc="combined"] { border-color: #4a3580; color: #4a3580; background: rgba(74,53,128,.06); }
+    .cbtn.active[data-tc="blitz"]  { border-color: #7a4f00; color: #7a4f00; background: rgba(122,79,0,.06);  }
+    .cbtn.active[data-tc="bullet"] { border-color: #922518; color: #922518; background: rgba(146,37,24,.06); }
+    .cbtn.active[data-tc="rapid"]  { border-color: #1a5f40; color: #1a5f40; background: rgba(26,95,64,.06);  }
+    .cbtn.active[data-tc="all"]    { border-color: #555;    color: #333;    background: rgba(42,42,42,.05);  }
 
     /* -----------------------------------------------------------------
        Layout : graphique à gauche, panneau d'info à droite
@@ -240,7 +238,7 @@
 
   <!-- ==================================================================
        SECTION 2 — ACCURACY PAR TRIMESTRE
-       Moyenne trimestrielle par cadence + vue combinée toutes cadences
+       Moyenne trimestrielle par cadence (blitz, bullet, rapide, les 3)
   ================================================================== -->
   <div class="section">
     <h3>Accuracy moyenne par trimestre</h3>
@@ -251,7 +249,6 @@
       <button class="cbtn" data-tc="bullet">Bullet</button>
       <button class="cbtn" data-tc="rapid">Rapide</button>
       <button class="cbtn" data-tc="all">Les 3 cadences</button>
-      <button class="cbtn" data-tc="combined">Toutes cadences</button>
     </div>
 
     <div class="layout">
@@ -300,28 +297,24 @@
     // -----------------------------------------------------------------
     // PALETTE & LABELS
     // Chaque cadence a une couleur fixe utilisée partout (courbe, bouton,
-    // légende, tooltip). La couleur "combined" est distincte des trois
-    // cadences individuelles et du gris "Les 3".
+    // légende, tooltip).
     // -----------------------------------------------------------------
     var COLORS = {
-      blitz    : '#7a4f00',
-      bullet   : '#922518',
-      rapid    : '#1a5f40',
-      combined : '#4a3580'
+      blitz  : '#7a4f00',
+      bullet : '#922518',
+      rapid  : '#1a5f40'
     };
 
     var LABELS = {
-      blitz    : 'Blitz (5 min)',
-      bullet   : 'Bullet (1–2 min)',
-      rapid    : 'Rapide (10–15 min)',
-      combined : 'Toutes cadences confondues'
+      blitz  : 'Blitz (5 min)',
+      bullet : 'Bullet (1–2 min)',
+      rapid  : 'Rapide (10–15 min)'
     };
 
     var LABELS_SHORT = {
-      blitz    : 'Blitz',
-      bullet   : 'Bullet',
-      rapid    : 'Rapide',
-      combined : 'Combiné'
+      blitz  : 'Blitz',
+      bullet : 'Bullet',
+      rapid  : 'Rapide'
     };
 
 
@@ -345,18 +338,13 @@
     // STRUCTURES DE DONNÉES
     // Remplies dynamiquement au chargement du CSV — rien n'est codé en dur.
     //
-    // eloData[tc]      → { map: Map<"YYYY-MM" → elo>, first: Date }
-    // accData[tc]      → [ { date, y, label } ] trié par date
-    // accDataCombined  → idem, toutes cadences agrégées
-    // avgData[tc]      → moyenne globale d'accuracy sur toute la période
-    // avgDataCombined  → idem, toutes cadences confondues
+    // eloData[tc]  → { map: Map<"YYYY-MM" → elo>, first: Date }
+    // accData[tc]  → [ { date, y, label } ] trié par date
+    // avgData[tc]  → moyenne globale d'accuracy sur toute la période
     // -----------------------------------------------------------------
-    var eloData         = { blitz: null, bullet: null, rapid: null };
-    var accData         = { blitz: [],   bullet: [],   rapid: []   };
-    var accDataCombined = [];
-
-    var avgData         = { blitz: 0, bullet: 0, rapid: 0 };
-    var avgDataCombined = 0;
+    var eloData = { blitz: null, bullet: null, rapid: null };
+    var accData = { blitz: [],   bullet: [],   rapid: []   };
+    var avgData = { blitz: 0,    bullet: 0,    rapid: 0    };
 
     // Modes courants des deux graphiques
     var eloMode = 'blitz';
@@ -609,8 +597,7 @@
 
     // -----------------------------------------------------------------
     // GRAPHIQUE ACCURACY
-    // Gère cinq modes : blitz, bullet, rapid, all (3 courbes), combined
-    // (1 seule courbe toutes cadences agrégées)
+    // Gère quatre modes : blitz, bullet, rapid, all (3 courbes)
     // -----------------------------------------------------------------
     function drawAcc(mode) {
       accMode = mode;
@@ -620,20 +607,12 @@
       var g = svgEl.append('g')
         .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-      // En mode "combined" : une seule courbe violette, sinon logique habituelle
-      var isCombined = (mode === 'combined');
-      var tcs = isCombined ? []
-              : (mode === 'all') ? ['blitz', 'bullet', 'rapid']
-              : [mode];
-
+      var tcs = (mode === 'all') ? ['blitz', 'bullet', 'rapid'] : [mode];
       var series = {};
       tcs.forEach(function(tc) { series[tc] = accData[tc]; });
 
-      // Rassemble tous les points pour calculer la plage Y
-      var allPts = isCombined
-        ? accDataCombined
-        : tcs.reduce(function(acc, tc) { return acc.concat(series[tc]); }, []);
-
+      // Plage Y sur l'ensemble des valeurs affichées
+      var allPts = tcs.reduce(function(acc, tc) { return acc.concat(series[tc]); }, []);
       var yScale = d3.scaleLinear()
         .domain([
           Math.floor(d3.min(allPts.map(function(d) { return d.y; })) - 3),
@@ -643,21 +622,17 @@
 
       addGridAndAxes(g, yScale, function(v) { return v + '%'; });
 
-      // Ligne de référence (moyenne globale) en mode cadence unique ou combiné
+      // Ligne de référence (moyenne globale) en mode cadence unique
       if (mode !== 'all') {
-        var avgRef   = isCombined ? avgDataCombined : avgData[mode];
-        var colorRef = isCombined ? COLORS.combined  : COLORS[mode];
-        var avgY     = yScale(avgRef);
-
+        var avgY = yScale(avgData[mode]);
         g.append('line')
           .attr('x1', 0).attr('x2', iW)
           .attr('y1', avgY).attr('y2', avgY)
-          .attr('stroke', colorRef).attr('stroke-width', 1)
+          .attr('stroke', COLORS[mode]).attr('stroke-width', 1)
           .attr('stroke-dasharray', '4,4').attr('opacity', 0.35);
-
         g.append('text')
           .attr('x', iW + 4).attr('y', avgY + 3)
-          .attr('fill', colorRef)
+          .attr('fill', COLORS[mode])
           .attr('font-family', 'monospace').attr('font-size', '0.58rem').attr('opacity', 0.6)
           .text('moy.');
       }
@@ -673,74 +648,39 @@
         .y1(function(d) { return yScale(d.y); })
         .curve(d3.curveMonotoneX);
 
-      if (isCombined) {
-        // Courbe unique toutes cadences
-        drawCurve(g, accDataCombined, COLORS.combined, 2, lineGen, areaGen);
-        drawLastLabel(g, accDataCombined, COLORS.combined,
+      tcs.forEach(function(tc) {
+        var sw = (mode === 'all') ? 1.6 : 2;
+        drawCurve(g, series[tc], COLORS[tc], sw, lineGen, areaGen);
+        drawLastLabel(g, series[tc], COLORS[tc],
           function(d) { return xScale(d.date); },
           function(d) { return yScale(d.y); },
           function(d) { return d.y + '%'; }
         );
-      } else {
-        // Une courbe par cadence sélectionnée
-        tcs.forEach(function(tc) {
-          var sw = (mode === 'all') ? 1.6 : 2;
-          drawCurve(g, series[tc], COLORS[tc], sw, lineGen, areaGen);
-          drawLastLabel(g, series[tc], COLORS[tc],
-            function(d) { return xScale(d.date); },
-            function(d) { return yScale(d.y); },
-            function(d) { return d.y + '%'; }
-          );
-        });
-      }
+      });
 
-      // Hover adapté selon le mode
-      if (isCombined) {
-        addHover(g, ['combined'],
-          function() { return accDataCombined; },
-          function(d) {
-            return '<span style="color:' + COLORS.combined + '">'
-              + 'Combiné : ' + d.y + '% '
-              + '<span style="color:#aaa">(' + d.label + ')</span></span>';
-          }
-        );
-      } else {
-        addHover(g, tcs,
-          function(tc) { return series[tc]; },
-          function(d, tc) {
-            return '<span style="color:' + COLORS[tc] + '">'
-              + LABELS_SHORT[tc] + ' : ' + d.y + '% '
-              + '<span style="color:#aaa">(' + d.label + ')</span></span>';
-          }
-        );
-      }
+      addHover(g, tcs,
+        function(tc) { return series[tc]; },
+        function(d, tc) {
+          return '<span style="color:' + COLORS[tc] + '">'
+            + LABELS_SHORT[tc] + ' : ' + d.y + '% '
+            + '<span style="color:#aaa">(' + d.label + ')</span></span>';
+        }
+      );
 
       // Légende
-      if (isCombined) {
-        var lastC = accDataCombined[accDataCombined.length - 1];
-        document.getElementById('acc-legend').innerHTML =
-          '<li>'
-          + '<span class="leg-swatch" style="background:' + COLORS.combined + '"></span>'
-          + LABELS.combined
-          + '<span class="leg-val">' + (lastC ? lastC.y + '%' : '—') + '</span>'
+      document.getElementById('acc-legend').innerHTML = tcs.map(function(tc) {
+        var pts  = series[tc];
+        var last = pts[pts.length - 1];
+        return '<li>'
+          + '<span class="leg-swatch" style="background:' + COLORS[tc] + '"></span>'
+          + LABELS[tc]
+          + '<span class="leg-val">' + (last ? last.y + '%' : '—') + '</span>'
           + '</li>';
-      } else {
-        document.getElementById('acc-legend').innerHTML = tcs.map(function(tc) {
-          var pts  = series[tc];
-          var last = pts[pts.length - 1];
-          return '<li>'
-            + '<span class="leg-swatch" style="background:' + COLORS[tc] + '"></span>'
-            + LABELS[tc]
-            + '<span class="leg-val">' + (last ? last.y + '%' : '—') + '</span>'
-            + '</li>';
-        }).join('');
-      }
+      }).join('');
 
       // Carte "Moyenne globale" — toujours visible, indépendante du mode affiché
-      var refs   = ['blitz', 'bullet', 'rapid'];
       var maxAvg = Math.max(avgData.blitz, avgData.bullet, avgData.rapid);
-
-      document.getElementById('avg-stats').innerHTML = refs.map(function(tc) {
+      document.getElementById('avg-stats').innerHTML = ['blitz', 'bullet', 'rapid'].map(function(tc) {
         var pct = ((avgData[tc] / maxAvg) * 100).toFixed(1);
         return '<div class="avg-row">'
           + '<span class="avg-dot" style="background:' + COLORS[tc] + '"></span>'
@@ -752,13 +692,7 @@
           +     '<div class="avg-bar-fill" style="width:' + pct + '%;background:' + COLORS[tc] + ';opacity:0.4"></div>'
           +   '</div>'
           + '</div>';
-      }).join('')
-      // Ligne supplémentaire pour la moyenne combinée
-      + '<div class="avg-row" style="margin-top:4px">'
-      + '<span class="avg-dot" style="background:' + COLORS.combined + '"></span>'
-      + '<span style="color:' + COLORS.combined + '">Combiné</span>'
-      + '<span class="avg-val" style="color:' + COLORS.combined + '">' + avgDataCombined + '%</span>'
-      + '</div>';
+      }).join('');
     }
 
 
@@ -787,7 +721,7 @@
     // -----------------------------------------------------------------
     // CHARGEMENT DES DONNÉES
     // Lit games.csv, agrège Elo mensuel et accuracy trimestrielle
-    // pour chaque cadence, puis calcule la série combinée.
+    // pour chaque cadence.
     // -----------------------------------------------------------------
     d3.dsv(';', 'data/games.csv').then(function(rows) {
 
@@ -837,16 +771,10 @@
         eloData[tc] = { map: eloMaps[tc], first: eloFirst[tc] || xMin };
       });
 
-      // Finalisation accuracy par cadence + construction du bucket combiné
-      var combinedBucket  = new Map(); // agrégation toutes cadences
-      var combinedSumAll  = 0;
-      var combinedCntAll  = 0;
-
+      // Finalisation accuracy : tri et filtre n ≥ 5 parties par trimestre
       ['blitz', 'bullet', 'rapid'].forEach(function(tc) {
         var arr = [];
-
         accBuckets[tc].forEach(function(b, qk) {
-          // On n'affiche un trimestre que si au moins 5 parties y contribuent
           if (b.count >= 5) {
             arr.push({
               date  : parseQuarter(qk),
@@ -854,36 +782,12 @@
               label : qk
             });
           }
-          // Fusion dans le bucket combiné (toutes cadences, sans filtre ici)
-          if (!combinedBucket.has(qk)) combinedBucket.set(qk, { sum: 0, count: 0 });
-          var bc = combinedBucket.get(qk);
-          bc.sum   += b.sum;
-          bc.count += b.count;
         });
-
         arr.sort(function(a, b) { return a.date - b.date; });
         accData[tc] = arr;
-
-        avgData[tc]      = accCntAll[tc] > 0
+        avgData[tc] = accCntAll[tc] > 0
           ? Math.round(accSumAll[tc] / accCntAll[tc] * 10) / 10 : 0;
-        combinedSumAll  += accSumAll[tc];
-        combinedCntAll  += accCntAll[tc];
       });
-
-      // Série combinée : même filtre n ≥ 5, triée chronologiquement
-      combinedBucket.forEach(function(b, qk) {
-        if (b.count >= 5) {
-          accDataCombined.push({
-            date  : parseQuarter(qk),
-            y     : Math.round(b.sum / b.count * 10) / 10,
-            label : qk
-          });
-        }
-      });
-      accDataCombined.sort(function(a, b) { return a.date - b.date; });
-
-      avgDataCombined = combinedCntAll > 0
-        ? Math.round(combinedSumAll / combinedCntAll * 10) / 10 : 0;
 
       // Affichage du compteur et rendu initial (blitz par défaut)
       document.getElementById('status').textContent =
