@@ -3,13 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <title>Distribution du nombre de coups</title>
-
-  <!-- Importation de la librairie d3 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 
+  <!-- Style et police -->
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: Georgia, serif;
       background: #f7f4ef;
@@ -18,14 +16,13 @@
       max-width: 860px;
       margin: 0 auto;
     }
-
     h2 {
       font-size: 1.2rem;
       font-weight: normal;
       margin-bottom: 18px;
     }
 
-    /* Les deux stats "moyenne" côte à côte */
+    /*  Moyenne du nombre de coups côte à côte */
     .metrics {
       display: flex;
       gap: 12px;
@@ -221,79 +218,83 @@ On observe que j’ai tendance à perdre davantage par échec et mat (48 % contr
 
 <script>
 
-// ─── Noms lisibles pour les modes de fin de partie ────────────────────────
-const OUTCOME_LABELS = {
+// Traduction du code brut du dataset afin de le rendre compréhensible pour le lecteur
+const Trad_Labels = {
   resigned:   'Abandon',
   checkmated: 'Échec et mat',
   timeout:    'Temps écoulé',
   abandoned:  'Autre'
 };
 
-// Palettes (bleu pour victoires, rouge pour défaites)
-const WIN_COLORS  = ['#3266ad', '#6fa8d6', '#aac8e8', '#d0e4f3'];
-const LOSS_COLORS = ['#b54040', '#cd7373', '#e0a0a0', '#f0d0d0'];
+// bleu = victoires, rouge = défaites
+const Couleur_Vic  = ['#3266ad', '#6fa8d6', '#aac8e8', '#d0e4f3'];
+const Couleur_Def = ['#b54040', '#cd7373', '#e0a0a0', '#f0d0d0'];
 
 
-// ─── Chargement des données ────────────────────────────────────────────────
-// Le CSV est lu avec d3.dsv (séparateur point-virgule)
+// Chargement des données avec d3.dsv 
 d3.dsv(';', 'data/games.csv').then(function(rows) {
 
-  // ── 1. Classement de chaque partie en victoire / défaite ────────────────
-  var winMoves  = [];   // nombre de coups des parties gagnées
-  var lossMoves = [];   // nombre de coups des parties perdues
+// Étape 1 : séparer les parties gagnées et perdues
+  // Je stocke les longueurs de parties et les "modes" de fin de partie
+  var coups_vic = [];   // nombre de coups lorsque je gagne
+  var coups_def = [];   // nombre de coups lorsque je perds
 
-  var winOutcomes  = {};   // comptage des modes de victoire
-  var lossOutcomes = {};   // comptage des modes de défaite
+  var mode_vic  = {};   // Comment je gagne (Abandon, mat..)
+  var mode_def = {};   // Comment je perds
 
   rows.forEach(function(row) {
-    var mc  = parseInt(row.moveCount);
+    var nbCoups  = parseInt(row.moveCount);
     var res = row.result;
-    var out = row.outcome;
+    var mode = row.outcome;
 
-    if (!mc || isNaN(mc)) return;
+    if (!nbCoups || isNaN(nbCoups)) return;
 
     if (res === 'win') {
-      winMoves.push(mc);
-      winOutcomes[out] = (winOutcomes[out] || 0) + 1;
+      coups_vic.push(nbCoups);
+      mode_vic[mode] = (mode_vic[mode] || 0) + 1;
 
     } else if (['checkmated', 'resigned', 'timeout', 'abandoned'].includes(res)) {
-      lossMoves.push(mc);
-      lossOutcomes[out] = (lossOutcomes[out] || 0) + 1;
+      coups_def.push(nbCoups);
+      mode_def[mode] = (mode_def[mode] || 0) + 1;
     }
   });
 
 
-  // ── 2. Calcul des moyennes ───────────────────────────────────────────────
-  var meanWin  = winMoves.reduce(function(a, b) { return a + b; }, 0) / winMoves.length;
-  var meanLoss = lossMoves.reduce(function(a, b) { return a + b; }, 0) / lossMoves.length;
+  // Étape 2 : calcul des moyennes
+  var moyenne_vic  = coups_vic.reduce(function(a, b) { return a + b; }, 0) / coups_vic.length;
+  var moyenne_def = coups_def.reduce(function(a, b) { return a + b; }, 0) / coups_def.length;
 
-  document.getElementById('mean-win').textContent  = meanWin.toFixed(1)  + ' coups';
-  document.getElementById('mean-loss').textContent = meanLoss.toFixed(1) + ' coups';
+  // Affichage ddans le HTML
+  document.getElementById('mean-win').textContent  = moyenne_vic.toFixed(1)  + ' coups';
+  document.getElementById('mean-loss').textContent = moyenne_def.toFixed(1) + ' coups';
 
 
-  // ── 3. Distribution coup par coup (en % pour comparer les volumes) ───────
-  // On compte combien de parties finissent exactement à N coups
-  var MAX_MOVE = 100;
+  // Étape 3 : construire la distribution des coups
+  // On compte combien de parties finissent exactement à n coups (en pourcentage)
+  
+  // On fixe arbitrairement un maximum par souci de visibilité 
+  var max_coups = 100;
 
-  var winCount  = {};
-  var lossCount = {};
-  winMoves.forEach(function(m)  { var k = Math.min(m, MAX_MOVE); winCount[k]  = (winCount[k]  || 0) + 1; });
-  lossMoves.forEach(function(m) { var k = Math.min(m, MAX_MOVE); lossCount[k] = (lossCount[k] || 0) + 1; });
+  var decompte_vic  = {};
+  var decompte_def = {};
+  coups_vic.forEach(function(m)  { var k = Math.min(m, max_coups); decompte_vic[k]  = (decompte_vic[k]  || 0) + 1; });
+  coups_def.forEach(function(m) { var k = Math.min(m, max_coups); decompte_def[k] = (decompte_def[k] || 0) + 1; });
 
-  var allMoves = d3.range(1, MAX_MOVE + 1);
-  var wT = winMoves.length;
-  var lT = lossMoves.length;
+  var r_coups = d3.range(1, max_coups + 1);
+  var vt = coups_vic.length;
+  var dT = coups_def.length;
 
-  var histData = allMoves.map(function(m) {
+  // Transformation en pourcentage pour une meilleure comparaison (d vs v)
+  var histogramme = r_coups.map(function(m) {
     return {
       move: m,
-      win:  ((winCount[m]  || 0) / wT * 100),
-      loss: ((lossCount[m] || 0) / lT * 100)
+      win:  ((decompte_vic[m]  || 0) / vt * 100),
+      loss: ((decompte_def[m] || 0) / dt * 100)
     };
   });
 
 
-  // ── 4. Dessin de l'histogramme avec D3 ──────────────────────────────────
+  // Étape 4 : Création du graphique principal (histogramme) 
   var margin = { top: 10, right: 16, bottom: 36, left: 42 };
   var W = document.getElementById('hist-container').clientWidth || 780;
   var H = 220;
@@ -306,18 +307,18 @@ d3.dsv(';', 'data/games.csv').then(function(rows) {
   var g = svg.append('g')
     .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-  // échelles
+  // Axe horizontal : nombre de coups
   var x = d3.scaleBand()
-    .domain(allMoves)
+    .domain(r_coups)
     .range([0, w])
     .padding(0.05);
-
-  var maxY = d3.max(histData, function(d) { return Math.max(d.win, d.loss); });
+// Axe vertical : pourcentage
+  var maxY = d3.max(histogramme, function(d) { return Math.max(d.win, d.loss); });
   var y = d3.scaleLinear()
     .domain([0, maxY + 0.2])
     .range([h, 0]);
 
-  // grille horizontale légère
+  // Grille horizontale
   g.selectAll('.grid-line')
     .data(y.ticks(4))
     .enter().append('line')
@@ -327,9 +328,9 @@ d3.dsv(';', 'data/games.csv').then(function(rows) {
       .attr('stroke', '#ede9e3')
       .attr('stroke-width', 1);
 
-  // barres défaites (derrière)
+  // Barres défaites 
   g.selectAll('.bar-loss')
-    .data(histData)
+    .data(histogramme)
     .enter().append('rect')
       .attr('class', 'bar-loss')
       .attr('x', function(d) { return x(d.move); })
@@ -339,9 +340,9 @@ d3.dsv(';', 'data/games.csv').then(function(rows) {
       .attr('fill', '#c0392b')
       .attr('opacity', 0.85);
 
-  // barres victoires (devant)
+  // Barres victoires 
   g.selectAll('.bar-win')
-    .data(histData)
+    .data(histogramme)
     .enter().append('rect')
       .attr('class', 'bar-win')
       .attr('x', function(d) { return x(d.move); })
@@ -352,17 +353,17 @@ d3.dsv(';', 'data/games.csv').then(function(rows) {
       .attr('opacity', 0.85);
 
 
-  // axe X 
+  // Axe X 
   g.append('g')
     .attr('class', 'axis')
     .attr('transform', 'translate(0,' + h + ')')
     .call(
       d3.axisBottom(x)
-        .tickValues(allMoves.filter(function(m) { return m % 10 === 0; }))
+        .tickValues(r_coups.filter(function(m) { return m % 10 === 0; }))
         .tickSize(4)
     );
 
-  // label axe X
+  // Label axe X
   svg.append('text')
     .attr('x', margin.left + w / 2)
     .attr('y', H - 4)
@@ -372,7 +373,7 @@ d3.dsv(';', 'data/games.csv').then(function(rows) {
     .attr('font-family', 'monospace')
     .text('Nombre de coups');
 
-  // axe Y
+  // Axe Y (Pourcentage)
   g.append('g')
     .attr('class', 'axis')
     .call(
@@ -383,7 +384,7 @@ d3.dsv(';', 'data/games.csv').then(function(rows) {
     );
 
 
-  // ── 5. Tooltip interactif ────────────────────────────────────────────────
+  // Étape 5 : interactivité 
   // Une ligne verticale suit la souris et affiche les valeurs exactes au survol
 
   var tooltip = d3.select('#tooltip');
@@ -408,7 +409,7 @@ d3.dsv(';', 'data/games.csv').then(function(rows) {
       var move = Math.round(x.domain()[0] + (mouseX / w) * (MAX_MOVE - 1));
       move = Math.max(1, Math.min(MAX_MOVE, move));
 
-      var d = histData[move - 1];
+      var d = histogramme[move - 1];
       var xPos = x(move) + x.bandwidth() / 2;
 
       // déplacer la ligne curseur
@@ -434,8 +435,8 @@ d3.dsv(';', 'data/games.csv').then(function(rows) {
 
 
   // ── 6. Camemberts ────────────────────────────────────────────────────────
-  drawPie('pie-win',  'legend-win',  winOutcomes,  WIN_COLORS);
-  drawPie('pie-loss', 'legend-loss', lossOutcomes, LOSS_COLORS);
+  drawPie('pie-win',  'legend-win',  mode_vic,  Couleur_Vic);
+  drawPie('pie-loss', 'legend-loss', mode_def, Couleur_Def);
 
 });
 
@@ -470,7 +471,7 @@ function drawPie(svgId, legendId, counts, colors) {
   var legendDiv = d3.select('#' + legendId);
   data.forEach(function(d, i) {
     var pct = Math.round(d[1] / total * 100);
-    var label = OUTCOME_LABELS[d[0]] || d[0];
+    var label = Trad_Labels[d[0]] || d[0];
 
     var item = legendDiv.append('div').attr('class', 'pie-legend-item');
     item.append('i').style('display','inline-block')
