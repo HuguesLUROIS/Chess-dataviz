@@ -4,10 +4,15 @@
   <meta charset="UTF-8">
   <title>Fréquence des coups joués par case et par pièce</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-
+ 
+  <!--  -----------------------------------------------------------------
+        Section 1 : Structure et visualisation de la page
+        Même charte graphique que les autres visualisations du projet
+  ----------------------------------------------------------------- -->
+ 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
+ 
     body {
       font-family: Georgia, serif;
       background: #f7f4ef;
@@ -16,14 +21,10 @@
       max-width: 960px;
       margin: 0 auto;
     }
-
-    h2 {
-      font-size: 1.2rem;
-      font-weight: normal;
-      margin-bottom: 6px;
-    }
-
-    /* texte introductif au-dessus du graphique */
+ 
+    h2 { font-size: 1.2rem; font-weight: normal; margin-bottom: 6px; }
+ 
+    /* Texte d'introduction encadré */
     .intro {
       font-size: 0.82rem;
       color: #777;
@@ -32,25 +33,25 @@
       padding-left: 12px;
       margin-bottom: 24px;
     }
-
-    /* layout principal : échiquier à gauche, statistiques et légende à droite */
+ 
+    /* Layout principal : échiquier à gauche, panneau à droite */
     .layout {
       display: flex;
       gap: 28px;
       align-items: flex-start;
       flex-wrap: wrap;
     }
-
-    /* wrapper de l'échiquier + labels */
-    .board-wrap { flex-shrink: 0; }
-
-    /* Rangées et colonnes */
-    .rank-labels {
+ 
+    /* Conteneur de l'échiquier et de ses labels */
+    .echiquier-wrap { flex-shrink: 0; }
+ 
+    /* Labels des rangées et colonnes */
+    .labels-rangs {
       display: flex;
       flex-direction: column;
       margin-right: 4px;
     }
-    .rank-label {
+    .label-rang {
       width: 14px;
       height: 56px;
       display: flex;
@@ -60,24 +61,24 @@
       color: #aaa;
       font-family: monospace;
     }
-    .file-labels {
+    .labels-colonnes {
       display: flex;
       margin-top: 4px;
       margin-left: 18px;
     }
-    .file-label {
+    .label-colonne {
       width: 56px;
       text-align: center;
       font-size: 0.6rem;
       color: #aaa;
       font-family: monospace;
     }
-
-    /* Couleur des cases de l'échiquier */
-    .sq-light { fill: #f0d9b5; }
-    .sq-dark  { fill: #b58863; }
-
-    /* glyphes des pièces */
+ 
+    /* Couleurs des cases de l'échiquier */
+    .case-claire { fill: #f0d9b5; }
+    .case-sombre  { fill: #b58863; }
+ 
+    /* Glyphes des pièces (cliquables) */
     .piece {
       font-size: 30px;
       dominant-baseline: central;
@@ -85,24 +86,24 @@
       cursor: pointer;
       user-select: none;
     }
-
-    /* panneau latéral */
-    .panel {
+ 
+    /* Panneau latéral */
+    .panneau {
       flex: 1;
       min-width: 200px;
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
-
-    /* carte générique du panneau */
-    .card {
+ 
+    /* Carte générique du panneau */
+    .carte {
       background: #fff;
       border: 1px solid #e0dbd4;
       border-radius: 6px;
       padding: 14px 16px;
     }
-    .card h3 {
+    .carte h3 {
       font-size: 0.68rem;
       text-transform: uppercase;
       letter-spacing: 1.5px;
@@ -111,8 +112,8 @@
       font-weight: normal;
       margin-bottom: 10px;
     }
-
-    /* toggle blancs / noirs */
+ 
+    /* Boutons Blancs / Noirs */
     .toggle {
       display: flex;
       border: 1px solid #e0dbd4;
@@ -130,21 +131,21 @@
       cursor: pointer;
       transition: background 0.15s, color 0.15s;
     }
-    .tbtn.active  { background: #2a2520; color: #f7f4ef; }
-    .tbtn:hover:not(.active) { background: #f0ebe3; }
-
-    /* info pièce considérée */
-    #info {
+    .tbtn.actif { background: #2a2520; color: #f7f4ef; }
+    .tbtn:hover:not(.actif) { background: #f0ebe3; }
+ 
+    /* Texte informatif sur la pièce sélectionnée */
+    #info-piece {
       font-size: 0.8rem;
       color: #555;
       line-height: 1.7;
       font-family: monospace;
     }
-
-    /* top 5 des coups */
-    #top-panel { display: none; }
-    #top-list  { list-style: none; }
-    #top-list li {
+ 
+    /* Top 5 des cases les plus visitées */
+    #panneau-top { display: none; }
+    #liste-top   { list-style: none; }
+    #liste-top li {
       display: flex;
       align-items: center;
       gap: 6px;
@@ -153,33 +154,32 @@
       font-size: 0.72rem;
       font-family: monospace;
     }
-    #top-list li:last-child { border-bottom: none; }
-    .sq-name  { color: #555; width: 26px; flex-shrink: 0; }
-    .sq-count { color: #922b21; font-weight: bold; margin-left: auto; flex-shrink: 0; }
-    /* Barres top 5 */
-    .sq-bar {
+    #liste-top li:last-child { border-bottom: none; }
+    .nom-case  { color: #555; width: 26px; flex-shrink: 0; }
+    .nb-coups  { color: #922b21; font-weight: bold; margin-left: auto; flex-shrink: 0; }
+    .barre-top {
       flex: 1;
       height: 5px;
       background: #f0ebe3;
       border-radius: 3px;
       overflow: hidden;
     }
-    .sq-bar-fill {
+    .remplissage-top {
       display: block;
       height: 100%;
       background: #922b21;
       opacity: 0.55;
       border-radius: 3px;
     }
-
-    /* Légende taille des cercles */
-    .legend-dots {
+ 
+    /* Légende des cercles (tailles proportionnelles aux quartiles) */
+    .legende-cercles {
       display: flex;
       align-items: flex-end;
       gap: 16px;
       margin-top: 6px;
     }
-    .legend-dot-item {
+    .legende-item {
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -188,19 +188,15 @@
       font-family: monospace;
       color: #aaa;
     }
-    .ldot {
-      background: #922b21;
-      border-radius: 50%;
-      opacity: 0.72;
-    }
-
-    #status {
+ 
+    /* Statut de chargement */
+    #statut {
       font-size: 0.62rem;
       color: #bbb;
       margin-top: 10px;
       font-family: monospace;
     }
-
+ 
     /* Note de conclusion */
     .note {
       font-size: 0.82rem;
@@ -213,67 +209,66 @@
   </style>
 </head>
 <body>
-
+ 
   <h2>Fréquence des coups joués par case et par pièce</h2>
-
+ 
   <p class="intro">
-   La fréquence à laquelle les pièces occupent certaines cases en dit long sur un style de jeu. Très vite, un élément ressort : la bataille pour le centre. 
-  Les cases e4, d4, e5 et d5 concentrent une grande partie des déplacements, ce qui confirme un des principes clés des échecs selon lequel le contrôle du centre est essentiel pour développer son jeu et mettre la pression à son adversaire. 
-  Cette heatmap est aussi grandement influencée par les ouvertures jouées, qui structurent les déplacements du restant de la partie. 
-  Mais chaque pièce est caractérisée par des déplacements typiques — cliquez dessus pour les découvrir.
+    La fréquence à laquelle les pièces occupent certaines cases en dit long sur un style de jeu. Très vite, un élément ressort : la bataille pour le centre.
+    Les cases e4, d4, e5 et d5 concentrent une grande partie des déplacements, ce qui confirme un des principes clés des échecs selon lequel le contrôle du centre est essentiel pour développer son jeu et mettre la pression à son adversaire.
+    Cette heatmap est aussi grandement influencée par les ouvertures jouées, qui structurent les déplacements du restant de la partie.
+    Mais chaque pièce est caractérisée par des déplacements typiques — cliquez dessus pour les découvrir.
   </p>
-
+ 
   <div class="layout">
-
-    <!-- échiquier -->
-    <div class="board-wrap">
+ 
+    <!-- Échiquier SVG -->
+    <div class="echiquier-wrap">
       <div style="display:flex">
-        <div class="rank-labels" id="rank-labels"></div>
-        <svg id="board" width="448" height="448"></svg>
+        <div class="labels-rangs" id="labels-rangs"></div>
+        <svg id="echiquier" width="448" height="448"></svg>
       </div>
-      <div class="file-labels" id="file-labels"></div>
-      <p id="status">Chargement des parties…</p>
+      <div class="labels-colonnes" id="labels-colonnes"></div>
+      <p id="statut">Chargement des parties…</p>
     </div>
-
-    <!-- panneau de contrôle -->
-    <div class="panel">
-
-      <div class="card">
+ 
+    <!-- Panneau de contrôle et d'information -->
+    <div class="panneau">
+ 
+      <div class="carte">
         <h3>Lorsque je joue les</h3>
         <div class="toggle">
-          <button class="tbtn active" data-side="w">♙ Blancs</button>
-          <button class="tbtn"        data-side="b">♟ Noirs</button>
+          <button class="tbtn actif" data-camp="w">♙ Blancs</button>
+          <button class="tbtn"       data-camp="b">♟ Noirs</button>
         </div>
       </div>
-
-      <div class="card">
+ 
+      <div class="carte">
         <h3>Pièce sélectionnée</h3>
-        <div id="info">Clique sur une pièce pour voir les cases où elle se déplace le plus.</div>
+        <div id="info-piece">Clique sur une pièce pour voir les cases où elle se déplace le plus.</div>
       </div>
-
-      <div class="card" id="legend-card">
-        <h3>Légende — fréquence </h3>
-        <div class="legend-dots" id="legend-dots">
-          <!-- rempli dynamiquement au moment du drawHeatmap() -->
+ 
+      <div class="carte">
+        <h3>Légende — fréquence</h3>
+        <div class="legende-cercles" id="legende-cercles">
           <span style="font-size:0.68rem;color:#bbb;font-family:monospace">
             Sélectionne une pièce
           </span>
         </div>
-        <p style="font-size:0.62rem;color:#bbb;font-family:monospace;margin-top:8px;line-height:1.5" id="legend-note">
-          Surface proportionnelle à la racine carrée du nombre de coups joués vers cette case (n&nbsp;=&nbsp;5&nbsp;093 parties).
+        <p style="font-size:0.62rem;color:#bbb;font-family:monospace;margin-top:8px;line-height:1.5">
+          Surface proportionnelle à la racine carrée du nombre de coups joués vers cette case (n = 5 093 parties).
         </p>
       </div>
-
-      <div class="card" id="top-panel">
-        <h3>Top 5 </h3>
-        <ul id="top-list"></ul>
+ 
+      <div class="carte" id="panneau-top">
+        <h3>Top 5</h3>
+        <ul id="liste-top"></ul>
       </div>
-
+ 
     </div>
   </div>
-
+ 
   <p class="note" id="note-piece" style="display:none"></p>
-
+ 
   <p class="note" style="margin-top:16px">
     Ce qui est remarquable, c'est à quel point ces cartes ressemblent à une empreinte digitale.
     Deux joueurs du même niveau peuvent avoir des heatmaps radicalement différentes selon qu'ils
@@ -281,16 +276,21 @@
     centrale est nette, mais on perçoit aussi des habitudes plus personnelles — des cases
     revenant de manière presque systématique, indépendamment de l'ouverture choisie.
   </p>
-
-<script>
-
-  // ── Constantes ────────────────────────────────────────────────────────────
-  const SQ    = 56;
-  const FILES = ['a','b','c','d','e','f','g','h'];
-  const RANKS = ['1','2','3','4','5','6','7','8'];
-
-  // petits textes affichés quand on sélectionne une pièce
-  const PIECE_NOTES = {
+ 
+ 
+  <!-- -----------------------------------------------------------------
+       Section 2 : Script et traitement des données
+  ----------------------------------------------------------------- -->
+ 
+  <script>
+ 
+  // Taille d'une case en pixels et labels de l'échiquier
+  var TAILLE   = 56;
+  var COLONNES = ['a','b','c','d','e','f','g','h'];
+  var RANGS    = ['1','2','3','4','5','6','7','8'];
+ 
+  // Textes analytiques affichés quand on clique sur un type de pièce
+  var NOTES_PIECES = {
     p: 'Les pions dessinent les grandes lignes de la stratégie. Une concentration sur les colonnes centrales (d, e) trahit un jeu offensif ; des pions sur les ailes indiquent des plans plus spécifiques.',
     n: 'Les cavaliers aiment les cases dites "naturelles" — f3, c3, f6, c6. Un cavalier souvent en e5 ou d5 signe un joueur qui cherche les avant-postes.',
     b: 'Les fous parcourent les diagonales. La case g5 ou b5 indique un fou actif, parfois agressif. Un fou cantonné derrière ses propres pions est souvent le signe d\'une partie difficile.',
@@ -298,16 +298,15 @@
     q: 'La dame est la pièce la plus mobile, et sa heatmap le montre. Une dame trop présente en début de partie peut trahir une tendance à sortir prématurément.',
     k: 'Le roi reste sagement en arrière — jusqu\'en finale, où il devient une pièce active. Une présence centrale du roi signe des fins de parties disputées.'
   };
-
-  // noms lisibles
-  const PIECE_LABEL = {
+ 
+  // Noms lisibles des types de pièces (affichés dans le panneau)
+  var NOMS_PIECES = {
     p: 'Pions', n: 'Cavaliers', b: 'Fous', r: 'Tours', q: 'Dame', k: 'Roi'
   };
-
-
-  // ── Disposition initiale des pièces sur l'échiquier ───────────────────────
-  // col/row en 0-indexé depuis a1 (col 0 = colonne a, row 0 = rangée 1)
-  const PIECES = [
+ 
+  // Disposition initiale des 32 pièces sur l'échiquier
+  // col et row sont en 0-indexé depuis a1 (col 0 = colonne a, row 0 = rangée 1)
+  var PIECES = [
     {t:'r',c:'w',g:'♖',col:0,row:0}, {t:'n',c:'w',g:'♘',col:1,row:0},
     {t:'b',c:'w',g:'♗',col:2,row:0}, {t:'q',c:'w',g:'♕',col:3,row:0},
     {t:'k',c:'w',g:'♔',col:4,row:0}, {t:'b',c:'w',g:'♗',col:5,row:0},
@@ -323,319 +322,328 @@
     {t:'r',c:'b',g:'♜',col:0,row:7}, {t:'n',c:'b',g:'♞',col:1,row:7},
     {t:'b',c:'b',g:'♝',col:2,row:7}, {t:'q',c:'b',g:'♛',col:3,row:7},
     {t:'k',c:'b',g:'♚',col:4,row:7}, {t:'b',c:'b',g:'♝',col:5,row:7},
-    {t:'n',c:'b',g:'♞',col:6,row:7}, {t:'r',c:'b',g:'♜',col:7,row:7},
+    {t:'n',c:'b',g:'♞',col:6,row:7}, {t:'r',c:'b',g:'♜',col:7,row:7}
   ];
-
-
+ 
+ 
   // ── Structure de données ──────────────────────────────────────────────────
-  // heatData[typePièce][couleurPièce][côtéJoué] = tableau de 64 entiers
-  // index d'une case : (rang-1)*8 + colonne  →  a1=0, b1=1, ..., h8=63
-  const heatData = {};
-  for (const t of 'pnbrqk') {
-    heatData[t] = {};
-    for (const c of 'wb')
-      heatData[t][c] = { w: new Array(64).fill(0), b: new Array(64).fill(0) };
+  // donneesFrequence[typePiece][couleurPiece][campJoue] = tableau de 64 entiers
+  // L'index d'une case dans le tableau : (rang-1)*8 + colonne  →  a1=0 … h8=63
+  var donneesFrequence = {};
+  'pnbrqk'.split('').forEach(function(t) {
+    donneesFrequence[t] = {};
+    'wb'.split('').forEach(function(c) {
+      donneesFrequence[t][c] = {
+        w: new Array(64).fill(0),
+        b: new Array(64).fill(0)
+      };
+    });
+  });
+ 
+  // Convertit une case SAN ("e4") en index 0-63 dans le tableau de fréquences
+  function caseVersIndex(caseStr) {
+    return (parseInt(caseStr[1]) - 1) * 8 + (caseStr.charCodeAt(0) - 97);
   }
-
-  function sqToIdx(sq) {
-    return (parseInt(sq[1]) - 1) * 8 + (sq.charCodeAt(0) - 97);
-  }
-
-
+ 
+ 
   // ── Parsing des coups SAN ─────────────────────────────────────────────────
-  // Pour chaque coup on incrémente la case de destination.
-  // Le roque déplace roi et tour, donc on les traite séparément.
-  function parseMoves(moves, userSide) {
-    moves.forEach(function(move, i) {
-
-      var pc = i % 2 === 0 ? 'w' : 'b';  // blancs jouent les coups pairs
-
-      // petit roque
-      if (move === 'O-O') {
-        heatData.k[pc][userSide][sqToIdx(pc === 'w' ? 'g1' : 'g8')]++;
-        heatData.r[pc][userSide][sqToIdx(pc === 'w' ? 'f1' : 'f8')]++;
+  // Pour chaque coup on incrémente le compteur de la case de destination.
+  // Le roque est traité séparément car il déplace deux pièces simultanément.
+  function enregistrerCoups(listeCoups, campJoueur) {
+    listeCoups.forEach(function(coup, i) {
+ 
+      // Les blancs jouent les coups d'index pair (0, 2, 4…), les noirs les impairs
+      var couleurCoup = i % 2 === 0 ? 'w' : 'b';
+ 
+      // Étape 1 : traiter les roques (cas spécial, deux pièces bougent)
+      if (coup === 'O-O') {
+        donneesFrequence.k[couleurCoup][campJoueur][caseVersIndex(couleurCoup === 'w' ? 'g1' : 'g8')]++;
+        donneesFrequence.r[couleurCoup][campJoueur][caseVersIndex(couleurCoup === 'w' ? 'f1' : 'f8')]++;
         return;
       }
-      // grand roque
-      if (move === 'O-O-O') {
-        heatData.k[pc][userSide][sqToIdx(pc === 'w' ? 'c1' : 'c8')]++;
-        heatData.r[pc][userSide][sqToIdx(pc === 'w' ? 'd1' : 'd8')]++;
+      if (coup === 'O-O-O') {
+        donneesFrequence.k[couleurCoup][campJoueur][caseVersIndex(couleurCoup === 'w' ? 'c1' : 'c8')]++;
+        donneesFrequence.r[couleurCoup][campJoueur][caseVersIndex(couleurCoup === 'w' ? 'd1' : 'd8')]++;
         return;
       }
-
-      // identifier la pièce (majuscule = pièce lourde, sinon pion)
-      var pt = 'p', rest = move;
-      if (/^[NBRQK]/.test(move)) { pt = move[0].toLowerCase(); rest = move.slice(1); }
-
-      // destination = les 2 derniers caractères après nettoyage
-      var dest = rest.replace(/[x+#]/g, '').replace(/=[NBRQ]/, '').slice(-2);
-      if (/^[a-h][1-8]$/.test(dest))
-        heatData[pt][pc][userSide][sqToIdx(dest)]++;
+ 
+      // Étape 2 : identifier le type de pièce
+      // Une lettre majuscule en début = pièce lourde ou légère ; sinon c'est un pion
+      var typePiece = 'p', reste = coup;
+      if (/^[NBRQK]/.test(coup)) {
+        typePiece = coup[0].toLowerCase();
+        reste = coup.slice(1);
+      }
+ 
+      // Étape 3 : extraire la case de destination (2 derniers caractères après nettoyage)
+      var caseArrivee = reste.replace(/[x+#]/g, '').replace(/=[NBRQ]/, '').slice(-2);
+      if (/^[a-h][1-8]$/.test(caseArrivee)) {
+        donneesFrequence[typePiece][couleurCoup][campJoueur][caseVersIndex(caseArrivee)]++;
+      }
     });
   }
-
-
-  // ── Construction de l'échiquier ───────────────────────────────────────────
-
-  // labels rangées (8 → 1 de haut en bas)
-  var rlEl = document.getElementById('rank-labels');
+ 
+ 
+  // ── Construction de l'échiquier SVG ──────────────────────────────────────
+ 
+  // Labels de rangs (8 → 1, de haut en bas)
+  var contRangs = document.getElementById('labels-rangs');
   for (var r = 7; r >= 0; r--) {
-    var el = document.createElement('div');
-    el.className = 'rank-label';
-    el.textContent = RANKS[r];
-    rlEl.appendChild(el);
+    var elR = document.createElement('div');
+    elR.className = 'label-rang';
+    elR.textContent = RANGS[r];
+    contRangs.appendChild(elR);
   }
-
-  // labels colonnes (a → h)
-  FILES.forEach(function(f) {
-    var el = document.createElement('div');
-    el.className = 'file-label';
-    el.textContent = f;
-    document.getElementById('file-labels').appendChild(el);
+ 
+  // Labels de colonnes (a → h)
+  COLONNES.forEach(function(c) {
+    var elC = document.createElement('div');
+    elC.className = 'label-colonne';
+    elC.textContent = c;
+    document.getElementById('labels-colonnes').appendChild(elC);
   });
-
-  var svg = d3.select('#board');
-
-  // les 64 cases
-  for (var row = 0; row < 8; row++) {
+ 
+  var svg = d3.select('#echiquier');
+ 
+  // Dessin des 64 cases
+  for (var rang = 0; rang < 8; rang++) {
     for (var col = 0; col < 8; col++) {
       svg.append('rect')
-        .attr('x', col * SQ).attr('y', (7 - row) * SQ)
-        .attr('width', SQ).attr('height', SQ)
-        .attr('class', (row + col) % 2 === 1 ? 'sq-light' : 'sq-dark');
+        .attr('x', col * TAILLE).attr('y', (7 - rang) * TAILLE)
+        .attr('width', TAILLE).attr('height', TAILLE)
+        .attr('class', (rang + col) % 2 === 1 ? 'case-claire' : 'case-sombre');
     }
   }
-
-  // un cercle par case — le rayon encode la fréquence (0 = invisible)
-  // D3 gère les transitions quand on change de pièce sélectionnée
-var tipDiv = d3.select('body').append('div')
-  .style('position', 'fixed')
-  .style('background', '#fff')
-  .style('border', '1px solid #e0dbd4')
-  .style('border-radius', '4px')
-  .style('padding', '6px 10px')
-  .style('font-size', '0.72rem')
-  .style('font-family', 'monospace')
-  .style('color', '#333')
-  .style('pointer-events', 'none')
-  .style('opacity', 0)
-  .style('transition', 'opacity 0.1s')
-  .style('white-space', 'nowrap');
-
-var dots = [];
-for (var i = 0; i < 64; i++) {
-  var sqLabel = FILES[i % 8] + RANKS[Math.floor(i / 8)];
-  dots.push(
-    svg.append('circle')
-      .attr('cx', (i % 8) * SQ + SQ / 2)
-      .attr('cy', (7 - Math.floor(i / 8)) * SQ + SQ / 2)
-      .attr('r', 0)
-      .attr('fill', '#922b21')
-      .attr('opacity', 0.72)
-      .attr('pointer-events', 'all')
-      .attr('data-sq', sqLabel)
-      .attr('data-idx', i)
-      .on('mousemove', function(event) {
-        var idx   = +d3.select(this).attr('data-idx');
-        var sq    = d3.select(this).attr('data-sq');
-        if (!selected) return;
-        var data  = heatData[selected.t][selected.c][userSide];
-        var total = d3.sum(data);
-        var val   = data[idx] || 0;
-        var pct   = total > 0 ? (val / total * 100).toFixed(1) : '0.0';
-        tipDiv
-          .style('opacity', 1)
-          .style('left', (event.clientX + 14) + 'px')
-          .style('top',  (event.clientY - 10) + 'px')
-          .html('<strong>' + sq + '</strong><br>'
-              + val.toLocaleString() + ' coups · ' + pct + '%');
-      })
-      .on('mouseleave', function() {
-        tipDiv.style('opacity', 0);
-      })
-  );
-}
-
-  // les pièces avec leur zone cliquable
-  var pieceEls = [];
+ 
+  // Infobulle qui suit la souris au survol des cercles
+  var infobulle = d3.select('body').append('div')
+    .style('position', 'fixed')
+    .style('background', '#fff')
+    .style('border', '1px solid #e0dbd4')
+    .style('border-radius', '4px')
+    .style('padding', '6px 10px')
+    .style('font-size', '0.72rem')
+    .style('font-family', 'monospace')
+    .style('color', '#333')
+    .style('pointer-events', 'none')
+    .style('opacity', 0)
+    .style('transition', 'opacity 0.1s')
+    .style('white-space', 'nowrap');
+ 
+  // Un cercle par case — le rayon encode la fréquence (rayon 0 = invisible)
+  // D3 gère les transitions fluides quand on change de pièce sélectionnée
+  var cercles = [];
+  for (var i = 0; i < 64; i++) {
+    var nomCase = COLONNES[i % 8] + RANGS[Math.floor(i / 8)];
+    cercles.push(
+      svg.append('circle')
+        .attr('cx', (i % 8) * TAILLE + TAILLE / 2)
+        .attr('cy', (7 - Math.floor(i / 8)) * TAILLE + TAILLE / 2)
+        .attr('r', 0)
+        .attr('fill', '#922b21')
+        .attr('opacity', 0.72)
+        .attr('pointer-events', 'all')
+        .attr('data-case', nomCase)
+        .attr('data-idx', i)
+        .on('mousemove', function(evenement) {
+          var idx   = +d3.select(this).attr('data-idx');
+          var cs    = d3.select(this).attr('data-case');
+          if (!pieceSelectionnee) return;
+          var data  = donneesFrequence[pieceSelectionnee.t][pieceSelectionnee.c][campUtilisateur];
+          var total = d3.sum(data);
+          var val   = data[idx] || 0;
+          var pct   = total > 0 ? (val / total * 100).toFixed(1) : '0.0';
+          infobulle
+            .style('opacity', 1)
+            .style('left', (evenement.clientX + 14) + 'px')
+            .style('top',  (evenement.clientY - 10) + 'px')
+            .html('<strong>' + cs + '</strong><br>' + val.toLocaleString() + ' coups · ' + pct + '%');
+        })
+        .on('mouseleave', function() { infobulle.style('opacity', 0); })
+    );
+  }
+ 
+  // Placement des pièces sur l'échiquier avec leur zone de clic
+  var elementsPieces = [];
   PIECES.forEach(function(p) {
-    var g = svg.append('g').style('cursor', 'pointer');
-
-    // rectangle de surbrillance (invisible par défaut)
-    var rect = g.append('rect')
-      .attr('x', p.col * SQ + 1).attr('y', (7 - p.row) * SQ + 1)
-      .attr('width', SQ - 2).attr('height', SQ - 2)
+    var groupe = svg.append('g').style('cursor', 'pointer');
+ 
+    // Rectangle de surbrillance — invisible par défaut, apparu au clic
+    var rect = groupe.append('rect')
+      .attr('x', p.col * TAILLE + 1).attr('y', (7 - p.row) * TAILLE + 1)
+      .attr('width', TAILLE - 2).attr('height', TAILLE - 2)
       .attr('rx', 3)
       .attr('fill', 'transparent')
       .attr('stroke', 'none');
-
-    g.append('text')
+ 
+    groupe.append('text')
       .attr('class', 'piece')
-      .attr('x', p.col * SQ + SQ / 2)
-      .attr('y', (7 - p.row) * SQ + SQ / 2 + 1)
+      .attr('x', p.col * TAILLE + TAILLE / 2)
+      .attr('y', (7 - p.row) * TAILLE + TAILLE / 2 + 1)
       .text(p.g);
-
-    g.on('click', function() { onPieceClick(p); });
-    pieceEls.push({ rect: rect, p: p });
+ 
+    groupe.on('click', function() { surClicPiece(p); });
+    elementsPieces.push({ rect: rect, p: p });
   });
-
-
+ 
+ 
   // ── Interactions ──────────────────────────────────────────────────────────
-  var selected = null;
-  var userSide = 'w';
-
-  function onPieceClick(p) {
-    // deuxième clic sur la même pièce → désélectionner
-    if (selected && selected.t === p.t && selected.c === p.c) {
-      deselect();
+  var pieceSelectionnee = null;   // pièce cliquée (objet du tableau PIECES)
+  var campUtilisateur   = 'w';    // 'w' = blancs, 'b' = noirs
+ 
+  function surClicPiece(p) {
+    // Un second clic sur la même pièce la désélectionne
+    if (pieceSelectionnee && pieceSelectionnee.t === p.t && pieceSelectionnee.c === p.c) {
+      deselectionner();
       return;
     }
-
-    // effacer les surlignages précédents
-    pieceEls.forEach(function(e) {
+ 
+    // Effacer les surlignages précédents
+    elementsPieces.forEach(function(e) {
       e.rect.attr('stroke', 'none').attr('fill', 'transparent');
     });
-
-    selected = p;
-
-    // surligner toutes les pièces du même type (ex : les deux cavaliers blancs)
-    pieceEls.forEach(function(e) {
-      if (e.p.t === p.t && e.p.c === p.c)
+ 
+    pieceSelectionnee = p;
+ 
+    // Surligner toutes les pièces du même type et de la même couleur
+    // (ex : les deux cavaliers blancs sont surlignés ensemble)
+    elementsPieces.forEach(function(e) {
+      if (e.p.t === p.t && e.p.c === p.c) {
         e.rect
           .attr('stroke', '#922b21')
           .attr('stroke-width', 2)
           .attr('fill', 'rgba(146,43,33,.1)');
+      }
     });
-
-    document.getElementById('info').textContent = PIECE_LABEL[p.t];
-
-    // afficher la note associée à cette pièce
+ 
+    document.getElementById('info-piece').textContent = NOMS_PIECES[p.t];
+ 
+    // Afficher la note analytique associée à ce type de pièce
     var noteEl = document.getElementById('note-piece');
-    noteEl.textContent = PIECE_NOTES[p.t];
+    noteEl.textContent = NOTES_PIECES[p.t];
     noteEl.style.display = 'block';
-
-    drawHeatmap();
+ 
+    dessinerHeatmap();
   }
-
-  function deselect() {
-    pieceEls.forEach(function(e) {
+ 
+  function deselectionner() {
+    elementsPieces.forEach(function(e) {
       e.rect.attr('stroke', 'none').attr('fill', 'transparent');
     });
-    selected = null;
-
-    // Animation disparition des pièces
-    dots.forEach(function(d) { d.transition().duration(200).attr('r', 0); });
-
-    document.getElementById('info').textContent = 'Clique sur une pièce pour voir où elle se déplace.';
-    document.getElementById('top-panel').style.display = 'none';
+    pieceSelectionnee = null;
+    cercles.forEach(function(c) { c.transition().duration(200).attr('r', 0); });
+    document.getElementById('info-piece').textContent = 'Clique sur une pièce pour voir où elle se déplace.';
+    document.getElementById('panneau-top').style.display = 'none';
     document.getElementById('note-piece').style.display = 'none';
   }
-
-  function drawHeatmap() {
-    if (!selected) return;
-
-    var data = heatData[selected.t][selected.c][userSide];
-    var maxVal = d3.max(data);
-    if (!maxVal) return;
-
-    // échelle racine carrée : les cases rares restent visibles
-    // sans que les très fréquentées n'écrasent tout
-    var rScale = d3.scaleSqrt()
-      .domain([0, maxVal])
-      .range([0, SQ * 0.42]);
-
-    // transition fluide quand on change de pièce
-    dots.forEach(function(d, idx) {
-      d.transition()
+ 
+  function dessinerHeatmap() {
+    if (!pieceSelectionnee) return;
+ 
+    var donnees = donneesFrequence[pieceSelectionnee.t][pieceSelectionnee.c][campUtilisateur];
+    var valeurMax = d3.max(donnees);
+    if (!valeurMax) return;
+ 
+    // Échelle racine carrée : les cases peu fréquentées restent visibles
+    // sans que les plus visitées n'écrasent visuellement tout le reste
+    var echelleRayon = d3.scaleSqrt()
+      .domain([0, valeurMax])
+      .range([0, TAILLE * 0.42]);
+ 
+    // Transition fluide lors du changement de pièce sélectionnée
+    cercles.forEach(function(c, idx) {
+      c.transition()
         .duration(250)
         .ease(d3.easeCubicOut)
-        .attr('r', rScale(data[idx] || 0));
+        .attr('r', echelleRayon(donnees[idx] || 0));
     });
-
-    // ── Légende dynamique basée sur les quartiles réels ───────────────────
-    // On calcule Q1, médiane et Q3 sur les cases non nulles uniquement.
-    // Les tailles des cercles de la légende correspondent aux rayons réels.
-    var nonZero = data.filter(function(v) { return v > 0; }).sort(d3.ascending);
-
-    var q1  = d3.quantile(nonZero, 0.25);
-    var med = d3.quantile(nonZero, 0.50);
-    var q3  = d3.quantile(nonZero, 0.75);
-
-  var legendData = [
-  { label: '1er quartile', val: Math.round(q1),  hint: '25% des cases sont visitées moins de ' + Math.round(q1) + ' fois' },
-  { label: 'Médiane',      val: Math.round(med), hint: 'La moitié des cases sont en-dessous de ' + Math.round(med) + ' coups' },
-  { label: '3e quartile',  val: Math.round(q3),  hint: '75% des cases sont en-dessous de ' + Math.round(q3) + ' coups' }
-];
-
-    var legendDiv = d3.select('#legend-dots');
-    legendDiv.html('');  // vider avant de redessiner
-
-    legendData.forEach(function(ld) {
-      var r = rScale(ld.val);
-      var item = legendDiv.append('div').attr('class', 'legend-dot-item');
-      // petit SVG inline pour que le cercle soit bien centré
+ 
+    // Légende dynamique basée sur les quartiles des cases non nulles
+    // Cela donne une idée de la dispersion réelle des déplacements
+    var valeursNonNulles = donnees
+      .filter(function(v) { return v > 0; })
+      .sort(d3.ascending);
+ 
+    var q1  = d3.quantile(valeursNonNulles, 0.25);
+    var med = d3.quantile(valeursNonNulles, 0.50);
+    var q3  = d3.quantile(valeursNonNulles, 0.75);
+ 
+    var donneesLegende = [
+      { etiquette: '1er quartile', valeur: Math.round(q1),  info: '25% des cases visitées moins de ' + Math.round(q1) + ' fois' },
+      { etiquette: 'Médiane',      valeur: Math.round(med), info: 'La moitié des cases en-dessous de ' + Math.round(med) + ' coups' },
+      { etiquette: '3e quartile',  valeur: Math.round(q3),  info: '75% des cases en-dessous de ' + Math.round(q3) + ' coups' }
+    ];
+ 
+    var divLegende = d3.select('#legende-cercles');
+    divLegende.html('');
+ 
+    donneesLegende.forEach(function(ld) {
+      var rayon = echelleRayon(ld.valeur);
+      var item  = divLegende.append('div').attr('class', 'legende-item');
       item.append('svg')
         .attr('width', 24).attr('height', 24)
         .append('circle')
           .attr('cx', 12).attr('cy', 12)
-          .attr('r', r)
+          .attr('r', rayon)
           .attr('fill', '#922b21')
           .attr('opacity', 0.72);
-      item.append('span').text(ld.label + ' (' + ld.val.toLocaleString() + ' coups)');
-item.append('span').style('font-size', '0.58rem').style('color', '#bbb').style('margin-top', '2px').text(ld.hint);
+      item.append('span').text(ld.etiquette + ' (' + ld.valeur.toLocaleString() + ' coups)');
+      item.append('span')
+        .style('font-size', '0.58rem')
+        .style('color', '#bbb')
+        .style('margin-top', '2px')
+        .text(ld.info);
     });
-
-
-    // ── Top 5 des cases les plus visitées ────────────────────────────────
-    var sorted = data
+ 
+    // Top 5 des cases les plus fréquentées par cette pièce
+    var classement = donnees
       .map(function(v, idx) {
-        return { sq: FILES[idx % 8] + RANKS[Math.floor(idx / 8)], v: v };
+        return { case: COLONNES[idx % 8] + RANGS[Math.floor(idx / 8)], valeur: v };
       })
-      .filter(function(d) { return d.v > 0; })
-      .sort(function(a, b) { return b.v - a.v; });
-
-    var top5    = sorted.slice(0, 5);
-    var topMax  = top5[0].v;
-
-    document.getElementById('top-list').innerHTML = top5
+      .filter(function(d) { return d.valeur > 0; })
+      .sort(function(a, b) { return b.valeur - a.valeur; });
+ 
+    var top5    = classement.slice(0, 5);
+    var maxTop  = top5[0].valeur;
+ 
+    document.getElementById('liste-top').innerHTML = top5
       .map(function(d) {
-        var barW = Math.round(d.v / topMax * 100);
+        var largeurBarre = Math.round(d.valeur / maxTop * 100);
         return '<li>'
-          + '<span class="sq-name">' + d.sq + '</span>'
-          + '<span class="sq-bar">'
-          +   '<span class="sq-bar-fill" style="width:' + barW + '%"></span>'
-          + '</span>'
-          + '<span class="sq-count">' + d.v.toLocaleString() + '</span>'
+          + '<span class="nom-case">' + d.case + '</span>'
+          + '<span class="barre-top"><span class="remplissage-top" style="width:' + largeurBarre + '%"></span></span>'
+          + '<span class="nb-coups">' + d.valeur.toLocaleString() + '</span>'
           + '</li>';
       })
       .join('');
-
-    document.getElementById('top-panel').style.display = 'block';
+ 
+    document.getElementById('panneau-top').style.display = 'block';
   }
-
-  // basculer entre blancs et noirs
+ 
+  // Bascule entre Blancs et Noirs
   document.querySelectorAll('.tbtn').forEach(function(btn) {
     btn.addEventListener('click', function() {
-      document.querySelectorAll('.tbtn').forEach(function(b) {
-        b.classList.remove('active');
-      });
-      btn.classList.add('active');
-      userSide = btn.dataset.side;
-      drawHeatmap();
+      document.querySelectorAll('.tbtn').forEach(function(b) { b.classList.remove('actif'); });
+      btn.classList.add('actif');
+      campUtilisateur = btn.dataset.camp;
+      dessinerHeatmap();
     });
   });
-
-
-  // ── Chargement des données ────────────────────────────────────────────────
-d3.dsv(';', '../data/games.csv').then(function(rows) {
-
-    rows.forEach(function(row) {
-      if (!row.pgn) return;
-
-      var side = row.userColor === 'white' ? 'w' : 'b';
-
-      // nettoyage du PGN : on retire les en-têtes, annotations et numéros de coups
-      var moves = row.pgn
+ 
+ 
+  <!-- -----------------------------------------------------------------
+       Section 2 : Chargement des données depuis le CSV
+  ----------------------------------------------------------------- -->
+ 
+  d3.dsv(';', '../data/games.csv').then(function(lignes) {
+ 
+    lignes.forEach(function(ligne) {
+      if (!ligne.pgn) return;
+ 
+      var campJoueur = ligne.userColor === 'white' ? 'w' : 'b';
+ 
+      // Nettoyage du PGN : on retire les en-têtes, annotations et numéros de coups
+      var coups = ligne.pgn
         .replace(/\[[^\]]*\]/g, '')
         .replace(/\{[^}]*\}/g, '')
         .replace(/\d+\.+/g, '')
@@ -643,14 +651,14 @@ d3.dsv(';', '../data/games.csv').then(function(rows) {
         .trim()
         .split(/\s+/)
         .filter(function(m) { return m.length > 0; });
-
-      parseMoves(moves, side);
+ 
+      enregistrerCoups(coups, campJoueur);
     });
-
-    document.getElementById('status').textContent =
-      rows.length.toLocaleString() + ' parties analysées';
+ 
+    document.getElementById('statut').textContent =
+      lignes.length.toLocaleString() + ' parties analysées';
   });
-
-</script>
+ 
+  </script>
 </body>
 </html>
