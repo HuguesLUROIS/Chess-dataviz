@@ -578,7 +578,7 @@ function selectionnerPiece(caseStr) {
     });
   }
 
-  function renderPieces() {
+function renderPieces() {
   calquePieces.selectAll('*').remove();
 
   var p = etat.plateau;
@@ -590,21 +590,21 @@ function selectionnerPiece(caseStr) {
     var coord = coordCase(cs);
     var estSelectionnee = (etat.selection === cs);
 
-calquePieces.append('text')
-  .attr('class','piece')
-  .attr('x', coord.c*TAILLE + TAILLE/2)
-  .attr('y', (7-coord.r)*TAILLE + TAILLE/2 + 2)
-  .style('opacity', estSelectionnee ? 1 : 0.95)
-  .style('filter', estSelectionnee ? 'drop-shadow(0px 0px 6px rgba(0,0,0,0.35))' : 'none')
-  .style('transform', estSelectionnee ? 'scale(1.25)' : 'scale(1)')
-  .style('transform-origin', 'center')
-  .text(GLYPHES[pc[0]][pc[1]] || '?')
-  .style('cursor', 'pointer')
-  .on('click', function() {
-    selectionnerPiece(cs);
-  });
-}
-}
+    calquePieces.append('text')
+      .attr('class','piece')
+      .attr('x', coord.c*TAILLE + TAILLE/2)
+      .attr('y', (7-coord.r)*TAILLE + TAILLE/2 + 2)
+      .style('opacity', estSelectionnee ? 1 : 0.95)
+      .style('filter', estSelectionnee ? 'drop-shadow(0px 0px 6px rgba(0,0,0,0.35))' : 'none')
+      .style('transform', estSelectionnee ? 'scale(1.25)' : 'scale(1)')
+      .style('transform-origin', 'center')
+      .text(GLYPHES[pc[0]][pc[1]] || '?')
+      .style('cursor', 'pointer')
+      .on('click', function() {
+        selectionnerPiece(cs);
+      });
+  });  
+}  
   function renderFleches() {
     calqueFleches.selectAll('*').remove();
     var dispos = getCoupsDispos();
