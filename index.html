@@ -43,7 +43,7 @@
       cursor: pointer;
     }
 
-    .nav-liens { display: flex; gap: 6px; }
+    .nav-liens { display: flex; gap: 20px; }
 
     .nav-lien {
       font-family: monospace;
@@ -180,11 +180,11 @@
   <div class="nav-interieur">
     <span class="nav-titre" onclick="afficherAccueil()">♟ Chess Dataviz</span>
     <div class="nav-liens">
-      <button class="nav-lien" onclick="afficherViz('progression')">Progression</button>
-      <button class="nav-lien" onclick="afficherViz('distribution')">Distribution</button>
-      <button class="nav-lien" onclick="afficherViz('heatmap')">Heatmap des déplacements</button>
-      <button class="nav-lien" onclick="afficherViz('explorateur')">Explorateur d'ouvertures</button>
-    </div>
+  <button class="nav-lien" onclick="afficherViz('progression')">Progression</button>
+  <button class="nav-lien" onclick="afficherViz('explorateur')">Explorateur d'ouvertures</button>
+  <button class="nav-lien" onclick="afficherViz('heatmap')">Heatmap des déplacements</button>
+  <button class="nav-lien" onclick="afficherViz('distribution')">Distribution</button>
+</div>
   </div>
 </nav>
 
@@ -223,11 +223,11 @@
       </div>
     </div>
 
-    <div class="carte-viz" onclick="afficherViz('distribution')">
-      <img class="viz-img" src="Images/distribution.png">
+       <div class="carte-viz" onclick="afficherViz('explorateur')">
+      <img class="viz-img" src="Images/ouvertures.png">
       <div class="viz-content">
-        <div class="viz-nom">Distribution des parties selon leur longueur</div>
-        <div class="viz-desc">Structure des parties selon leur issue.</div>
+        <div class="viz-nom">Explorateur d’ouvertures</div>
+        <div class="viz-desc">Répertoire et visualisations d’ouvertures.</div>
       </div>
     </div>
 
@@ -239,11 +239,11 @@
       </div>
     </div>
 
-    <div class="carte-viz" onclick="afficherViz('explorateur')">
-      <img class="viz-img" src="Images/ouvertures.png">
+     <div class="carte-viz" onclick="afficherViz('distribution')">
+      <img class="viz-img" src="Images/distribution.png">
       <div class="viz-content">
-        <div class="viz-nom">Explorateur d’ouvertures</div>
-        <div class="viz-desc">Répertoire et visualisations d’ouvertures.</div>
+        <div class="viz-nom">Distribution des parties selon leur longueur</div>
+        <div class="viz-desc">Structure des parties selon leur issue.</div>
       </div>
     </div>
 
