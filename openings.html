@@ -177,7 +177,7 @@
   <!-- Titre et en têtes de l'échiquier  -->
   <div class="section">
     <h3>Echiquier interactif</h3>
-    <p class="sous-titre">Profondeur de 15 coups · 4 960 parties</p>
+    <p class="sous-titre">Profondeur de 10 coups · 4 960 parties</p>
 
     <div class="controles" id="controles-camp">
       <button class="bouton actif" data-camp="w">♙ Blancs</button>
@@ -869,10 +869,10 @@ Cela mène majoritairement à des ouvertures comme le gambit Benko ou la Benoni.
       // Nom court (pour regrouper l'ensemble des caro kann par exemple)
       var nomCourt = ouv.replace(/\s+\d.*/,'').split(' ').slice(0,4).join(' ');
 
-      // Parcourir les 15 premiers coups
+      // Parcourir les 10 premiers coups
       var plateau = initPlateau(), trait = 'w';
 
-      for (var prof = 0; prof < Math.min(30, coups.length); prof++) {
+      for (var prof = 0; prof < Math.min(20, coups.length); prof++) {
         var cle = coups.slice(0, prof).join('|');
         var mv  = coups[prof];
 
