@@ -183,8 +183,8 @@
     <div class="nav-liens">
       <button class="nav-lien" onclick="afficherViz('progression')">Progression</button>
       <button class="nav-lien" onclick="afficherViz('distribution')">Distribution</button>
-      <button class="nav-lien" onclick="afficherViz('heatmap')">Heatmap</button>
-      <button class="nav-lien" onclick="afficherViz('explorateur')">Explorateur</button>
+      <button class="nav-lien" onclick="afficherViz('heatmap')">Heatmap des déplacements</button>
+      <button class="nav-lien" onclick="afficherViz('explorateur')">Explorateur d'ouvertures</button>
     </div>
   </div>
 </nav>
@@ -202,13 +202,12 @@
       <div class="hero-eyebrow">Chess.com · 2018–2026 · Data storytelling</div>
 
       <h1 class="hero-titre">
-        Analyse d’un style de jeu et de sa progression
+        Analyse de 5000 parties d'échecs personnelles jouées en ligne de 2018 à 2026
       </h1>
 
       <p class="hero-desc">
-        Ce projet vise à comprendre mon style de jeu à partir de 4 966 parties jouées sur Chess.com.
-        L’objectif est d’analyser la progression du niveau, les choix d’ouvertures et les patterns de jeu
-        afin de transformer un historique brut en visualisations interprétables.
+        Ce projet de Data Storytelling vise à comprendre mon style de jeu à partir de 5 093 parties jouées sur Chess.com.
+        L’objectif est d’analyser la progression, le répertoire d’ouvertures et quelques observations statistiques intéressantes des parties d'un joueur d'échecs amateur.
       </p>
     </div>
   </div>
@@ -220,16 +219,16 @@
     <div class="carte-viz" onclick="afficherViz('progression')">
       <img class="viz-img" src="Images/progression.png">
       <div class="viz-content">
-        <div class="viz-nom">Progression Elo</div>
-        <div class="viz-desc">Évolution du niveau et précision dans le temps.</div>
+        <div class="viz-nom">Progression </div>
+        <div class="viz-desc">Évolution du Elo et précision dans le temps.</div>
       </div>
     </div>
 
     <div class="carte-viz" onclick="afficherViz('distribution')">
       <img class="viz-img" src="Images/distribution.png">
       <div class="viz-content">
-        <div class="viz-nom">Distribution des coups</div>
-        <div class="viz-desc">Structure des parties selon les résultats.</div>
+        <div class="viz-nom">Distribution des parties selon leur longueur</div>
+        <div class="viz-desc">Structure des parties selon leur issue.</div>
       </div>
     </div>
 
@@ -237,7 +236,7 @@
       <img class="viz-img" src="Images/heatmap_deplacements.png">
       <div class="viz-content">
         <div class="viz-nom">Heatmap des déplacements</div>
-        <div class="viz-desc">Zones du plateau les plus utilisées.</div>
+        <div class="viz-desc">Cases du plateau les plus utilisées.</div>
       </div>
     </div>
 
@@ -245,14 +244,14 @@
       <img class="viz-img" src="Images/ouvertures.png">
       <div class="viz-content">
         <div class="viz-nom">Explorateur d’ouvertures</div>
-        <div class="viz-desc">Répertoire et tendances d’ouvertures.</div>
+        <div class="viz-desc">Répertoire et visualisations d’ouvertures.</div>
       </div>
     </div>
 
   </div>
 
   <div class="pied">
-    Chess Dataviz · 4 966 parties · 2018–2026
+    Chess Dataviz · 5 093 parties · 2018–2026
   </div>
 
 </div>
