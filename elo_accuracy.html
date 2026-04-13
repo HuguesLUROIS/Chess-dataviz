@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Progression Elo & Accuracy</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+
+  <style>
+    /* ── Reset & base ─────────────────────────────────────────────────────── */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Georgia, serif;
+      background: #f7f4ef;
+      color: #2a2a2a;
+      padding: 32px 28px 60px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    h2 {
+      font-size: 1.2rem;
+      font-weight: normal;
+      margin-bottom: 6px;
+    }
+
+    /* ── Textes encadrés (intro, notes) ───────────────────────────────────── */
+    .intro, .note {
+      font-size: 0.82rem;
+      color: #777;
+      line-height: 1.7;
+      border-left: 2px solid #ddd;
+      padding-left: 12px;
+    }
+    .intro { margin-bottom: 28px; }
+    .note  { margin-top: 20px; margin-bottom: 28px; }
+
+    /* ── Sections ─────────────────────────────────────────────────────────── */
+    .section { margin-bottom: 12px; }
+    .section h3 {
+      font-size: 0.95rem;
+      font-weight: normal;
+      margin-bottom: 4px;
+      color: #444;
+    }
+    .section .sub {
+      font-size: 0.72rem;
+      color: #aaa;
+      font-family: monospace;
+      margin-bottom: 14px;
+    }
+
+    /* ── Boutons de sélection de cadence ──────────────────────────────────── */
+    .controls { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .cbtn {
+      padding: 6px 14px;
+      border: 1px solid #e0dbd4;
+      border-radius: 4px;
+      background: transparent;
+      font-family: monospace;
+      font-size: 0.72rem;
+      color: #aaa;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .cbtn:hover:not(.active) { background: #f0ebe3; }
+    .cbtn.active[data-tc="blitz"]  { border-color: #7a4f00; color: #7a4f00; background: rgba(122,79,0,.06); }
+    .cbtn.active[data-tc="bullet"] { border-color: #922518; color: #922518; background: rgba(146,37,24,.06); }
+    .cbtn.active[data-tc="rapid"]  { border-color: #1a5f40; color: #1a5f40; background: rgba(26,95,64,.06); }
+    .cbtn.active[data-tc="all"]    { border-color: #555;    color: #333;    background: rgba(42,42,42,.05); }
+
+    /* ── Layout graphique + panneau latéral ───────────────────────────────── */
+    .layout { display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap; }
+    .chart-wrap { flex-shrink: 0; }
+
+    /* ── Axes D3 ──────────────────────────────────────────────────────────── */
+    .axis path, .axis line { stroke: #ddd; shape-rendering: crispEdges; }
+    .axis text { font-family: monospace; font-size: 0.62rem; fill: #aaa; }
+    .grid line { stroke: #e8e3dc; stroke-dasharray: 2,3; shape-rendering: crispEdges; }
+    .grid path { stroke: none; }
+    .year-line { stroke: #ddd; stroke-width: 1; }
+
+    /* ── Panneau latéral ──────────────────────────────────────────────────── */
+    .panel { flex: 1; min-width: 170px; display: flex; flex-direction: column; gap: 12px; }
+    .card {
+      background: #fff;
+      border: 1px solid #e0dbd4;
+      border-radius: 6px;
+      padding: 14px 16px;
+    }
+    .card h4 {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #aaa;
+      font-family: monospace;
+      font-weight: normal;
+      margin-bottom: 10px;
+    }
+
+    /* Liste de légende */
+    .legend-list { list-style: none; }
+    .legend-list li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 0;
+      border-bottom: 1px solid #f0ebe3;
+      font-size: 0.72rem;
+      font-family: monospace;
+      color: #555;
+    }
+    .legend-list li:last-child { border-bottom: none; }
+    .leg-swatch { width: 18px; height: 2px; border-radius: 1px; flex-shrink: 0; }
+    .leg-val    { margin-left: auto; font-weight: bold; color: #333; }
+
+    /* Carte "Moyenne globale" */
+    .avg-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+      border-bottom: 1px solid #f0ebe3;
+      font-size: 0.72rem;
+      font-family: monospace;
+      color: #555;
+    }
+    .avg-row:last-child { border-bottom: none; }
+    .avg-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .avg-val  { margin-left: auto; font-weight: bold; font-size: 0.9rem; }
+    .avg-bar-wrap { width: 100%; height: 3px; background: #f0ebe3; border-radius: 2px; overflow: hidden; margin-top: 2px; }
+    .avg-bar-fill { height: 100%; border-radius: 2px; }
+
+    /* ── Tooltip ──────────────────────────────────────────────────────────── */
+    #tip {
+      position: fixed;
+      background: #fff;
+      border: 1px solid #e0dbd4;
+      border-radius: 4px;
+      padding: 7px 11px;
+      font-size: 0.72rem;
+      font-family: monospace;
+      color: #333;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.1s;
+      white-space: nowrap;
+      line-height: 1.7;
+      z-index: 100;
+    }
+
+    /* ── Statut de chargement ─────────────────────────────────────────────── */
+    #status {
+      font-size: 0.62rem;
+      color: #bbb;
+      margin-top: 10px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Progression Elo & précision de jeu</h2>
+
+  <p class="intro">
+    Deux lectures d'une même trajectoire : le classement Elo, qui mesure le niveau relatif face à la
+    communauté, et l'accuracy, estimée par l'analyse automatique de chaque partie. L'Elo monte quand
+    on bat des adversaires mieux classés ; l'accuracy reflète la qualité intrinsèque des coups,
+    indépendamment du résultat. Comparer les deux révèle si la progression est due à un meilleur jeu
+    ou à d'autres facteurs.
+  </p>
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 1 — CLASSEMENT ELO                                           -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <h3>Classement Elo mensuel</h3>
+    <p class="sub">Dernier Elo enregistré chaque mois · 2018 – 2026</p>
+
+    <div class="controls" id="elo-controls">
+      <button class="cbtn active" data-tc="blitz">Blitz</button>
+      <button class="cbtn" data-tc="bullet">Bullet</button>
+      <button class="cbtn" data-tc="rapid">Rapide</button>
+      <button class="cbtn" data-tc="all">Les 3 cadences</button>
+    </div>
+
+    <div class="layout">
+      <div class="chart-wrap">
+        <svg id="elo-chart"></svg>
+        <p id="status">Chargement des données…</p>
+      </div>
+      <div class="panel">
+        <div class="card">
+          <h4>Cadences affichées</h4>
+          <ul class="legend-list" id="elo-legend"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Texte analytique après le graphique Elo -->
+  <p class="note">
+    La progression Elo illustre une trajectoire d'apprentissage sur huit ans, ponctuée de longues
+    périodes d'inactivité. Le blitz, cadence la plus jouée (2 948 parties), affiche la montée la
+    plus régulière : de 776 points en 2018 à 1 910 fin 2025. Le rapide, pratiqué plus tardivement,
+    a franchi le cap des 2 000 points dès fin 2023 — seuil symbolique témoignant d'une maîtrise
+    technique solide. Le bullet, cadence la plus exigeante en réflexes, reste plus volatil : les
+    sauts entre périodes actives reflètent des sessions intensives plutôt qu'une progression continue.
+  </p>
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 2 — ACCURACY PAR TRIMESTRE                                   -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <h3>Accuracy moyenne par trimestre</h3>
+    <p class="sub">Moyenne des analyses automatiques Chess.com · n ≥ 5 parties / trimestre</p>
+
+    <div class="controls" id="acc-controls">
+      <button class="cbtn active" data-tc="blitz">Blitz</button>
+      <button class="cbtn" data-tc="bullet">Bullet</button>
+      <button class="cbtn" data-tc="rapid">Rapide</button>
+      <button class="cbtn" data-tc="all">Les 3 cadences</button>
+    </div>
+
+    <div class="layout">
+      <div class="chart-wrap">
+        <svg id="acc-chart"></svg>
+      </div>
+      <div class="panel">
+        <div class="card">
+          <h4>Cadences affichées</h4>
+          <ul class="legend-list" id="acc-legend"></ul>
+        </div>
+
+        <!-- Texte de lecture avant les moyennes -->
+        <div class="card">
+          <h4>Lecture</h4>
+          <p style="font-size:0.72rem;color:#777;line-height:1.6;font-family:monospace">
+            L'accuracy mesure la proportion de coups optimaux joués selon l'analyse du moteur.
+            Contrairement à l'Elo, elle ne dépend pas du niveau de l'adversaire — c'est une
+            mesure de qualité absolue. Le blitz affiche la moyenne la plus basse (72,8 %) :
+            la contrainte de temps y génère mécaniquement davantage d'erreurs.
+          </p>
+        </div>
+
+        <div class="card">
+          <h4>Moyenne globale · 4 960 parties</h4>
+          <div id="avg-stats"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="note">
+    Ce qui frappe dans ces deux graphiques, c'est leur relative indépendance. L'Elo suit une
+    progression longue et structurée — presque une courbe d'apprentissage classique. L'accuracy,
+    lissée par trimestre, révèle une hausse progressive de la qualité de jeu, particulièrement
+    visible en rapide dès 2022. Cela rappelle que gagner aux échecs ne suppose pas toujours de
+    jouer les meilleurs coups : la psychologie, la gestion du temps et le choix des ouvertures
+    pèsent autant que la précision pure.
+  </p>
+
+  <div id="tip"></div>
+
+
+  <script>
+
+    // ── Constantes visuelles ────────────────────────────────────────────────
+    var COLORS = { blitz: '#7a4f00', bullet: '#922518', rapid: '#1a5f40' };
+
+    // Labels longs (panneau latéral) et courts (tooltip)
+    var LABELS       = { blitz: 'Blitz (5 min)', bullet: 'Bullet (1–2 min)', rapid: 'Rapide (10–15 min)' };
+    var LABELS_SHORT = { blitz: 'Blitz',         bullet: 'Bullet',           rapid: 'Rapide'             };
+
+    // Dimensions communes aux deux graphiques
+    var W      = 610;
+    var H      = 340;
+    var margin = { top: 16, right: 64, bottom: 34, left: 50 };
+    var iW     = W - margin.left - margin.right;  // largeur de la zone de tracé
+    var iH     = H - margin.top  - margin.bottom; // hauteur de la zone de tracé
+
+    // Domaine temporel : mi-2018 → début 2026
+    var xMin   = new Date(2018, 5, 1);
+    var xMax   = new Date(2026, 2, 1);
+    var xScale = d3.scaleTime().domain([xMin, xMax]).range([0, iW]);
+
+
+    // ── Structures de données (alimentées au chargement du CSV) ────────────
+    // eloData[tc]  = { map: Map<"YYYY-MM" → elo>, first: Date }
+    // accData[tc]  = [ { date, y, label } ]    trié chronologiquement
+    // avgData[tc]  = moyenne globale d'accuracy sur toutes les parties
+    var eloData = { blitz: null, bullet: null, rapid: null };
+    var accData = { blitz: [],   bullet: [],   rapid: [] };
+    var avgData = { blitz: 0,    bullet: 0,    rapid: 0 };
+
+    // États courants de chaque graphique
+    var eloMode = 'blitz';
+    var accMode = 'blitz';
+
+
+    // ── Utilitaires de date ─────────────────────────────────────────────────
+
+    // "YYYY-MM" → 1er du mois
+    function parseYM(s) {
+      var p = s.split('-');
+      return new Date(+p[0], +p[1] - 1, 1);
+    }
+
+    // "YYYYQn" → milieu du trimestre (2e mois)
+    function parseQuarter(s) {
+      var yr = +s.slice(0, 4);
+      var q  = +s.slice(5);
+      return new Date(yr, (q - 1) * 3 + 1, 1);
+    }
+
+    // Date → "YYYYQn"
+    function toQuarterKey(date) {
+      return date.getFullYear() + 'Q' + (Math.floor(date.getMonth() / 3) + 1);
+    }
+
+
+    // ── Forward-fill de l'Elo ───────────────────────────────────────────────
+    // Construit une série mensuelle continue : les mois sans partie conservent
+    // le dernier Elo connu (real = false) afin de ne pas rompre la courbe.
+    function buildFullElo(tc) {
+      var entry = eloData[tc];
+      if (!entry) return [];
+
+      var map       = entry.map;
+      var firstDate = entry.first;
+      var result    = [];
+      var d         = new Date(xMin);
+      var lastY     = null;
+
+      while (d <= xMax) {
+        var key  = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+        var real = map.has(key);
+        if (real) lastY = map.get(key);
+
+        if (d >= firstDate && lastY !== null)
+          result.push({ date: new Date(d), y: lastY, real: real });
+        else
+          result.push({ date: new Date(d), y: null,  real: false });
+
+        d.setMonth(d.getMonth() + 1);
+      }
+      return result;
+    }
+
+
+    // ── Helpers de rendu partagés ───────────────────────────────────────────
+
+    // Grille horizontale, traits d'années, axe X (années) et axe Y
+    function addGridAndAxes(g, yScale, yFmt) {
+      // Grille horizontale en pointillés
+      g.append('g').attr('class', 'grid')
+        .call(d3.axisLeft(yScale).ticks(5).tickSize(-iW).tickFormat(''));
+
+      // Trait vertical fin à chaque changement d'année
+      d3.range(2018, 2027).forEach(function(yr) {
+        var x = xScale(new Date(yr, 0, 1));
+        if (x < 0 || x > iW) return;
+        g.append('line').attr('class', 'year-line')
+          .attr('x1', x).attr('x2', x)
+          .attr('y1', 0).attr('y2', iH);
+      });
+
+      // Axe X : une marque par an
+      g.append('g').attr('class', 'axis')
+        .attr('transform', 'translate(0,' + iH + ')')
+        .call(d3.axisBottom(xScale)
+          .ticks(d3.timeYear.every(1))
+          .tickFormat(d3.timeFormat('%Y')));
+
+      // Axe Y : 5 marques avec le format fourni
+      g.append('g').attr('class', 'axis')
+        .call(d3.axisLeft(yScale).ticks(5).tickFormat(yFmt));
+    }
+
+    // Superpose une zone de capture souris, une ligne de curseur et le tooltip.
+    // getSeries(tc) → tableau de points { date, y }
+    // fmtRow(point, tc) → HTML d'une ligne de tooltip
+    function addHover(g, tcs, getSeries, fmtRow) {
+      var vLine = g.append('line')
+        .attr('y1', 0).attr('y2', iH)
+        .attr('stroke', '#bbb').attr('stroke-width', 1)
+        .attr('stroke-dasharray', '3,3')
+        .attr('opacity', 0);
+
+      var bisect = d3.bisector(function(d) { return d.date; }).left;
+      var tip    = document.getElementById('tip');
+
+      g.append('rect')
+        .attr('width', iW).attr('height', iH)
+        .attr('fill', 'transparent')
+        .style('cursor', 'crosshair')
+        .on('mousemove', function(event) {
+          var mx    = d3.pointer(event)[0];
+          var hDate = xScale.invert(mx);
+          vLine.attr('x1', mx).attr('x2', mx).attr('opacity', 1);
+
+          // Pour chaque cadence affichée, trouver le point le plus proche
+          var rows = tcs.map(function(tc) {
+            var pts = getSeries(tc).filter(function(d) { return d.y !== null; });
+            if (!pts.length) return null;
+            var idx = bisect(pts, hDate, 1);
+            var d0  = pts[Math.max(0, idx - 1)];
+            var d1  = pts[Math.min(pts.length - 1, idx)];
+            var d   = (!d0 || !d1) ? (d0 || d1)
+                    : (hDate - d0.date > d1.date - hDate ? d1 : d0);
+            return d ? fmtRow(d, tc) : null;
+          }).filter(Boolean);
+
+          tip.innerHTML = rows.join('<br>');
+          tip.style.opacity = 1;
+          tip.style.left    = (event.clientX + 14) + 'px';
+          tip.style.top     = (event.clientY - 10) + 'px';
+        })
+        .on('mouseleave', function() {
+          vLine.attr('opacity', 0);
+          tip.style.opacity = 0;
+        });
+    }
+
+
+    // ── Dessin — Graphique ELO ───────────────────────────────────────────────
+    function drawElo(mode) {
+      eloMode = mode;
+
+      var svgEl = d3.select('#elo-chart').attr('width', W).attr('height', H);
+      svgEl.selectAll('*').remove();
+      var g = svgEl.append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+      var tcs    = (mode === 'all') ? ['blitz', 'bullet', 'rapid'] : [mode];
+      var series = {};
+      tcs.forEach(function(tc) { series[tc] = buildFullElo(tc); });
+
+      // Domaine Y calculé sur les points réels uniquement
+      var allVals = tcs.reduce(function(acc, tc) {
+        return acc.concat(
+          series[tc]
+            .filter(function(d) { return d.real && d.y !== null; })
+            .map(function(d) { return d.y; })
+        );
+      }, []);
+      var yMin   = Math.floor((d3.min(allVals) - 80) / 100) * 100;
+      var yMax   = Math.ceil ((d3.max(allVals) + 80) / 100) * 100;
+      var yScale = d3.scaleLinear().domain([yMin, yMax]).range([iH, 0]);
+
+      addGridAndAxes(g, yScale, function(v) { return v; });
+
+      // Générateur de courbe (monotone pour éviter les oscillations)
+      var lineGen = d3.line()
+        .x(function(d) { return xScale(d.date); })
+        .y(function(d) { return yScale(d.y); })
+        .defined(function(d) { return d.y !== null; })
+        .curve(d3.curveMonotoneX);
+
+      // Générateur d'aire de fond
+      var areaGen = d3.area()
+        .x(function(d)  { return xScale(d.date); })
+        .y0(iH)
+        .y1(function(d) { return yScale(d.y); })
+        .defined(function(d) { return d.y !== null; })
+        .curve(d3.curveMonotoneX);
+
+      tcs.forEach(function(tc) {
+        var full  = series[tc];
+        var color = COLORS[tc];
+        var sw    = (mode === 'all') ? 1.6 : 2;
+
+        // Aire de fond semi-transparente
+        g.append('path').datum(full)
+          .attr('fill', color).attr('fill-opacity', 0.06)
+          .attr('d', areaGen);
+
+        // Courbe continue (Elo maintenu inclus — trait plein sans pointillés)
+        g.append('path')
+          .datum(full.filter(function(d) { return d.y !== null; }))
+          .attr('fill', 'none')
+          .attr('stroke', color)
+          .attr('stroke-width', sw)
+          .attr('stroke-linejoin', 'round')
+          .attr('stroke-linecap', 'round')
+          .attr('d', lineGen);
+
+        // Étiquette de la dernière valeur réelle (coin droit de la courbe)
+        var lastR = null;
+        for (var i = full.length - 1; i >= 0; i--) {
+          if (full[i].real) { lastR = full[i]; break; }
+        }
+        if (lastR) {
+          g.append('text')
+            .attr('x', xScale(lastR.date) + 5)
+            .attr('y', yScale(lastR.y) + 4)
+            .attr('fill', color)
+            .attr('font-family', 'monospace')
+            .attr('font-size', '0.63rem')
+            .attr('font-weight', 'bold')
+            .text(lastR.y);
+        }
+      });
+
+      addHover(g, tcs,
+        function(tc) { return series[tc]; },
+        function(d, tc) {
+          return '<span style="color:' + COLORS[tc] + '">'
+            + LABELS_SHORT[tc] + ' : ' + d.y
+            + '</span>';
+        }
+      );
+
+      // Légende : cadence + dernière valeur réelle
+      document.getElementById('elo-legend').innerHTML = tcs.map(function(tc) {
+        var full = series[tc];
+        var last = null;
+        for (var i = full.length - 1; i >= 0; i--) {
+          if (full[i].real) { last = full[i]; break; }
+        }
+        return '<li>'
+          + '<span class="leg-swatch" style="background:' + COLORS[tc] + '"></span>'
+          + LABELS[tc]
+          + '<span class="leg-val">' + (last ? last.y : '—') + '</span>'
+          + '</li>';
+      }).join('');
+    }
+
+
+    // ── Dessin — Graphique ACCURACY ──────────────────────────────────────────
+    function drawAcc(mode) {
+      accMode = mode;
+
+      var svgEl = d3.select('#acc-chart').attr('width', W).attr('height', H);
+      svgEl.selectAll('*').remove();
+      var g = svgEl.append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+      var tcs    = (mode === 'all') ? ['blitz', 'bullet', 'rapid'] : [mode];
+      var series = {};
+      tcs.forEach(function(tc) { series[tc] = accData[tc]; });
+
+      // Domaine Y sur l'ensemble des valeurs affichées
+      var allVals = tcs.reduce(function(acc, tc) {
+        return acc.concat(series[tc].map(function(d) { return d.y; }));
+      }, []);
+      var yMin   = Math.floor(d3.min(allVals) - 3);
+      var yMax   = Math.ceil (d3.max(allVals) + 3);
+      var yScale = d3.scaleLinear().domain([yMin, yMax]).range([iH, 0]);
+
+      addGridAndAxes(g, yScale, function(v) { return v + '%'; });
+
+      // Ligne de moyenne globale (visible en mode cadence unique uniquement)
+      if (mode !== 'all') {
+        var avgY = yScale(avgData[mode]);
+        g.append('line')
+          .attr('x1', 0).attr('x2', iW)
+          .attr('y1', avgY).attr('y2', avgY)
+          .attr('stroke', COLORS[mode])
+          .attr('stroke-width', 1)
+          .attr('stroke-dasharray', '4,4')
+          .attr('opacity', 0.35);
+        g.append('text')
+          .attr('x', iW + 4).attr('y', avgY + 3)
+          .attr('fill', COLORS[mode])
+          .attr('font-family', 'monospace').attr('font-size', '0.58rem').attr('opacity', 0.6)
+          .text('moy.');
+      }
+
+      var lineGen = d3.line()
+        .x(function(d) { return xScale(d.date); })
+        .y(function(d) { return yScale(d.y); })
+        .curve(d3.curveMonotoneX);
+
+      var areaGen = d3.area()
+        .x(function(d)  { return xScale(d.date); })
+        .y0(iH)
+        .y1(function(d) { return yScale(d.y); })
+        .curve(d3.curveMonotoneX);
+
+      tcs.forEach(function(tc) {
+        var pts   = series[tc];
+        var color = COLORS[tc];
+        var sw    = (mode === 'all') ? 1.6 : 2;
+
+        g.append('path').datum(pts)
+          .attr('fill', color).attr('fill-opacity', 0.06)
+          .attr('d', areaGen);
+
+        g.append('path').datum(pts)
+          .attr('fill', 'none')
+          .attr('stroke', color)
+          .attr('stroke-width', sw)
+          .attr('stroke-linejoin', 'round')
+          .attr('stroke-linecap', 'round')
+          .attr('d', lineGen);
+
+        // Étiquette dernière valeur
+        var last = pts[pts.length - 1];
+        if (last) {
+          g.append('text')
+            .attr('x', xScale(last.date) + 5)
+            .attr('y', yScale(last.y) + 4)
+            .attr('fill', color)
+            .attr('font-family', 'monospace').attr('font-size', '0.63rem').attr('font-weight', 'bold')
+            .text(last.y + '%');
+        }
+      });
+
+      addHover(g, tcs,
+        function(tc) { return series[tc]; },
+        function(d, tc) {
+          return '<span style="color:' + COLORS[tc] + '">'
+            + LABELS_SHORT[tc] + ' : ' + d.y + '% '
+            + '<span style="color:#aaa">(' + d.label + ')</span>'
+            + '</span>';
+        }
+      );
+
+      // Légende
+      document.getElementById('acc-legend').innerHTML = tcs.map(function(tc) {
+        var pts  = series[tc];
+        var last = pts[pts.length - 1];
+        return '<li>'
+          + '<span class="leg-swatch" style="background:' + COLORS[tc] + '"></span>'
+          + LABELS[tc]
+          + '<span class="leg-val">' + (last ? last.y + '%' : '—') + '</span>'
+          + '</li>';
+      }).join('');
+
+      // Carte "Moyenne globale" — toujours affichée quelle que soit la sélection
+      var maxAvg = Math.max(avgData.blitz, avgData.bullet, avgData.rapid);
+      document.getElementById('avg-stats').innerHTML = ['blitz', 'bullet', 'rapid'].map(function(tc) {
+        var pct = ((avgData[tc] / maxAvg) * 100).toFixed(1);
+        return '<div class="avg-row">'
+          + '<span class="avg-dot" style="background:' + COLORS[tc] + '"></span>'
+          + '<span style="color:' + COLORS[tc] + '">' + LABELS_SHORT[tc] + '</span>'
+          + '<span class="avg-val" style="color:' + COLORS[tc] + '">' + avgData[tc] + '%</span>'
+          + '</div>'
+          + '<div style="padding:0 0 6px 0;border-bottom:1px solid #f0ebe3">'
+          +   '<div class="avg-bar-wrap">'
+          +     '<div class="avg-bar-fill" style="width:' + pct + '%;background:' + COLORS[tc] + ';opacity:0.4"></div>'
+          +   '</div>'
+          + '</div>';
+      }).join('');
+    }
+
+
+    // ── Boutons de sélection de cadence ─────────────────────────────────────
+    document.getElementById('elo-controls').addEventListener('click', function(e) {
+      var btn = e.target.closest('.cbtn');
+      if (!btn) return;
+      document.querySelectorAll('#elo-controls .cbtn')
+        .forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      drawElo(btn.dataset.tc);
+    });
+
+    document.getElementById('acc-controls').addEventListener('click', function(e) {
+      var btn = e.target.closest('.cbtn');
+      if (!btn) return;
+      document.querySelectorAll('#acc-controls .cbtn')
+        .forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      drawAcc(btn.dataset.tc);
+    });
+
+
+    // ── Chargement des données depuis le CSV ─────────────────────────────────
+    d3.dsv(';', 'data/games.csv').then(function(rows) {
+
+      // Structures temporaires d'agrégation
+      // eloMaps[tc]    : Map<"YYYY-MM" → dernier Elo du mois>
+      // eloFirst[tc]   : première date jouée dans cette cadence
+      // accBuckets[tc] : Map<"YYYYQn"  → { sum, count }>
+      // accSumAll[tc]  : cumul pour la moyenne globale
+      // accCntAll[tc]  : nombre de parties avec accuracy renseignée
+      var eloMaps    = { blitz: new Map(), bullet: new Map(), rapid: new Map() };
+      var eloFirst   = { blitz: null,      bullet: null,      rapid: null      };
+      var accBuckets = { blitz: new Map(), bullet: new Map(), rapid: new Map() };
+      var accSumAll  = { blitz: 0,         bullet: 0,         rapid: 0         };
+      var accCntAll  = { blitz: 0,         bullet: 0,         rapid: 0         };
+
+      rows.forEach(function(row) {
+        var tc = row.timeClass;
+        if (!eloMaps[tc]) return; // ignorer "daily" et autres cadences
+
+        var date = row.date ? row.date.trim() : '';
+        var parts = date.split('.');
+        if (parts.length !== 3) return;
+
+        var yr  = +parts[0];
+        var mo  = +parts[1];
+        var dy  = +parts[2];
+        var dt  = new Date(yr, mo - 1, dy);
+
+        // ── Elo mensuel ──
+        var elo = parseInt(row.userRating, 10);
+        if (!isNaN(elo)) {
+          var monthKey = yr + '-' + String(mo).padStart(2, '0');
+          // La dernière ligne du mois (CSV trié par date) écrase les précédentes
+          eloMaps[tc].set(monthKey, elo);
+          if (!eloFirst[tc] || dt < eloFirst[tc]) eloFirst[tc] = dt;
+        }
+
+        // ── Accuracy trimestrielle ──
+        var acc       = parseFloat(row.userAccuracy);
+        var startTime = row.startTime ? row.startTime.trim() : '';
+        if (!isNaN(acc) && acc > 0 && startTime.match(/^\d{2}:\d{2}:\d{2}$/)) {
+          var qk = toQuarterKey(dt);
+          if (!accBuckets[tc].has(qk)) accBuckets[tc].set(qk, { sum: 0, count: 0 });
+          var b = accBuckets[tc].get(qk);
+          b.sum   += acc;
+          b.count++;
+          accSumAll[tc] += acc;
+          accCntAll[tc]++;
+        }
+      });
+
+      // ── Finalisation Elo ──
+      ['blitz', 'bullet', 'rapid'].forEach(function(tc) {
+        eloData[tc] = { map: eloMaps[tc], first: eloFirst[tc] || xMin };
+      });
+
+      // ── Finalisation Accuracy : tri et filtre n ≥ 5 parties ──
+      ['blitz', 'bullet', 'rapid'].forEach(function(tc) {
+        var arr = [];
+        accBuckets[tc].forEach(function(b, qk) {
+          if (b.count >= 5) {
+            arr.push({
+              date:  parseQuarter(qk),
+              y:     Math.round(b.sum / b.count * 10) / 10,
+              label: qk
+            });
+          }
+        });
+        arr.sort(function(a, b) { return a.date - b.date; });
+        accData[tc] = arr;
+        avgData[tc] = accCntAll[tc] > 0
+          ? Math.round(accSumAll[tc] / accCntAll[tc] * 10) / 10
+          : 0;
+      });
+
+      // Mise à jour du compteur et rendu initial
+      document.getElementById('status').textContent =
+        rows.length.toLocaleString() + ' parties chargées';
+
+      drawElo('blitz');
+      drawAcc('blitz');
+    });
+
+  </script>
+</body>
+</html>
