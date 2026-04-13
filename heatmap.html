@@ -23,7 +23,7 @@
       margin-bottom: 6px;
     }
 
-    /* texte intro au-dessus du graphique */
+    /* texte introductif au-dessus du graphique */
     .intro {
       font-size: 0.82rem;
       color: #777;
@@ -33,7 +33,7 @@
       margin-bottom: 24px;
     }
 
-    /* layout principal : échiquier à gauche, panneau à droite */
+    /* layout principal : échiquier à gauche, statistiques et légende à droite */
     .layout {
       display: flex;
       gap: 28px;
@@ -44,7 +44,7 @@
     /* wrapper de l'échiquier + labels */
     .board-wrap { flex-shrink: 0; }
 
-    /* labels de rangées et colonnes */
+    /* Numérotation des rangées et des colonnes */
     .rank-labels {
       display: flex;
       flex-direction: column;
@@ -73,7 +73,7 @@
       font-family: monospace;
     }
 
-    /* cases de l'échiquier */
+    /* couleur des cases de l'échiquier */
     .sq-light { fill: #f0d9b5; }
     .sq-dark  { fill: #b58863; }
 
@@ -133,7 +133,7 @@
     .tbtn.active  { background: #2a2520; color: #f7f4ef; }
     .tbtn:hover:not(.active) { background: #f0ebe3; }
 
-    /* info pièce sélectionnée */
+    /* info pièce considérée */
     #info {
       font-size: 0.8rem;
       color: #555;
@@ -141,7 +141,7 @@
       font-family: monospace;
     }
 
-    /* top 5 */
+    /* top 5 des coups */
     #top-panel { display: none; }
     #top-list  { list-style: none; }
     #top-list li {
@@ -156,7 +156,7 @@
     #top-list li:last-child { border-bottom: none; }
     .sq-name  { color: #555; width: 26px; flex-shrink: 0; }
     .sq-count { color: #922b21; font-weight: bold; margin-left: auto; flex-shrink: 0; }
-    /* petite barre proportionnelle dans le top 5 */
+    /* Barres top 5 */
     .sq-bar {
       flex: 1;
       height: 5px;
@@ -172,7 +172,7 @@
       border-radius: 3px;
     }
 
-    /* légende taille des cercles */
+    /* Légende taille des cercles */
     .legend-dots {
       display: flex;
       align-items: flex-end;
@@ -201,7 +201,7 @@
       font-family: monospace;
     }
 
-    /* note de conclusion */
+    /* Note de conclusion */
     .note {
       font-size: 0.82rem;
       color: #777;
@@ -248,11 +248,11 @@
 
       <div class="card">
         <h3>Pièce sélectionnée</h3>
-        <div id="info">Clique sur une pièce pour voir où elle se déplace.</div>
+        <div id="info">Clique sur une pièce pour voir les cases où elle se déplace le plus.</div>
       </div>
 
       <div class="card" id="legend-card">
-        <h3>Légende — fréquence de destination</h3>
+        <h3>Légende — fréquence </h3>
         <div class="legend-dots" id="legend-dots">
           <!-- rempli dynamiquement au moment du drawHeatmap() -->
           <span style="font-size:0.68rem;color:#bbb;font-family:monospace">
@@ -265,7 +265,7 @@
       </div>
 
       <div class="card" id="top-panel">
-        <h3>Top 5 — cases de destination (coups absolus)</h3>
+        <h3>Top 5 </h3>
         <ul id="top-list"></ul>
       </div>
 
@@ -523,7 +523,7 @@ for (var i = 0; i < 64; i++) {
     });
     selected = null;
 
-    // les cercles disparaissent en douceur
+    // Animation disparition des pièces
     dots.forEach(function(d) { d.transition().duration(200).attr('r', 0); });
 
     document.getElementById('info').textContent = 'Clique sur une pièce pour voir où elle se déplace.';
@@ -587,7 +587,6 @@ item.append('span').style('font-size', '0.58rem').style('color', '#bbb').style('
 
 
     // ── Top 5 des cases les plus visitées ────────────────────────────────
-    // Avec une petite barre proportionnelle pour visualiser l'écart entre cases
     var sorted = data
       .map(function(v, idx) {
         return { sq: FILES[idx % 8] + RANKS[Math.floor(idx / 8)], v: v };
