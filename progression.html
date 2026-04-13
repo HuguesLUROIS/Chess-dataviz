@@ -21,15 +21,9 @@
       margin: 0 auto;
     }
 
-    h2 {
-      font-size: 1.2rem;
-      font-weight: normal;
-      margin-bottom: 6px;
-    }
+    h2 { font-size: 1.2rem; font-weight: normal; margin-bottom: 6px; }
 
-    /* -----------------------------------------------------------------
-       Blocs de texte encadrés (introduction, commentaires analytiques)
-    ----------------------------------------------------------------- */
+    /* Textes encadrés — introduction et notes analytiques */
     .intro, .note {
       font-size: 0.82rem;
       color: #777;
@@ -40,32 +34,18 @@
     .intro { margin-bottom: 28px; }
     .note  { margin-top: 20px; margin-bottom: 28px; }
 
-    /* -----------------------------------------------------------------
-       Sections (Elo / Accuracy)
-    ----------------------------------------------------------------- */
+    /* Sections du document */
     .section { margin-bottom: 12px; }
-
-    .section h3 {
-      font-size: 0.95rem;
-      font-weight: normal;
-      margin-bottom: 4px;
-      color: #444;
-    }
-
-    .section .sub {
-      font-size: 0.72rem;
-      color: #aaa;
-      font-family: monospace;
-      margin-bottom: 14px;
-    }
+    .section h3 { font-size: 0.95rem; font-weight: normal; margin-bottom: 4px; color: #444; }
+    .section .sous-titre { font-size: 0.72rem; color: #aaa; font-family: monospace; margin-bottom: 14px; }
 
     /* -----------------------------------------------------------------
        Boutons de filtre par cadence
        Chaque cadence a sa propre couleur d'activation
     ----------------------------------------------------------------- */
-    .controls { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .controles { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
 
-    .cbtn {
+    .bouton {
       padding: 6px 14px;
       border: 1px solid #e0dbd4;
       border-radius: 4px;
@@ -76,44 +56,42 @@
       cursor: pointer;
       transition: background 0.15s, color 0.15s, border-color 0.15s;
     }
-    .cbtn:hover:not(.active) { background: #f0ebe3; }
+    .bouton:hover:not(.actif) { background: #f0ebe3; }
 
-    .cbtn.active[data-tc="blitz"]  { border-color: #7a4f00; color: #7a4f00; background: rgba(122,79,0,.06);  }
-    .cbtn.active[data-tc="bullet"] { border-color: #922518; color: #922518; background: rgba(146,37,24,.06); }
-    .cbtn.active[data-tc="rapid"]  { border-color: #1a5f40; color: #1a5f40; background: rgba(26,95,64,.06);  }
-    .cbtn.active[data-tc="all"]    { border-color: #555;    color: #333;    background: rgba(42,42,42,.05);  }
-
-    /* -----------------------------------------------------------------
-       Layout : graphique à gauche, panneau d'info à droite
-    ----------------------------------------------------------------- */
-    .layout { display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap; }
-    .chart-wrap { flex-shrink: 0; }
+    .bouton.actif[data-cadence="blitz"]  { border-color: #7a4f00; color: #7a4f00; background: rgba(122,79,0,.06);  }
+    .bouton.actif[data-cadence="bullet"] { border-color: #922518; color: #922518; background: rgba(146,37,24,.06); }
+    .bouton.actif[data-cadence="rapid"]  { border-color: #1a5f40; color: #1a5f40; background: rgba(26,95,64,.06);  }
+    .bouton.actif[data-cadence="tout"]   { border-color: #555;    color: #333;    background: rgba(42,42,42,.05);  }
 
     /* -----------------------------------------------------------------
-       Axes et grille D3
+       Layout : graphique à gauche, panneau à droite
     ----------------------------------------------------------------- */
-    .axis path, .axis line { stroke: #ddd; shape-rendering: crispEdges; }
-    .axis text  { font-family: monospace; font-size: 0.62rem; fill: #aaa; }
+    .disposition { display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap; }
+    .graphique-wrap { flex-shrink: 0; }
 
-    /* Grille horizontale en pointillés très légers */
-    .grid line  { stroke: #e8e3dc; stroke-dasharray: 2,3; shape-rendering: crispEdges; }
-    .grid path  { stroke: none; }
+    /* Style des axes D3 */
+    .axe path, .axe line { stroke: #ddd; shape-rendering: crispEdges; }
+    .axe text { font-family: monospace; font-size: 0.62rem; fill: #aaa; }
 
-    /* Séparateur vertical par année */
-    .year-line  { stroke: #ddd; stroke-width: 1; }
+    /* Grille horizontale en pointillés légers */
+    .grille line { stroke: #e8e3dc; stroke-dasharray: 2,3; shape-rendering: crispEdges; }
+    .grille path { stroke: none; }
+
+    /* Séparateurs verticaux par année */
+    .trait-annee { stroke: #ddd; stroke-width: 1; }
 
     /* -----------------------------------------------------------------
-       Panneau latéral : cartes d'information
+       Panneau latéral — cartes d'information
     ----------------------------------------------------------------- */
-    .panel { flex: 1; min-width: 170px; display: flex; flex-direction: column; gap: 12px; }
+    .panneau { flex: 1; min-width: 170px; display: flex; flex-direction: column; gap: 12px; }
 
-    .card {
+    .carte {
       background: #fff;
       border: 1px solid #e0dbd4;
       border-radius: 6px;
       padding: 14px 16px;
     }
-    .card h4 {
+    .carte h4 {
       font-size: 0.68rem;
       text-transform: uppercase;
       letter-spacing: 1.5px;
@@ -123,9 +101,9 @@
       margin-bottom: 10px;
     }
 
-    /* Liste de légende (cadence + dernière valeur) */
-    .legend-list { list-style: none; }
-    .legend-list li {
+    /* Légende : swatch coloré + nom de cadence + dernière valeur */
+    .liste-legende { list-style: none; }
+    .liste-legende li {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -135,12 +113,12 @@
       font-family: monospace;
       color: #555;
     }
-    .legend-list li:last-child { border-bottom: none; }
-    .leg-swatch { width: 18px; height: 2px; border-radius: 1px; flex-shrink: 0; }
-    .leg-val    { margin-left: auto; font-weight: bold; color: #333; }
+    .liste-legende li:last-child { border-bottom: none; }
+    .swatch-couleur { width: 18px; height: 2px; border-radius: 1px; flex-shrink: 0; }
+    .valeur-legende { margin-left: auto; font-weight: bold; color: #333; }
 
-    /* Lignes de la carte "Moyenne globale" avec barre proportionnelle */
-    .avg-row {
+    /* Carte "Moyenne globale" avec barre proportionnelle */
+    .ligne-moyenne {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -150,16 +128,16 @@
       font-family: monospace;
       color: #555;
     }
-    .avg-row:last-child { border-bottom: none; }
-    .avg-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .avg-val  { margin-left: auto; font-weight: bold; font-size: 0.9rem; }
-    .avg-bar-wrap { width: 100%; height: 3px; background: #f0ebe3; border-radius: 2px; overflow: hidden; margin-top: 2px; }
-    .avg-bar-fill { height: 100%; border-radius: 2px; }
+    .ligne-moyenne:last-child { border-bottom: none; }
+    .point-couleur { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .valeur-moyenne { margin-left: auto; font-weight: bold; font-size: 0.9rem; }
+    .piste-barre { width: 100%; height: 3px; background: #f0ebe3; border-radius: 2px; overflow: hidden; margin-top: 2px; }
+    .remplissage-barre { height: 100%; border-radius: 2px; }
 
     /* -----------------------------------------------------------------
-       Tooltip — suit le curseur, invisible par défaut
+       Infobulle au survol
     ----------------------------------------------------------------- */
-    #tip {
+    #infobulle {
       position: fixed;
       background: #fff;
       border: 1px solid #e0dbd4;
@@ -176,8 +154,8 @@
       z-index: 100;
     }
 
-    /* Ligne de statut chargement */
-    #status {
+    /* Statut de chargement */
+    #statut {
       font-size: 0.62rem;
       color: #bbb;
       margin-top: 10px;
@@ -190,599 +168,597 @@
   <h2>Ma progression de 2018 à 2026</h2>
 
   <p class="intro">
-    Pour évaluer la progression d'un joueur, deux indicateurs présents dans le jeu de données peuvent être exploités. L'évolution dans le temps du classement Elo en fonction des cadences semble être la première information naturelle à observer pour tout joueur d'échecs. Le classement Elo mesure le niveau relatif face à la
-    communauté échiquéenne. Lorsque l'on affronte et bat un adversaire, notre score elo va augmenter d'un nombre de points qui dépend du différentiel elo avec notre adversaire. Voici, ci-dessous, les séries temporelles illustrant ma progression elo (pour toutes cadences) de 2008 à aujourd'hui. 
+    Pour évaluer la progression d'un joueur, deux indicateurs présents dans le jeu de données peuvent être exploités.
+    L'évolution dans le temps du classement Elo en fonction des cadences semble être la première information naturelle
+    à observer pour tout joueur d'échecs. Le classement Elo mesure le niveau relatif face à la communauté échiquéenne.
+    Lorsque l'on affronte et bat un adversaire, notre score Elo va augmenter d'un nombre de points qui dépend du
+    différentiel Elo avec notre adversaire. Voici, ci-dessous, les séries temporelles illustrant ma progression Elo
+    (pour toutes cadences) de 2018 à aujourd'hui.
   </p>
 
   <!-- ==================================================================
        SECTION 1 — CLASSEMENT ELO
-       Série mensuelle avec forward-fill sur les périodes inactives
+       Série mensuelle avec report de la dernière valeur connue
+       sur les périodes sans parties (forward-fill)
   ================================================================== -->
   <div class="section">
     <h3>Évolution du classement Elo</h3>
-    <p class="sub">Dernier Elo enregistré chaque mois · 2018 – 2026</p>
+    <p class="sous-titre">Dernier Elo enregistré chaque mois · 2018 – 2026</p>
 
-    <div class="controls" id="elo-controls">
-      <button class="cbtn active" data-tc="blitz">Blitz</button>
-      <button class="cbtn" data-tc="bullet">Bullet</button>
-      <button class="cbtn" data-tc="rapid">Rapide</button>
-      <button class="cbtn" data-tc="all">Les 3 cadences</button>
+    <div class="controles" id="controles-elo">
+      <button class="bouton actif" data-cadence="blitz">Blitz</button>
+      <button class="bouton"       data-cadence="bullet">Bullet</button>
+      <button class="bouton"       data-cadence="rapid">Rapide</button>
+      <button class="bouton"       data-cadence="tout">Les 3 cadences</button>
     </div>
 
-    <div class="layout">
-      <div class="chart-wrap">
-        <svg id="elo-chart"></svg>
-        <p id="status">Chargement des données…</p>
+    <div class="disposition">
+      <div class="graphique-wrap">
+        <svg id="graphique-elo"></svg>
+        <p id="statut">Chargement des données…</p>
       </div>
-      <div class="panel">
-        <div class="card">
+      <div class="panneau">
+        <div class="carte">
           <h4>Cadences affichées</h4>
-          <ul class="legend-list" id="elo-legend"></ul>
+          <ul class="liste-legende" id="legende-elo"></ul>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Texte analytique placé entre les deux graphiques -->
+  <!-- Analyse entre les deux graphiques -->
   <p class="note">
-    Nous observons grâce à ces trois courbes une progression conséquente dans toutes les cadences. En blitz, la cadence la plus jouée (2943 parties), mon classement est passé de moins de 800 elos en 2018 à 1910 en 2026. En rapide l'évolution est conséquente avec une augmentation de près de 1000 points. Ce qui est marquant en combinant les 3 courbes, c'est d'observer les périodes à forte progression et les périodes de stagnation et d'inactivité. Nous observons par exemple que l'année 2022 a été marquée par une explosion des classements dans toutes les cadences avec une augmentation moyenne d'environ 400 points elo. La période 2023-2025 a, quant à elle, était beaucoup plus calme. Cela s'explique par un nombre de parties restreint sur cette période.     
-  Après avoir observé l'évolution Elo au cours du temps, il est intéressant d'observer l'évolution de la précision moyenne. La précision mesure la proportion de "meilleurs coups" joués selon l'ordinateur. Ci-dessous l'évolution de la précision moyenne au cours du temps et selon chacune des cadences. 
-    <!-- ==================================================================
-       SECTION 2 — ACCURACY PAR TRIMESTRE
-       Moyenne trimestrielle par cadence (blitz, bullet, rapide, les 3)
+    Nous observons grâce à ces trois courbes une progression conséquente dans toutes les cadences. En blitz,
+    la cadence la plus jouée (2 948 parties), mon classement est passé de moins de 800 points en 2018 à 1 910 en 2026.
+    En rapide, l'évolution est conséquente avec une augmentation de près de 1 000 points. Ce qui est marquant
+    en combinant les 3 courbes, c'est d'observer les périodes à forte progression et les périodes de stagnation
+    et d'inactivité. L'année 2022 a notamment été marquée par une explosion des classements dans toutes les cadences,
+    avec une augmentation moyenne d'environ 400 points Elo. La période 2023–2025 a, quant à elle, été beaucoup plus
+    calme — ce qui s'explique par un nombre de parties restreint sur cette période.
+    Après avoir observé l'évolution Elo au cours du temps, il est intéressant d'observer l'évolution de la précision
+    moyenne. La précision mesure la proportion de « meilleurs coups » joués selon l'ordinateur.
+  </p>
+
+  <!-- ==================================================================
+       SECTION 2 — PRÉCISION PAR TRIMESTRE
+       Moyenne trimestrielle par cadence
   ================================================================== -->
   <div class="section">
     <h3>Précision moyenne par trimestre</h3>
-    <p class="sub">Moyenne par trimestre des précisions obtenues par analyses Chess.com</p> 
+    <p class="sous-titre">Moyenne par trimestre des précisions obtenues par analyses Chess.com · n ≥ 5 parties</p>
 
-    <div class="controls" id="acc-controls">
-      <button class="cbtn active" data-tc="blitz">Blitz</button>
-      <button class="cbtn" data-tc="bullet">Bullet</button>
-      <button class="cbtn" data-tc="rapid">Rapide</button>
-      <button class="cbtn" data-tc="all">Les 3 cadences</button>
+    <div class="controles" id="controles-precision">
+      <button class="bouton actif" data-cadence="blitz">Blitz</button>
+      <button class="bouton"       data-cadence="bullet">Bullet</button>
+      <button class="bouton"       data-cadence="rapid">Rapide</button>
+      <button class="bouton"       data-cadence="tout">Les 3 cadences</button>
     </div>
 
-    <div class="layout">
-      <div class="chart-wrap">
-        <svg id="acc-chart"></svg>
+    <div class="disposition">
+      <div class="graphique-wrap">
+        <svg id="graphique-precision"></svg>
       </div>
-      <div class="panel">
-        <div class="card">
+      <div class="panneau">
+        <div class="carte">
           <h4>Cadences affichées</h4>
-          <ul class="legend-list" id="acc-legend"></ul>
+          <ul class="liste-legende" id="legende-precision"></ul>
         </div>
-
-        <!-- Note de lecture avant les chiffres bruts 
-        <div class="card">
-          <h4>Lecture</h4>
-          <p style="font-size:0.72rem;color:#777;line-height:1.6;font-family:monospace">
-            L'accuracy mesure la proportion de coups optimaux joués selon l'analyse du moteur.
-            Contrairement à l'Elo, elle ne dépend pas du niveau de l'adversaire — c'est une
-            mesure de qualité absolue. Le blitz affiche la moyenne la plus basse (72,8 %) :
-            la contrainte de temps y génère mécaniquement davantage d'erreurs.
-          </p>
-        </div>-->
-
-        <div class="card">
+        <div class="carte">
           <h4>Moyenne globale</h4>
-          <div id="avg-stats"></div>
+          <div id="moyennes-globales"></div>
         </div>
       </div>
     </div>
   </div>
 
   <p class="note">
-    Deux faits marquants sont à tirés de ces graphiques. Premièrement, il est intéressant et rassurant d'observer que la précision moyenne est plus importante pour les cadences longues. Plus je dispose de temps, plus je suis capable de trouver les meilleurs coups. 
-    Deuxièmement, les courbes de progression de la précision, bien que plus volatiles, possédent des caractéristiques communes avec celles de l'évolution du classement elo. Nous observons, en moyenne, une augmentation de près de 5 points de pourcentage entre 2022 et 2023 tandis que la période 2023-2025 est marquée par une évolution beaucoup plus fluctuante et où il est difficile d'observer une progression claire. 
+    Deux faits marquants ressortent de ces graphiques. Premièrement, il est intéressant et rassurant d'observer
+    que la précision moyenne est plus importante pour les cadences longues — plus je dispose de temps, plus je
+    suis capable de trouver les meilleurs coups. Deuxièmement, les courbes de progression de la précision,
+    bien que plus volatiles, partagent des caractéristiques communes avec celles de l'évolution du classement Elo.
+    On observe en moyenne une augmentation de près de 5 points de pourcentage entre 2022 et 2023, tandis que la
+    période 2023–2025 est marquée par une évolution beaucoup plus fluctuante.
   </p>
 
-  <div id="tip"></div>
+  <div id="infobulle"></div>
 
 
+  <!-- =================================================================
+       SCRIPT — Traitement des données et rendu des graphiques
+  ================================================================= -->
   <script>
 
-    // -----------------------------------------------------------------
-    // PALETTE & LABELS
-    // Chaque cadence a une couleur fixe utilisée partout (courbe, bouton,
-    // légende, tooltip).
-    // -----------------------------------------------------------------
-    var COLORS = {
-      blitz  : '#7a4f00',
-      bullet : '#922518',
-      rapid  : '#1a5f40'
-    };
+  // ── Palette et labels des cadences ───────────────────────────────────
+  // Chaque cadence a une couleur fixe réutilisée partout : courbe, bouton,
+  // légende et infobulle. Les labels longs servent au panneau, les courts
+  // à l'infobulle pour ne pas surcharger l'affichage.
+  var COULEURS = {
+    blitz  : '#7a4f00',
+    bullet : '#922518',
+    rapid  : '#1a5f40'
+  };
 
-    var LABELS = {
-      blitz  : 'Blitz (5 min)',
-      bullet : 'Bullet (1–2 min)',
-      rapid  : 'Rapide (10–15 min)'
-    };
+  var LABELS_LONGS = {
+    blitz  : 'Blitz (5 min)',
+    bullet : 'Bullet (1–2 min)',
+    rapid  : 'Rapide (10–15 min)'
+  };
 
-    var LABELS_SHORT = {
-      blitz  : 'Blitz',
-      bullet : 'Bullet',
-      rapid  : 'Rapide'
-    };
-
-
-    // -----------------------------------------------------------------
-    // DIMENSIONS
-    // Identiques pour les deux graphiques afin d'aligner les axes.
-    // -----------------------------------------------------------------
-    var W      = 610;
-    var H      = 340;
-    var margin = { top: 16, right: 64, bottom: 34, left: 50 };
-    var iW     = W - margin.left - margin.right;
-    var iH     = H - margin.top  - margin.bottom;
-
-    // Domaine temporel commun aux deux graphiques
-    var xMin   = new Date(2018, 5, 1);
-    var xMax   = new Date(2026, 2, 1);
-    var xScale = d3.scaleTime().domain([xMin, xMax]).range([0, iW]);
+  var LABELS_COURTS = {
+    blitz  : 'Blitz',
+    bullet : 'Bullet',
+    rapid  : 'Rapide'
+  };
 
 
-    // -----------------------------------------------------------------
-    // STRUCTURES DE DONNÉES
-    // Remplies dynamiquement au chargement du CSV — rien n'est codé en dur.
-    //
-    // eloData[tc]  → { map: Map<"YYYY-MM" → elo>, first: Date }
-    // accData[tc]  → [ { date, y, label } ] trié par date
-    // avgData[tc]  → moyenne globale d'accuracy sur toute la période
-    // -----------------------------------------------------------------
-    var eloData = { blitz: null, bullet: null, rapid: null };
-    var accData = { blitz: [],   bullet: [],   rapid: []   };
-    var avgData = { blitz: 0,    bullet: 0,    rapid: 0    };
+  // ── Dimensions communes aux deux graphiques ───────────────────────────
+  // On fixe les mêmes dimensions pour aligner les axes horizontaux.
+  var LARGEUR  = 610;
+  var HAUTEUR  = 340;
+  var marges   = { haut: 16, droite: 64, bas: 34, gauche: 50 };
+  var larg_int = LARGEUR  - marges.gauche - marges.droite;   // zone de tracé
+  var haut_int = HAUTEUR  - marges.haut   - marges.bas;
 
-    // Modes courants des deux graphiques
-    var eloMode = 'blitz';
-    var accMode = 'blitz';
+  // Domaine temporel commun (mi-2018 → début 2026)
+  var dateMin   = new Date(2018, 5, 1);
+  var dateMax   = new Date(2026, 2, 1);
+  var echelleX  = d3.scaleTime().domain([dateMin, dateMax]).range([0, larg_int]);
 
 
-    // -----------------------------------------------------------------
-    // UTILITAIRES DE DATE
-    // -----------------------------------------------------------------
+  // ── Structures de données ─────────────────────────────────────────────
+  // Alimentées ligne par ligne au chargement du CSV, rien n'est codé en dur.
+  //
+  // donneesElo[cadence]       → { map: Map<"YYYY-MM" → elo>, premiere: Date }
+  // donneesPrecision[cadence] → [ { date, valeur, label } ] trié par date
+  // moyennesGlobales[cadence] → précision moyenne sur toute la période
+  var donneesElo       = { blitz: null, bullet: null, rapid: null };
+  var donneesPrecision = { blitz: [],   bullet: [],   rapid: []   };
+  var moyennesGlobales = { blitz: 0,    bullet: 0,    rapid: 0    };
 
-    // "YYYY-MM" → 1er du mois
-    function parseYM(s) {
-      var p = s.split('-');
-      return new Date(+p[0], +p[1] - 1, 1);
+  // Cadences actives sur chaque graphique
+  var cadenceElo       = 'blitz';
+  var cadencePrecision = 'blitz';
+
+
+  // ── Utilitaires de date ───────────────────────────────────────────────
+
+  // "YYYY-MM" → 1er du mois correspondant
+  function parseMoisAnnee(s) {
+    var parties = s.split('-');
+    return new Date(+parties[0], +parties[1] - 1, 1);
+  }
+
+  // "YYYYQn" → milieu du trimestre (2e mois), pour centrer le point sur l'axe
+  function parseTrimestre(s) {
+    var annee = +s.slice(0, 4);
+    var trim  = +s.slice(5);
+    return new Date(annee, (trim - 1) * 3 + 1, 1);
+  }
+
+  // Date JS → clé de trimestre "YYYYQn" (ex. new Date(2022,8,1) → "2022Q3")
+  function cleTrimestre(date) {
+    return date.getFullYear() + 'Q' + (Math.floor(date.getMonth() / 3) + 1);
+  }
+
+
+  // ── Série Elo continue (forward-fill) ────────────────────────────────
+  // Sur les mois sans partie, on conserve le dernier Elo connu (reel=false)
+  // afin que la courbe reste continue visuellement.
+  function serieEloComplete(cadence) {
+    var entree = donneesElo[cadence];
+    if (!entree) return [];
+
+    var carte      = entree.map;
+    var premiereDate = entree.premiere;
+    var resultat   = [];
+    var curseur    = new Date(dateMin);
+    var dernierElo = null;
+
+    while (curseur <= dateMax) {
+      var cle  = curseur.getFullYear() + '-' + String(curseur.getMonth() + 1).padStart(2, '0');
+      var reel = carte.has(cle);
+      if (reel) dernierElo = carte.get(cle);
+
+      if (curseur >= premiereDate && dernierElo !== null)
+        resultat.push({ date: new Date(curseur), valeur: dernierElo, reel: reel });
+      else
+        resultat.push({ date: new Date(curseur), valeur: null, reel: false });
+
+      curseur.setMonth(curseur.getMonth() + 1);
     }
-
-    // "YYYYQn" → milieu du trimestre (2e mois, pour centrer visuellement)
-    function parseQuarter(s) {
-      var yr = +s.slice(0, 4);
-      var q  = +s.slice(5);
-      return new Date(yr, (q - 1) * 3 + 1, 1);
-    }
-
-    // Date → "YYYYQn" (ex. new Date(2022,8,1) → "2022Q3")
-    function toQuarterKey(date) {
-      return date.getFullYear() + 'Q' + (Math.floor(date.getMonth() / 3) + 1);
-    }
+    return resultat;
+  }
 
 
-    // -----------------------------------------------------------------
-    // FORWARD-FILL ELO
-    // Construit une série mensuelle continue sur tout le domaine.
-    // Les mois sans partie conservent le dernier Elo connu (real=false)
-    // pour que la courbe ne se rompe pas visuellement.
-    // -----------------------------------------------------------------
-    function buildFullElo(tc) {
-      var entry = eloData[tc];
-      if (!entry) return [];
+  // ── Helpers de rendu partagés ─────────────────────────────────────────
 
-      var map       = entry.map;
-      var firstDate = entry.first;
-      var result    = [];
-      var d         = new Date(xMin);
-      var lastY     = null;
+  // Dessine la grille horizontale, les traits verticaux annuels et les deux axes
+  function ajouterGrilleEtAxes(g, echelleY, formatY) {
+    // Grille horizontale en pointillés
+    g.append('g').attr('class', 'grille')
+      .call(d3.axisLeft(echelleY).ticks(5).tickSize(-larg_int).tickFormat(''));
 
-      while (d <= xMax) {
-        var key  = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-        var real = map.has(key);
-        if (real) lastY = map.get(key);
+    // Trait vertical au 1er janvier de chaque année
+    d3.range(2018, 2027).forEach(function(annee) {
+      var x = echelleX(new Date(annee, 0, 1));
+      if (x < 0 || x > larg_int) return;
+      g.append('line').attr('class', 'trait-annee')
+        .attr('x1', x).attr('x2', x)
+        .attr('y1', 0).attr('y2', haut_int);
+    });
 
-        if (d >= firstDate && lastY !== null)
-          result.push({ date: new Date(d), y: lastY, real: real });
-        else
-          result.push({ date: new Date(d), y: null,  real: false });
+    // Axe horizontal : une marque par an
+    g.append('g').attr('class', 'axe')
+      .attr('transform', 'translate(0,' + haut_int + ')')
+      .call(d3.axisBottom(echelleX)
+        .ticks(d3.timeYear.every(1))
+        .tickFormat(d3.timeFormat('%Y')));
 
-        d.setMonth(d.getMonth() + 1);
-      }
-      return result;
-    }
+    // Axe vertical
+    g.append('g').attr('class', 'axe')
+      .call(d3.axisLeft(echelleY).ticks(5).tickFormat(formatY));
+  }
 
+  // Zone de capture souris avec ligne verticale et infobulle
+  // obtenirSerie(cadence) → tableau de points
+  // formaterLigne(point, cadence) → HTML d'une ligne dans l'infobulle
+  function ajouterSurvol(g, cadences, obtenirSerie, formaterLigne) {
+    var ligneCurseur = g.append('line')
+      .attr('y1', 0).attr('y2', haut_int)
+      .attr('stroke', '#bbb').attr('stroke-width', 1)
+      .attr('stroke-dasharray', '3,3')
+      .attr('opacity', 0);
 
-    // -----------------------------------------------------------------
-    // HELPERS DE RENDU PARTAGÉS
-    // Factorisés pour ne pas les dupliquer entre drawElo et drawAcc.
-    // -----------------------------------------------------------------
+    var bisecteur = d3.bisector(function(d) { return d.date; }).left;
+    var infobulle = document.getElementById('infobulle');
 
-    // Grille horizontale, séparateurs d'années, axes X et Y
-    function addGridAndAxes(g, yScale, yFmt) {
-      g.append('g').attr('class', 'grid')
-        .call(d3.axisLeft(yScale).ticks(5).tickSize(-iW).tickFormat(''));
+    g.append('rect')
+      .attr('width', larg_int).attr('height', haut_int)
+      .attr('fill', 'transparent')
+      .style('cursor', 'crosshair')
+      .on('mousemove', function(evenement) {
+        var mx          = d3.pointer(evenement)[0];
+        var dateCurseur = echelleX.invert(mx);
+        ligneCurseur.attr('x1', mx).attr('x2', mx).attr('opacity', 1);
 
-      d3.range(2018, 2027).forEach(function(yr) {
-        var x = xScale(new Date(yr, 0, 1));
-        if (x < 0 || x > iW) return;
-        g.append('line').attr('class', 'year-line')
-          .attr('x1', x).attr('x2', x)
-          .attr('y1', 0).attr('y2', iH);
+        // Pour chaque cadence affichée, trouver le point le plus proche
+        var lignes = cadences.map(function(c) {
+          var pts = obtenirSerie(c).filter(function(d) { return d.valeur !== null; });
+          if (!pts.length) return null;
+          var idx = bisecteur(pts, dateCurseur, 1);
+          var g0  = pts[Math.max(0, idx - 1)];
+          var g1  = pts[Math.min(pts.length - 1, idx)];
+          var plus_proche = (!g0 || !g1) ? (g0 || g1)
+                          : (dateCurseur - g0.date > g1.date - dateCurseur ? g1 : g0);
+          return plus_proche ? formaterLigne(plus_proche, c) : null;
+        }).filter(Boolean);
+
+        infobulle.innerHTML = lignes.join('<br>');
+        infobulle.style.opacity = 1;
+        infobulle.style.left    = (evenement.clientX + 14) + 'px';
+        infobulle.style.top     = (evenement.clientY - 10) + 'px';
+      })
+      .on('mouseleave', function() {
+        ligneCurseur.attr('opacity', 0);
+        infobulle.style.opacity = 0;
       });
+  }
 
-      g.append('g').attr('class', 'axis')
-        .attr('transform', 'translate(0,' + iH + ')')
-        .call(d3.axisBottom(xScale)
-          .ticks(d3.timeYear.every(1))
-          .tickFormat(d3.timeFormat('%Y')));
+  // Trace une courbe avec son aire de fond semi-transparente
+  function tracerCourbe(g, points, couleur, epaisseur, generateurLigne, generateurAire) {
+    // Aire de fond
+    g.append('path').datum(points)
+      .attr('fill', couleur).attr('fill-opacity', 0.06)
+      .attr('d', generateurAire);
+    // Courbe
+    g.append('path').datum(points)
+      .attr('fill', 'none')
+      .attr('stroke', couleur)
+      .attr('stroke-width', epaisseur)
+      .attr('stroke-linejoin', 'round')
+      .attr('stroke-linecap', 'round')
+      .attr('d', generateurLigne);
+  }
 
-      g.append('g').attr('class', 'axis')
-        .call(d3.axisLeft(yScale).ticks(5).tickFormat(yFmt));
-    }
-
-    // Zone de capture souris avec ligne de curseur verticale et tooltip.
-    // getSeries(tc) retourne le tableau de points pour une cadence donnée.
-    // fmtRow(point, tc) retourne le HTML d'une ligne dans le tooltip.
-    function addHover(g, tcs, getSeries, fmtRow) {
-      var vLine = g.append('line')
-        .attr('y1', 0).attr('y2', iH)
-        .attr('stroke', '#bbb').attr('stroke-width', 1)
-        .attr('stroke-dasharray', '3,3')
-        .attr('opacity', 0);
-
-      var bisect = d3.bisector(function(d) { return d.date; }).left;
-      var tip    = document.getElementById('tip');
-
-      g.append('rect')
-        .attr('width', iW).attr('height', iH)
-        .attr('fill', 'transparent')
-        .style('cursor', 'crosshair')
-        .on('mousemove', function(event) {
-          var mx    = d3.pointer(event)[0];
-          var hDate = xScale.invert(mx);
-          vLine.attr('x1', mx).attr('x2', mx).attr('opacity', 1);
-
-          var rows = tcs.map(function(tc) {
-            var pts = getSeries(tc).filter(function(d) { return d.y !== null; });
-            if (!pts.length) return null;
-            var idx = bisect(pts, hDate, 1);
-            var d0  = pts[Math.max(0, idx - 1)];
-            var d1  = pts[Math.min(pts.length - 1, idx)];
-            var nearest = (!d0 || !d1) ? (d0 || d1)
-                        : (hDate - d0.date > d1.date - hDate ? d1 : d0);
-            return nearest ? fmtRow(nearest, tc) : null;
-          }).filter(Boolean);
-
-          tip.innerHTML = rows.join('<br>');
-          tip.style.opacity = 1;
-          tip.style.left    = (event.clientX + 14) + 'px';
-          tip.style.top     = (event.clientY - 10) + 'px';
-        })
-        .on('mouseleave', function() {
-          vLine.attr('opacity', 0);
-          tip.style.opacity = 0;
-        });
-    }
-
-    // Trace une courbe + aire de fond pour un tableau de points donné
-    function drawCurve(g, pts, color, strokeWidth, lineGen, areaGen) {
-      g.append('path').datum(pts)
-        .attr('fill', color).attr('fill-opacity', 0.06)
-        .attr('d', areaGen);
-
-      g.append('path').datum(pts)
-        .attr('fill', 'none')
-        .attr('stroke', color)
-        .attr('stroke-width', strokeWidth)
-        .attr('stroke-linejoin', 'round')
-        .attr('stroke-linecap', 'round')
-        .attr('d', lineGen);
-    }
-
-    // Pose l'étiquette de la dernière valeur à droite de la courbe
-    function drawLastLabel(g, pts, color, xFn, yFn, fmt) {
-      var last = pts[pts.length - 1];
-      if (!last) return;
-      g.append('text')
-        .attr('x', xFn(last) + 5)
-        .attr('y', yFn(last) + 4)
-        .attr('fill', color)
-        .attr('font-family', 'monospace')
-        .attr('font-size', '0.63rem')
-        .attr('font-weight', 'bold')
-        .text(fmt(last));
-    }
+  // Affiche la valeur du dernier point à droite de la courbe
+  function etiquetteDernierPoint(g, points, couleur, fnX, fnY, formater) {
+    var dernier = points[points.length - 1];
+    if (!dernier) return;
+    g.append('text')
+      .attr('x', fnX(dernier) + 5)
+      .attr('y', fnY(dernier) + 4)
+      .attr('fill', couleur)
+      .attr('font-family', 'monospace')
+      .attr('font-size', '0.63rem')
+      .attr('font-weight', 'bold')
+      .text(formater(dernier));
+  }
 
 
-    // -----------------------------------------------------------------
-    // GRAPHIQUE ELO
-    // -----------------------------------------------------------------
-    function drawElo(mode) {
-      eloMode = mode;
+  // ── Graphique Elo ─────────────────────────────────────────────────────
+  function dessinerElo(cadence) {
+    cadenceElo = cadence;
 
-      var svgEl = d3.select('#elo-chart').attr('width', W).attr('height', H);
-      svgEl.selectAll('*').remove();
-      var g = svgEl.append('g')
-        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+    var svgEl = d3.select('#graphique-elo').attr('width', LARGEUR).attr('height', HAUTEUR);
+    svgEl.selectAll('*').remove();
+    var g = svgEl.append('g')
+      .attr('transform', 'translate(' + marges.gauche + ',' + marges.haut + ')');
 
-      var tcs    = (mode === 'all') ? ['blitz', 'bullet', 'rapid'] : [mode];
-      var series = {};
-      tcs.forEach(function(tc) { series[tc] = buildFullElo(tc); });
+    // Cadences à afficher
+    var cadences = (cadence === 'tout') ? ['blitz', 'bullet', 'rapid'] : [cadence];
+    var series   = {};
+    cadences.forEach(function(c) { series[c] = serieEloComplete(c); });
 
-      // Plage Y calculée sur les points effectivement joués (real=true)
-      var allVals = tcs.reduce(function(acc, tc) {
-        return acc.concat(
-          series[tc].filter(function(d) { return d.real; }).map(function(d) { return d.y; })
-        );
-      }, []);
-      var yScale = d3.scaleLinear()
-        .domain([
-          Math.floor((d3.min(allVals) - 80) / 100) * 100,
-          Math.ceil ((d3.max(allVals) + 80) / 100) * 100
-        ])
-        .range([iH, 0]);
+    // Plage Y calculée uniquement sur les points réellement joués
+    var toutesValeurs = cadences.reduce(function(acc, c) {
+      return acc.concat(series[c].filter(function(d) { return d.reel; }).map(function(d) { return d.valeur; }));
+    }, []);
+    var echelleY = d3.scaleLinear()
+      .domain([
+        Math.floor((d3.min(toutesValeurs) - 80) / 100) * 100,
+        Math.ceil ((d3.max(toutesValeurs) + 80) / 100) * 100
+      ])
+      .range([haut_int, 0]);
 
-      addGridAndAxes(g, yScale, function(v) { return v; });
+    ajouterGrilleEtAxes(g, echelleY, function(v) { return v; });
 
-      var lineGen = d3.line()
-        .x(function(d) { return xScale(d.date); })
-        .y(function(d) { return yScale(d.y); })
-        .defined(function(d) { return d.y !== null; })
-        .curve(d3.curveMonotoneX);
+    // Générateurs de forme
+    var generateurLigne = d3.line()
+      .x(function(d) { return echelleX(d.date); })
+      .y(function(d) { return echelleY(d.valeur); })
+      .defined(function(d) { return d.valeur !== null; })
+      .curve(d3.curveMonotoneX);
 
-      var areaGen = d3.area()
-        .x(function(d)  { return xScale(d.date); })
-        .y0(iH)
-        .y1(function(d) { return yScale(d.y); })
-        .defined(function(d) { return d.y !== null; })
-        .curve(d3.curveMonotoneX);
+    var generateurAire = d3.area()
+      .x(function(d)  { return echelleX(d.date); })
+      .y0(haut_int)
+      .y1(function(d) { return echelleY(d.valeur); })
+      .defined(function(d) { return d.valeur !== null; })
+      .curve(d3.curveMonotoneX);
 
-      tcs.forEach(function(tc) {
-        var sw = (mode === 'all') ? 1.6 : 2;
-        // La série inclut les mois "maintenus" (real=false) pour une courbe continue
-        drawCurve(g, series[tc].filter(function(d) { return d.y !== null; }),
-                  COLORS[tc], sw, lineGen, areaGen);
-
-        // Étiquette sur le dernier point réel de la série
-        var lastReal = null;
-        for (var i = series[tc].length - 1; i >= 0; i--) {
-          if (series[tc][i].real) { lastReal = series[tc][i]; break; }
-        }
-        if (lastReal) {
-          g.append('text')
-            .attr('x', xScale(lastReal.date) + 5)
-            .attr('y', yScale(lastReal.y) + 4)
-            .attr('fill', COLORS[tc])
-            .attr('font-family', 'monospace').attr('font-size', '0.63rem').attr('font-weight', 'bold')
-            .text(lastReal.y);
-        }
-      });
-
-      addHover(g, tcs,
-        function(tc) { return series[tc]; },
-        function(d, tc) {
-          return '<span style="color:' + COLORS[tc] + '">'
-            + LABELS_SHORT[tc] + ' : ' + d.y + '</span>';
-        }
+    cadences.forEach(function(c) {
+      var epaisseur = (cadence === 'tout') ? 1.6 : 2;
+      // On filtre les null mais on conserve les points "maintenus" (forward-fill)
+      tracerCourbe(g,
+        series[c].filter(function(d) { return d.valeur !== null; }),
+        COULEURS[c], epaisseur, generateurLigne, generateurAire
       );
 
-      // Légende : ligne colorée + nom de cadence + dernière valeur réelle
-      document.getElementById('elo-legend').innerHTML = tcs.map(function(tc) {
-        var lastReal = null;
-        for (var i = series[tc].length - 1; i >= 0; i--) {
-          if (series[tc][i].real) { lastReal = series[tc][i]; break; }
-        }
-        return '<li>'
-          + '<span class="leg-swatch" style="background:' + COLORS[tc] + '"></span>'
-          + LABELS[tc]
-          + '<span class="leg-val">' + (lastReal ? lastReal.y : '—') + '</span>'
-          + '</li>';
-      }).join('');
-    }
-
-
-    // -----------------------------------------------------------------
-    // GRAPHIQUE ACCURACY
-    // Gère quatre modes : blitz, bullet, rapid, all (3 courbes)
-    // -----------------------------------------------------------------
-    function drawAcc(mode) {
-      accMode = mode;
-
-      var svgEl = d3.select('#acc-chart').attr('width', W).attr('height', H);
-      svgEl.selectAll('*').remove();
-      var g = svgEl.append('g')
-        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-      var tcs = (mode === 'all') ? ['blitz', 'bullet', 'rapid'] : [mode];
-      var series = {};
-      tcs.forEach(function(tc) { series[tc] = accData[tc]; });
-
-      // Plage Y sur l'ensemble des valeurs affichées
-      var allPts = tcs.reduce(function(acc, tc) { return acc.concat(series[tc]); }, []);
-      var yScale = d3.scaleLinear()
-        .domain([
-          Math.floor(d3.min(allPts.map(function(d) { return d.y; })) - 3),
-          Math.ceil (d3.max(allPts.map(function(d) { return d.y; })) + 3)
-        ])
-        .range([iH, 0]);
-
-      addGridAndAxes(g, yScale, function(v) { return v + '%'; });
-
-      // Ligne de référence (moyenne globale) en mode cadence unique
-      if (mode !== 'all') {
-        var avgY = yScale(avgData[mode]);
-        g.append('line')
-          .attr('x1', 0).attr('x2', iW)
-          .attr('y1', avgY).attr('y2', avgY)
-          .attr('stroke', COLORS[mode]).attr('stroke-width', 1)
-          .attr('stroke-dasharray', '4,4').attr('opacity', 0.35);
+      // Étiquette sur le dernier point réel (pas forward-fill)
+      var dernierReel = null;
+      for (var i = series[c].length - 1; i >= 0; i--) {
+        if (series[c][i].reel) { dernierReel = series[c][i]; break; }
+      }
+      if (dernierReel) {
         g.append('text')
-          .attr('x', iW + 4).attr('y', avgY + 3)
-          .attr('fill', COLORS[mode])
-          .attr('font-family', 'monospace').attr('font-size', '0.58rem').attr('opacity', 0.6)
-          .text('moy.');
+          .attr('x', echelleX(dernierReel.date) + 5)
+          .attr('y', echelleY(dernierReel.valeur) + 4)
+          .attr('fill', COULEURS[c])
+          .attr('font-family', 'monospace').attr('font-size', '0.63rem').attr('font-weight', 'bold')
+          .text(dernierReel.valeur);
       }
+    });
 
-      var lineGen = d3.line()
-        .x(function(d) { return xScale(d.date); })
-        .y(function(d) { return yScale(d.y); })
-        .curve(d3.curveMonotoneX);
+    ajouterSurvol(g, cadences,
+      function(c) { return series[c]; },
+      function(d, c) {
+        return '<span style="color:' + COULEURS[c] + '">'
+          + LABELS_COURTS[c] + ' : ' + d.valeur + '</span>';
+      }
+    );
 
-      var areaGen = d3.area()
-        .x(function(d)  { return xScale(d.date); })
-        .y0(iH)
-        .y1(function(d) { return yScale(d.y); })
-        .curve(d3.curveMonotoneX);
+    // Mise à jour de la légende
+    document.getElementById('legende-elo').innerHTML = cadences.map(function(c) {
+      var dernierReel = null;
+      for (var i = series[c].length - 1; i >= 0; i--) {
+        if (series[c][i].reel) { dernierReel = series[c][i]; break; }
+      }
+      return '<li>'
+        + '<span class="swatch-couleur" style="background:' + COULEURS[c] + '"></span>'
+        + LABELS_LONGS[c]
+        + '<span class="valeur-legende">' + (dernierReel ? dernierReel.valeur : '—') + '</span>'
+        + '</li>';
+    }).join('');
+  }
 
-      tcs.forEach(function(tc) {
-        var sw = (mode === 'all') ? 1.6 : 2;
-        drawCurve(g, series[tc], COLORS[tc], sw, lineGen, areaGen);
-        drawLastLabel(g, series[tc], COLORS[tc],
-          function(d) { return xScale(d.date); },
-          function(d) { return yScale(d.y); },
-          function(d) { return d.y + '%'; }
-        );
-      });
 
-      addHover(g, tcs,
-        function(tc) { return series[tc]; },
-        function(d, tc) {
-          return '<span style="color:' + COLORS[tc] + '">'
-            + LABELS_SHORT[tc] + ' : ' + d.y + '% '
-            + '<span style="color:#aaa">(' + d.label + ')</span></span>';
-        }
+  // ── Graphique Précision ───────────────────────────────────────────────
+  function dessinerPrecision(cadence) {
+    cadencePrecision = cadence;
+
+    var svgEl = d3.select('#graphique-precision').attr('width', LARGEUR).attr('height', HAUTEUR);
+    svgEl.selectAll('*').remove();
+    var g = svgEl.append('g')
+      .attr('transform', 'translate(' + marges.gauche + ',' + marges.haut + ')');
+
+    var cadences = (cadence === 'tout') ? ['blitz', 'bullet', 'rapid'] : [cadence];
+    var series   = {};
+    cadences.forEach(function(c) { series[c] = donneesPrecision[c]; });
+
+    // Plage Y sur toutes les valeurs affichées
+    var tousPoints = cadences.reduce(function(acc, c) { return acc.concat(series[c]); }, []);
+    var echelleY   = d3.scaleLinear()
+      .domain([
+        Math.floor(d3.min(tousPoints.map(function(d) { return d.valeur; })) - 3),
+        Math.ceil (d3.max(tousPoints.map(function(d) { return d.valeur; })) + 3)
+      ])
+      .range([haut_int, 0]);
+
+    ajouterGrilleEtAxes(g, echelleY, function(v) { return v + '%'; });
+
+    // Ligne de référence : moyenne globale (uniquement en mode cadence unique)
+    if (cadence !== 'tout') {
+      var yMoyenne = echelleY(moyennesGlobales[cadence]);
+      g.append('line')
+        .attr('x1', 0).attr('x2', larg_int)
+        .attr('y1', yMoyenne).attr('y2', yMoyenne)
+        .attr('stroke', COULEURS[cadence]).attr('stroke-width', 1)
+        .attr('stroke-dasharray', '4,4').attr('opacity', 0.35);
+      g.append('text')
+        .attr('x', larg_int + 4).attr('y', yMoyenne + 3)
+        .attr('fill', COULEURS[cadence])
+        .attr('font-family', 'monospace').attr('font-size', '0.58rem').attr('opacity', 0.6)
+        .text('moy.');
+    }
+
+    var generateurLigne = d3.line()
+      .x(function(d) { return echelleX(d.date); })
+      .y(function(d) { return echelleY(d.valeur); })
+      .curve(d3.curveMonotoneX);
+
+    var generateurAire = d3.area()
+      .x(function(d)  { return echelleX(d.date); })
+      .y0(haut_int)
+      .y1(function(d) { return echelleY(d.valeur); })
+      .curve(d3.curveMonotoneX);
+
+    cadences.forEach(function(c) {
+      var epaisseur = (cadence === 'tout') ? 1.6 : 2;
+      tracerCourbe(g, series[c], COULEURS[c], epaisseur, generateurLigne, generateurAire);
+      etiquetteDernierPoint(g, series[c], COULEURS[c],
+        function(d) { return echelleX(d.date); },
+        function(d) { return echelleY(d.valeur); },
+        function(d) { return d.valeur + '%'; }
       );
+    });
 
-      // Légende
-      document.getElementById('acc-legend').innerHTML = tcs.map(function(tc) {
-        var pts  = series[tc];
-        var last = pts[pts.length - 1];
-        return '<li>'
-          + '<span class="leg-swatch" style="background:' + COLORS[tc] + '"></span>'
-          + LABELS[tc]
-          + '<span class="leg-val">' + (last ? last.y + '%' : '—') + '</span>'
-          + '</li>';
-      }).join('');
+    ajouterSurvol(g, cadences,
+      function(c) { return series[c]; },
+      function(d, c) {
+        return '<span style="color:' + COULEURS[c] + '">'
+          + LABELS_COURTS[c] + ' : ' + d.valeur + '% '
+          + '<span style="color:#aaa">(' + d.label + ')</span></span>';
+      }
+    );
 
-      // Carte "Moyenne globale" — toujours visible, indépendante du mode affiché
-      var maxAvg = Math.max(avgData.blitz, avgData.bullet, avgData.rapid);
-      document.getElementById('avg-stats').innerHTML = ['blitz', 'bullet', 'rapid'].map(function(tc) {
-        var pct = ((avgData[tc] / maxAvg) * 100).toFixed(1);
-        return '<div class="avg-row">'
-          + '<span class="avg-dot" style="background:' + COLORS[tc] + '"></span>'
-          + '<span style="color:' + COLORS[tc] + '">' + LABELS_SHORT[tc] + '</span>'
-          + '<span class="avg-val" style="color:' + COLORS[tc] + '">' + avgData[tc] + '%</span>'
+    // Légende
+    document.getElementById('legende-precision').innerHTML = cadences.map(function(c) {
+      var pts     = series[c];
+      var dernier = pts[pts.length - 1];
+      return '<li>'
+        + '<span class="swatch-couleur" style="background:' + COULEURS[c] + '"></span>'
+        + LABELS_LONGS[c]
+        + '<span class="valeur-legende">' + (dernier ? dernier.valeur + '%' : '—') + '</span>'
+        + '</li>';
+    }).join('');
+
+    // Carte "Moyenne globale" — toujours visible quelle que soit la sélection
+    var maxMoyenne = Math.max(moyennesGlobales.blitz, moyennesGlobales.bullet, moyennesGlobales.rapid);
+    document.getElementById('moyennes-globales').innerHTML =
+      ['blitz', 'bullet', 'rapid'].map(function(c) {
+        var pct = ((moyennesGlobales[c] / maxMoyenne) * 100).toFixed(1);
+        return '<div class="ligne-moyenne">'
+          + '<span class="point-couleur" style="background:' + COULEURS[c] + '"></span>'
+          + '<span style="color:' + COULEURS[c] + '">' + LABELS_COURTS[c] + '</span>'
+          + '<span class="valeur-moyenne" style="color:' + COULEURS[c] + '">' + moyennesGlobales[c] + '%</span>'
           + '</div>'
           + '<div style="padding:0 0 6px 0;border-bottom:1px solid #f0ebe3">'
-          +   '<div class="avg-bar-wrap">'
-          +     '<div class="avg-bar-fill" style="width:' + pct + '%;background:' + COLORS[tc] + ';opacity:0.4"></div>'
+          +   '<div class="piste-barre">'
+          +     '<div class="remplissage-barre" style="width:' + pct + '%;background:' + COULEURS[c] + ';opacity:0.4"></div>'
           +   '</div>'
           + '</div>';
       }).join('');
-    }
+  }
 
 
-    // -----------------------------------------------------------------
-    // BOUTONS DE SÉLECTION
-    // -----------------------------------------------------------------
-    document.getElementById('elo-controls').addEventListener('click', function(e) {
-      var btn = e.target.closest('.cbtn');
-      if (!btn) return;
-      document.querySelectorAll('#elo-controls .cbtn')
-        .forEach(function(b) { b.classList.remove('active'); });
-      btn.classList.add('active');
-      drawElo(btn.dataset.tc);
+  // ── Boutons de sélection ──────────────────────────────────────────────
+  document.getElementById('controles-elo').addEventListener('click', function(e) {
+    var btn = e.target.closest('.bouton');
+    if (!btn) return;
+    document.querySelectorAll('#controles-elo .bouton')
+      .forEach(function(b) { b.classList.remove('actif'); });
+    btn.classList.add('actif');
+    dessinerElo(btn.dataset.cadence);
+  });
+
+  document.getElementById('controles-precision').addEventListener('click', function(e) {
+    var btn = e.target.closest('.bouton');
+    if (!btn) return;
+    document.querySelectorAll('#controles-precision .bouton')
+      .forEach(function(b) { b.classList.remove('actif'); });
+    btn.classList.add('actif');
+    dessinerPrecision(btn.dataset.cadence);
+  });
+
+
+  // ── Chargement du CSV ─────────────────────────────────────────────────
+  d3.dsv(';', 'data/games.csv').then(function(lignes) {
+
+    /* Étape 1 : déclaration des structures temporaires
+       On accumule les valeurs ligne par ligne avant d'agréger. */
+    var cartesElo      = { blitz: new Map(), bullet: new Map(), rapid: new Map() };
+    var premiereDates  = { blitz: null,      bullet: null,      rapid: null      };
+    var bucketsPrecis  = { blitz: new Map(), bullet: new Map(), rapid: new Map() };
+    var sommePrecis    = { blitz: 0,         bullet: 0,         rapid: 0         };
+    var comptePrecis   = { blitz: 0,         bullet: 0,         rapid: 0         };
+
+    /* Étape 2 : lecture ligne par ligne */
+    lignes.forEach(function(ligne) {
+      var cadence = ligne.timeClass;
+      if (!cartesElo[cadence]) return;   // ignorer "daily" et autres
+
+      var date   = ligne.date ? ligne.date.trim() : '';
+      var parties = date.split('.');
+      if (parties.length !== 3) return;
+
+      var annee = +parties[0], mois = +parties[1], jour = +parties[2];
+      var dt    = new Date(annee, mois - 1, jour);
+
+      // Elo mensuel : la dernière valeur du mois remplace les précédentes
+      // (le CSV étant trié par date, c'est bien la valeur de fin de mois)
+      var elo = parseInt(ligne.userRating, 10);
+      if (!isNaN(elo)) {
+        var cle_mois = annee + '-' + String(mois).padStart(2, '0');
+        cartesElo[cadence].set(cle_mois, elo);
+        if (!premiereDates[cadence] || dt < premiereDates[cadence]) premiereDates[cadence] = dt;
+      }
+
+      // Précision trimestrielle : on cumule pour calculer la moyenne
+      var precision   = parseFloat(ligne.userAccuracy);
+      var heureDebut  = ligne.startTime ? ligne.startTime.trim() : '';
+      if (!isNaN(precision) && precision > 0 && heureDebut.match(/^\d{2}:\d{2}:\d{2}$/)) {
+        var cle_trim = cleTrimestre(dt);
+        if (!bucketsPrecis[cadence].has(cle_trim))
+          bucketsPrecis[cadence].set(cle_trim, { somme: 0, compte: 0 });
+        var seau = bucketsPrecis[cadence].get(cle_trim);
+        seau.somme   += precision;
+        seau.compte++;
+        sommePrecis[cadence]  += precision;
+        comptePrecis[cadence]++;
+      }
     });
 
-    document.getElementById('acc-controls').addEventListener('click', function(e) {
-      var btn = e.target.closest('.cbtn');
-      if (!btn) return;
-      document.querySelectorAll('#acc-controls .cbtn')
-        .forEach(function(b) { b.classList.remove('active'); });
-      btn.classList.add('active');
-      drawAcc(btn.dataset.tc);
+    /* Étape 3 : finalisation des données Elo */
+    ['blitz', 'bullet', 'rapid'].forEach(function(c) {
+      donneesElo[c] = { map: cartesElo[c], premiere: premiereDates[c] || dateMin };
     });
 
-
-    // -----------------------------------------------------------------
-    // CHARGEMENT DES DONNÉES
-    // Lit games.csv, agrège Elo mensuel et accuracy trimestrielle
-    // pour chaque cadence.
-    // -----------------------------------------------------------------
-    d3.dsv(';', 'data/games.csv').then(function(rows) {
-
-      // Buckets temporaires remplis ligne par ligne
-      var eloMaps    = { blitz: new Map(), bullet: new Map(), rapid: new Map() };
-      var eloFirst   = { blitz: null,      bullet: null,      rapid: null      };
-      var accBuckets = { blitz: new Map(), bullet: new Map(), rapid: new Map() };
-      var accSumAll  = { blitz: 0,         bullet: 0,         rapid: 0         };
-      var accCntAll  = { blitz: 0,         bullet: 0,         rapid: 0         };
-
-      rows.forEach(function(row) {
-        var tc = row.timeClass;
-        if (!eloMaps[tc]) return; // exclut "daily" et autres
-
-        var date  = row.date ? row.date.trim() : '';
-        var parts = date.split('.');
-        if (parts.length !== 3) return;
-
-        var yr = +parts[0], mo = +parts[1], dy = +parts[2];
-        var dt = new Date(yr, mo - 1, dy);
-
-        // Elo mensuel : on garde la dernière valeur vue dans le mois
-        // (le CSV étant trié chronologiquement, c'est la valeur de fin de mois)
-        var elo = parseInt(row.userRating, 10);
-        if (!isNaN(elo)) {
-          var mkey = yr + '-' + String(mo).padStart(2, '0');
-          eloMaps[tc].set(mkey, elo);
-          if (!eloFirst[tc] || dt < eloFirst[tc]) eloFirst[tc] = dt;
+    /* Étape 4 : finalisation des données de précision
+       On ne conserve que les trimestres avec au moins 5 parties. */
+    ['blitz', 'bullet', 'rapid'].forEach(function(c) {
+      var tableau = [];
+      bucketsPrecis[c].forEach(function(seau, cle_trim) {
+        if (seau.compte >= 5) {
+          tableau.push({
+            date   : parseTrimestre(cle_trim),
+            valeur : Math.round(seau.somme / seau.compte * 10) / 10,
+            label  : cle_trim
+          });
         }
-
-        // Accuracy trimestrielle : cumul pour la moyenne par trimestre
-        var acc = parseFloat(row.userAccuracy);
-        var st  = row.startTime ? row.startTime.trim() : '';
-        if (!isNaN(acc) && acc > 0 && st.match(/^\d{2}:\d{2}:\d{2}$/)) {
-          var qk = toQuarterKey(dt);
-          if (!accBuckets[tc].has(qk)) accBuckets[tc].set(qk, { sum: 0, count: 0 });
-          var b = accBuckets[tc].get(qk);
-          b.sum += acc;
-          b.count++;
-          accSumAll[tc] += acc;
-          accCntAll[tc]++;
-        }
       });
-
-      // Finalisation Elo
-      ['blitz', 'bullet', 'rapid'].forEach(function(tc) {
-        eloData[tc] = { map: eloMaps[tc], first: eloFirst[tc] || xMin };
-      });
-
-      // Finalisation accuracy : tri et filtre n ≥ 5 parties par trimestre
-      ['blitz', 'bullet', 'rapid'].forEach(function(tc) {
-        var arr = [];
-        accBuckets[tc].forEach(function(b, qk) {
-          if (b.count >= 5) {
-            arr.push({
-              date  : parseQuarter(qk),
-              y     : Math.round(b.sum / b.count * 10) / 10,
-              label : qk
-            });
-          }
-        });
-        arr.sort(function(a, b) { return a.date - b.date; });
-        accData[tc] = arr;
-        avgData[tc] = accCntAll[tc] > 0
-          ? Math.round(accSumAll[tc] / accCntAll[tc] * 10) / 10 : 0;
-      });
-
-      // Affichage du compteur et rendu initial (blitz par défaut)
-      document.getElementById('status').textContent =
-        rows.length.toLocaleString() + ' parties chargées';
-
-      drawElo('blitz');
-      drawAcc('blitz');
+      tableau.sort(function(a, b) { return a.date - b.date; });
+      donneesPrecision[c] = tableau;
+      moyennesGlobales[c] = comptePrecis[c] > 0
+        ? Math.round(sommePrecis[c] / comptePrecis[c] * 10) / 10 : 0;
     });
+
+    /* Étape 5 : affichage */
+    document.getElementById('statut').textContent =
+      lignes.length.toLocaleString() + ' parties chargées';
+
+    dessinerElo('blitz');
+    dessinerPrecision('blitz');
+  });
 
   </script>
 </body>
