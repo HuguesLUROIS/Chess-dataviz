@@ -230,26 +230,41 @@
         <!-- Légende détaillée -->
         <div class="carte">
           <h4>Légende</h4>
-          <div class="legende-grille">
+         <div class="legende-grille">
 
-         <!-- Dégradé couleur = winrate -->
-<div class="legende-ligne">
-  <span style="flex:0 0 60px">Winrate</span>
-  <div class="barre-degrade"></div>
-</div>
-<div class="legende-ligne" style="margin-top:-4px">
-  <span style="flex:0 0 60px"></span>
-  <span style="flex:1;display:flex;justify-content:space-between;font-size:.58rem;color:#bbb">
-    <span>0%</span><span>30%</span><span>45%</span><span>50%</span><span>55%</span><span>70%</span><span>100%</span>
-  </span>
-</div>
+  <!-- Dégradé couleur = winrate : 6 blocs séparés -->
+  <div class="legende-ligne">
+    <span style="flex:0 0 60px">Winrate</span>
+    <div style="flex:1;display:flex;gap:2px">
+      <div style="flex:0 0 30%;height:7px;border-radius:3px;background:#c0392b"></div>
+      <div style="flex:0 0 15%;height:7px;border-radius:3px;background:#e07060"></div>
+      <div style="flex:0 0 5%; height:7px;border-radius:3px;background:#f0b8b0"></div>
+      <div style="flex:0 0 5%; height:7px;border-radius:3px;background:#85c1a3"></div>
+      <div style="flex:0 0 15%;height:7px;border-radius:3px;background:#4a9e7a"></div>
+      <div style="flex:0 0 30%;height:7px;border-radius:3px;background:#1a5f40"></div>
+    </div>
+  </div>
 
-          <!-- Épaisseur = fréquence -->
-<div class="legende-ligne" style="margin-top:8px;font-size:.58rem;color:#bbb;font-family:monospace">
-  Plus la flèche est épaisse, plus le coup a été joué fréquemment.
-</div>
+  <!-- Labels positionnés aux bons endroits -->
+  <div class="legende-ligne" style="margin-top:-2px">
+    <span style="flex:0 0 60px"></span>
+    <div style="flex:1;display:flex;font-size:.58rem;color:#bbb;font-family:monospace">
+      <span style="flex:0 0 0%;transform:translateX(-50%)">0%</span>
+      <span style="flex:0 0 30%;text-align:right">30%</span>
+      <span style="flex:0 0 15%;text-align:right">45%</span>
+      <span style="flex:0 0 5%; text-align:right">50%</span>
+      <span style="flex:0 0 5%; text-align:right">55%</span>
+      <span style="flex:0 0 15%;text-align:right">70%</span>
+      <span style="flex:0 0 30%;text-align:right">100%</span>
+    </div>
+  </div>
 
-          </div>
+  <!-- Fréquence = épaisseur -->
+  <div class="legende-ligne" style="margin-top:8px;font-size:.58rem;color:#bbb;font-family:monospace">
+    Plus la flèche est épaisse, plus le coup a été joué fréquemment.
+  </div>
+
+</div>
         </div>
 
       </div>
@@ -821,21 +836,20 @@ function renderPieces() {
   }
   function cacherInfo() { infobulleEl.style.opacity = 0; }
 
-
- function afficherBarCharts() {
+function afficherBarCharts() {
   if (!etat.bar) return;
   var couleurs = { w:'#7a4f00', b:'#2a2a2a' };
   ['w','b'].forEach(function(camp) {
     var items = etat.bar[camp];
-    var maxPct = items[0].pct;   
     var cont  = document.getElementById(camp==='w' ? 'graphique-blancs' : 'graphique-noirs');
     cont.innerHTML = items.map(function(d) {
-      var larg = (d.pct / maxPct * 100).toFixed(0);   // proportionnel au maximum
       return '<div class="rangee-barre">'
-        +'<span class="etiq-ouv" title="'+d.nom+'">'+d.nom+'</span>'
-        +'<span class="piste-barre"><span class="remplissage" style="width:'+larg+'%;background:'+couleurs[camp]+';opacity:.7"></span></span>'
-        +'<span class="val-barre">'+d.n+' <span style="color:#bbb">('+d.pct+'%)</span></span>'
-        +'</div>';
+        + '<span class="etiq-ouv" title="' + d.nom + '">' + d.nom + '</span>'
+        + '<span class="piste-barre" style="position:relative">'
+        +   '<span class="remplissage" style="width:' + d.pct + '%;background:' + couleurs[camp] + ';opacity:.7"></span>'
+        + '</span>'
+        + '<span class="val-barre">' + d.n + ' <span style="color:#bbb">(' + d.pct + '%)</span></span>'
+        + '</div>';
     }).join('');
   });
 }
