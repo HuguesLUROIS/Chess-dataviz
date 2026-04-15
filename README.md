@@ -10,11 +10,11 @@ Analyse de 5 093 parties d'échecs personnelles jouées sur Chess.com de 2018 à
 
 **Progression Elo & précision** — Évolution mensuelle du classement Elo et de la précision moyenne par trimestre selon les trois cadences, avec filtres interactifs et infobulle en survolant les graphiques.
 
-**Explorateur d'ouvertures** — Échiquier interactif : jouez un coup et visualisez les réponses les plus fréquentes avec leur winrate. Les flèches partent de la case réelle de chaque pièce ; les cavaliers tracent leur déplacement en L.
+**Explorateur d'ouvertures** — Échiquier interactif : jouez un coup et visualisez les réponses les plus fréquentes avec leur winrate associé. Permet également d'apprécier l'étendu restreinte de mon répertoire !! 
 
-**Heatmap des déplacements** — Fréquence de déplacement de chaque pièce sur chaque case. Cliquez sur une pièce pour afficher sa heatmap individuelle.
+**Heatmap des déplacements** — Fréquence de déplacement de chaque type de pièce (et selon chaque couleur) sur chaque case. Cliquez sur une pièce pour afficher sa heatmap individuelle.
 
-**Distribution des coups** — Comparaison de la distribution du nombre de coups par partie selon le résultat, complétée par les modes de fin de partie.
+**Distribution des coups** — Comparaison de la distribution du nombre de coups par partie selon le résultat (V/D) + Storytelling explcatif sur le différentiel observé.
 
 ---
 
