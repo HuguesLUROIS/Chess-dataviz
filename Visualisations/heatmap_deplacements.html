@@ -320,8 +320,7 @@ Ces cartes ne reflètent donc pas seulement des principes généraux du jeu d’
  
  
   // Structure de données 
-  // donneesFrequence[typePiece][couleurPiece][campJoue] = tableau de 64 entiers
-  // L'index d'une case dans le tableau : (rang-1)*8 + colonne  →  a1=0 … h8=63
+  // Frequence = tableau de 64 entiers
   var donneesFrequence = {};
   'pnbrqk'.split('').forEach(function(t) {
     donneesFrequence[t] = {};
@@ -333,22 +332,22 @@ Ces cartes ne reflètent donc pas seulement des principes généraux du jeu d’
     });
   });
  
-  // Convertit une case SAN ("e4") en index 0-63 dans le tableau de fréquences
+ 
   function caseVersIndex(caseStr) {
     return (parseInt(caseStr[1]) - 1) * 8 + (caseStr.charCodeAt(0) - 97);
   }
  
  
-  // ── Parsing des coups SAN ─────────────────────────────────────────────────
-  // Pour chaque coup on incrémente le compteur de la case de destination.
+  //  Parsing des coups SAN
+  // Pour chaque coup on incrémente le compteur de la case sur laquelle la piece se deplace.
   // Le roque est traité séparément car il déplace deux pièces simultanément.
   function enregistrerCoups(listeCoups, campJoueur) {
     listeCoups.forEach(function(coup, i) {
  
-      // Les blancs jouent les coups d'index pair (0, 2, 4…), les noirs les impairs
+      // Les blancs jouent les coups pair, les noirs les impairs
       var couleurCoup = i % 2 === 0 ? 'w' : 'b';
  
-      // Étape 1 : traiter les roques (cas spécial, deux pièces bougent)
+      // Traiter les roques (cas spécial, deux pièces bougent)
       if (coup === 'O-O') {
         donneesFrequence.k[couleurCoup][campJoueur][caseVersIndex(couleurCoup === 'w' ? 'g1' : 'g8')]++;
         donneesFrequence.r[couleurCoup][campJoueur][caseVersIndex(couleurCoup === 'w' ? 'f1' : 'f8')]++;
@@ -360,7 +359,7 @@ Ces cartes ne reflètent donc pas seulement des principes généraux du jeu d’
         return;
       }
  
-      // Étape 2 : identifier le type de pièce
+      // Identifier le type de pièce
       // Une lettre majuscule en début = pièce lourde ou légère ; sinon c'est un pion
       var typePiece = 'p', reste = coup;
       if (/^[NBRQK]/.test(coup)) {
@@ -368,7 +367,7 @@ Ces cartes ne reflètent donc pas seulement des principes généraux du jeu d’
         reste = coup.slice(1);
       }
  
-      // Étape 3 : extraire la case de destination (2 derniers caractères après nettoyage)
+      // extraire la case de destination (2 derniers caractères après nettoyage)
       var caseArrivee = reste.replace(/[x+#]/g, '').replace(/=[NBRQ]/, '').slice(-2);
       if (/^[a-h][1-8]$/.test(caseArrivee)) {
         donneesFrequence[typePiece][couleurCoup][campJoueur][caseVersIndex(caseArrivee)]++;
@@ -423,8 +422,8 @@ Ces cartes ne reflètent donc pas seulement des principes généraux du jeu d’
     .style('transition', 'opacity 0.1s')
     .style('white-space', 'nowrap');
  
-  // Un cercle par case — le rayon encode la fréquence (rayon 0 = invisible)
-  // D3 gère les transitions fluides quand on change de pièce sélectionnée
+
+  // D3 gère les transitions quand on change de pièce sélectionnée
   var cercles = [];
   for (var i = 0; i < 64; i++) {
     var nomCase = COLONNES[i % 8] + RANGS[Math.floor(i / 8)];
@@ -456,7 +455,7 @@ Ces cartes ne reflètent donc pas seulement des principes généraux du jeu d’
     );
   }
  
-  // Placement des pièces sur l'échiquier avec leur zone de clic
+  // Placement des pièces sur l'échiquier 
   var elementsPieces = [];
   PIECES.forEach(function(p) {
     var groupe = svg.append('g').style('cursor', 'pointer');
@@ -480,10 +479,10 @@ Ces cartes ne reflètent donc pas seulement des principes généraux du jeu d’
   });
  
  
-  // ── Interactions ──────────────────────────────────────────────────────────
-  var pieceSelectionnee = null;   // pièce cliquée (objet du tableau PIECES)
-  var campUtilisateur   = 'w';    // 'w' = blancs, 'b' = noirs
- 
+  //  Interactions 
+  var pieceSelectionnee = null;  
+  var campUtilisateur   = 'w';   
+    
   function surClicPiece(p) {
     // Un second clic sur la même pièce la désélectionne
     if (pieceSelectionnee && pieceSelectionnee.t === p.t && pieceSelectionnee.c === p.c) {
@@ -633,7 +632,6 @@ Ces cartes ne reflètent donc pas seulement des principes généraux du jeu d’
  
       var campJoueur = ligne.userColor === 'white' ? 'w' : 'b';
  
-      // Nettoyage du PGN : on retire les en-têtes, annotations et numéros de coups
       var coups = ligne.pgn
         .replace(/\[[^\]]*\]/g, '')
         .replace(/\{[^}]*\}/g, '')
