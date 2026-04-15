@@ -246,18 +246,10 @@
         <div id="info-piece">Clique sur une pièce pour voir les cases où elle se déplace le plus.</div>
       </div>
  
-   <div class="carte">
+  <div class="carte">
   <h3>Légende — fréquence</h3>
-  <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
-    <svg width="24" height="24">
-      <circle cx="12" cy="12" r="10" fill="#922b21" opacity="0.72"/>
-    </svg>
-    <span style="font-size:0.62rem;color:#bbb;font-family:monospace;line-height:1.5">
-      = case la plus fréquentée<br>de la pièce sélectionnée
-    </span>
-  </div>
-  <p style="font-size:0.62rem;color:#bbb;font-family:monospace;margin-top:10px;line-height:1.5">
-    Surface proportionnelle à la racine carrée du nombre de coups joués vers cette case (n = 5 093 parties).
+  <p style="font-size:0.62rem;color:#bbb;font-family:monospace;line-height:1.6;margin-top:4px">
+    La taille de chaque cercle est proportionnelle au nombre de coups joués vers cette case, normalisée sur le maximum de la pièce sélectionnée. L'encodage utilise la racine carrée afin que l'aire perçue soit proportionnelle à la fréquence relative.
   </p>
 </div>
  
