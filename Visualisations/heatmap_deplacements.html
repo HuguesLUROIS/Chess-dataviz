@@ -549,42 +549,6 @@ Ces cartes ne reflètent donc pas seulement des principes généraux du jeu d’
         .attr('r', echelleRayon(donnees[idx] || 0));
     });
  
-    // Légende basée sur les quartiles des cases aux déplacements non nuls
-    var valeursNonNulles = donnees
-      .filter(function(v) { return v > 0; })
-      .sort(d3.ascending);
- 
-    var q1  = d3.quantile(valeursNonNulles, 0.25);
-    var med = d3.quantile(valeursNonNulles, 0.50);
-    var q3  = d3.quantile(valeursNonNulles, 0.75);
- 
-    var donneesLegende = [
-      { etiquette: '1er quartile', valeur: Math.round(q1),  info: '25% des cases visitées moins de ' + Math.round(q1) + ' fois' },
-      { etiquette: 'Médiane',      valeur: Math.round(med), info: 'La moitié des cases en-dessous de ' + Math.round(med) + ' coups' },
-      { etiquette: '3e quartile',  valeur: Math.round(q3),  info: '75% des cases en-dessous de ' + Math.round(q3) + ' coups' }
-    ];
- 
-    var divLegende = d3.select('#legende-cercles');
-    divLegende.html('');
- 
-    donneesLegende.forEach(function(ld) {
-      var rayon = echelleRayon(ld.valeur);
-      var item  = divLegende.append('div').attr('class', 'legende-item');
-      item.append('svg')
-        .attr('width', 24).attr('height', 24)
-        .append('circle')
-          .attr('cx', 12).attr('cy', 12)
-          .attr('r', rayon)
-          .attr('fill', '#922b21')
-          .attr('opacity', 0.72);
-      item.append('span').text(ld.etiquette + ' (' + ld.valeur.toLocaleString() + ' coups)');
-      item.append('span')
-        .style('font-size', '0.58rem')
-        .style('color', '#bbb')
-        .style('margin-top', '2px')
-        .text(ld.info);
-    });
- 
     // Top 5 cases visitées par le type de pièces considéré
     var classement = donnees
       .map(function(v, idx) {
