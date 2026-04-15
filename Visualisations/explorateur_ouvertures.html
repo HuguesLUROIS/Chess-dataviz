@@ -234,7 +234,7 @@
                   <div style="flex:35;background:#1a5f40"></div>
                 </div>
 
-                <!-- Ligne verticale 50% : strictement dans la hauteur de la barre -->
+                <!-- Ligne verticale 50%  -->
                 <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:1.5px;height:7px;background:#fff;opacity:.9;pointer-events:none;"></div>
 
                 <!-- Label 50% au-dessus de la barre -->
@@ -296,7 +296,7 @@ Cela mène majoritairement à des ouvertures comme le gambit Benko ou la Benoni.
   var COLS    = ['a','b','c','d','e','f','g','h'];
   var RANGS   = ['1','2','3','4','5','6','7','8'];
 
-  // Glyphes des pièces
+  // Symboles des pièces
   var GLYPHES = {
     w: { P:'♙', N:'♘', B:'♗', R:'♖', Q:'♕', K:'♔' },
     b: { P:'♟', N:'♞', B:'♝', R:'♜', Q:'♛', K:'♚' }
@@ -881,7 +881,7 @@ function renderClics() {
       .forEach(function(b) { b.classList.remove('actif'); });
     btn.classList.add('actif');
     etat.camp        = btn.dataset.camp;
-    etat.orientation = btn.dataset.camp;  // flip : blancs en bas si 'w', noirs en bas si 'b'
+    etat.orientation = btn.dataset.camp;  // switch : blancs en bas si 'w', noirs en bas si 'b'
     etat.coups       = [];
     etat.selection   = null;
     // Reconstruire les labels de coordonnées selon la nouvelle orientation
