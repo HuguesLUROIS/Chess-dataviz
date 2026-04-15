@@ -145,10 +145,10 @@
   flex: 1; height: 7px; border-radius: 3px;
   background: linear-gradient(to right,
     #c0392b 0%,  #c0392b 30%,
-    #e07060 30%, #e07060 45%,
-    #f0b8b0 45%, #f0b8b0 50%,
-    #85c1a3 50%, #85c1a3 55%,
-    #4a9e7a 55%, #4a9e7a 70%,
+    #e07060 30%, #e07060 40%,
+    #f0b8b0 40%, #f0b8b0 50%,
+    #85c1a3 50%, #85c1a3 60%,
+    #4a9e7a 60%, #4a9e7a 70%,
     #1a5f40 70%, #1a5f40 100%);
 }
     .exemples-ep    { display: flex; align-items: center; gap: 12px; }
@@ -251,9 +251,9 @@
     <div style="flex:1;display:flex;font-size:.58rem;color:#bbb;font-family:monospace">
       <span style="flex:0 0 0%;transform:translateX(-50%)">0%</span>
       <span style="flex:0 0 30%;text-align:right">30%</span>
-      <span style="flex:0 0 15%;text-align:right">45%</span>
+      <span style="flex:0 0 15%;text-align:right">40%</span>
       <span style="flex:0 0 5%; text-align:right">50%</span>
-      <span style="flex:0 0 5%; text-align:right">55%</span>
+      <span style="flex:0 0 5%; text-align:right">60%</span>
       <span style="flex:0 0 15%;text-align:right">70%</span>
       <span style="flex:0 0 30%;text-align:right">100%</span>
     </div>
@@ -554,9 +554,9 @@ function selectionnerPiece(caseStr) {
   }
 function couleurWR(wr) {
   if (wr < 30)  return '#c0392b';  // rouge vif   — défaite majoritaiement
-  if (wr < 45)  return '#e07060';  // rouge   — défavorable
+  if (wr < 40)  return '#e07060';  // rouge   — défavorable
    if (wr < 50)  return '#f0b8b0'; // rouge pâle  — légèrement défavorable
-   if (wr < 55)  return '#85c1a3';  // vert pâle   — légèrement favorable
+   if (wr < 60)  return '#85c1a3';  // vert pâle   — légèrement favorable
   if (wr < 70)  return '#4a9e7a'; // vert    — favorable   d
   return '#1a5f40';                // vert vif    — victoire majoritairement
 }
