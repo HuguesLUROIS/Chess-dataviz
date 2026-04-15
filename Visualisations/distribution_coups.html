@@ -370,7 +370,7 @@ d3.dsv(';', '../data/games.csv').then(function(rows) {
       .attr('opacity', 0.85);
 
 
-  // Axe X 
+   // Axe X 
   g.append('g')
     .attr('class', 'axis')
     .attr('transform', 'translate(0,' + h + ')')
@@ -378,6 +378,7 @@ d3.dsv(';', '../data/games.csv').then(function(rows) {
       d3.axisBottom(x)
         .tickValues(r_coups.filter(function(m) { return m % 10 === 0; }))
         .tickSize(4)
+        .tickFormat(function(d) { return d === 100 ? '100+' : d; })
     );
 
   // Label axe X
