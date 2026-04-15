@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Explorateur d'ouvertures</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+
+  <!--  -----------------------------------------------------------------
+       Section 1 : Structure et visualisation de la page
+    ----------------------------------------------------------------- -->
+  
+  <!-- Style et police : choix d'un design simple et lisible -->
+  
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Georgia, serif;
+      background: #f7f4ef;
+      color: #2a2a2a;
+      padding: 32px 28px 60px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    h2 { font-size: 1.2rem; font-weight: normal; margin-bottom: 6px; }
+
+    /* Textes explicatifs (introduction, conclusion) */
+    .intro, .note {
+      font-size: 0.82rem; color: #777; line-height: 1.7;
+      border-left: 2px solid #ddd; padding-left: 12px;
+    }
+    .intro { margin-bottom: 24px; }
+    .note  { margin-top: 20px; margin-bottom: 28px; }
+
+    .section { margin-bottom: 40px; }
+    .section h3 { font-size: 0.95rem; font-weight: normal; margin-bottom: 4px; color: #444; }
+    .sous-titre { font-size: 0.72rem; color: #aaa; font-family: monospace; margin-bottom: 14px; }
+
+    /* Style des axes */
+    .axis path, .axis line { stroke: #ddd; }
+    .axis text { fill: #aaa; font-size: 10px; font-family: monospace; }
+
+    /* Infobulle */
+    #infobulle {
+      position: fixed; background: #fff; border: 1px solid #e0dbd4;
+      border-radius: 4px; padding: 6px 10px; font-size: 0.72rem;
+      font-family: monospace; color: #333; pointer-events: none;
+      opacity: 0; transition: opacity .1s; white-space: nowrap; z-index: 100;
+    }
+
+    /* Boutons Blancs / Noirs */
+    .controles { display: flex; gap: 8px; margin-bottom: 16px; }
+    .bouton {
+      padding: 6px 16px; border: 1px solid #e0dbd4; border-radius: 4px;
+      background: transparent; font-family: monospace; font-size: 0.72rem;
+      color: #aaa; cursor: pointer;
+      transition: background .15s, color .15s, border-color .15s;
+    }
+    .bouton:hover:not(.actif) { background: #f0ebe3; }
+    .bouton.actif[data-camp="w"] { border-color:#5a5020; color:#5a5020; background:rgba(90,80,32,.07); }
+    .bouton.actif[data-camp="b"] { border-color:#2a2a2a; color:#2a2a2a; background:rgba(42,42,42,.07); }
+
+    /* Disposition Échiquier */
+    .disposition { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+    .echiquier-ext { flex-shrink: 0; }
+
+    /* Labels de coordonnées */
+    .coord-ligne     { display: flex; align-items: flex-start; }
+    .labels-rangs    { display: flex; flex-direction: column; width: 14px; margin-right: 3px; }
+    .label-rang      { height: 56px; display: flex; align-items: center; justify-content: center;
+                       font-size: .6rem; color: #aaa; font-family: monospace; }
+    .labels-colonnes { display: flex; margin-top: 4px; margin-left: 17px; }
+    .label-col       { width: 56px; text-align: center; font-size: .6rem;
+                       color: #aaa; font-family: monospace; }
+
+    /* Cases */
+    .case-claire   { fill: #f0d9b5; }
+    .case-sombre   { fill: #b58863; }
+    .case-hl-dep   { fill: rgba(100,160,100,.42); }
+    .case-hl-arr   { fill: rgba(100,160,100,.58); }
+    .case-selectionnee { fill: rgba(90, 130, 200, .45); }
+
+    /* Pièces */
+    .piece { font-size: 34px; dominant-baseline: central; text-anchor: middle;
+             pointer-events: none; user-select: none; }
+
+    /* Bloc latéral */
+    .panneau { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 10px; }
+
+    .carte {
+      background: #fff; border: 1px solid #e0dbd4;
+      border-radius: 6px; padding: 14px 16px;
+    }
+    .carte h4 {
+      font-size: .68rem; text-transform: uppercase; letter-spacing: 1.5px;
+      color: #aaa; font-family: monospace; font-weight: normal; margin-bottom: 8px;
+    }
+
+    /* Nom de l'ouverture */
+    #nom-ouverture { font-family: Georgia, serif; font-style: italic;
+                     font-size: .85rem; color: #555; line-height: 1.5; min-height: 1.5em; }
+
+    /* Séquence de coups */
+    #fil-coups { font-family: monospace; font-size: .72rem; color: #555;
+                 line-height: 1.9; min-height: 1.9em; }
+    .jeton-coup {
+      display: inline-block; background: #f0ebe3; border: 1px solid #e0dbd4;
+      border-radius: 3px; padding: 1px 5px; margin: 1px 2px;
+      cursor: pointer; transition: background .1s;
+    }
+    .jeton-coup:hover { background: #e0dbd4; }
+
+    /* Bouton retour */
+    #btn-retour {
+      padding: 5px 12px; border: 1px solid #e0dbd4; border-radius: 4px;
+      background: transparent; font-family: monospace; font-size: .7rem;
+      color: #aaa; cursor: pointer; transition: background .1s, color .1s;
+      display: none; align-self: flex-start;
+    }
+    #btn-retour:hover { background: #f0ebe3; color: #555; }
+
+    /* Liste des coups */
+    #liste-coups { list-style: none; }
+    #liste-coups li {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 4px; border-bottom: 1px solid #f0ebe3;
+      font-size: .7rem; font-family: monospace; color: #555;
+      cursor: pointer; transition: background .1s; border-radius: 3px;
+    }
+    #liste-coups li:last-child { border-bottom: none; }
+    #liste-coups li:hover { background: #f0ebe3; }
+    .nom-coup   { flex: 0 0 42px; font-weight: bold; color: #333; }
+    .nb-parties { flex: 0 0 56px; color: #aaa; }
+    .barre-wrap { flex: 1; height: 4px; background: #f0ebe3; border-radius: 2px; overflow: hidden; }
+    .barre-fill { height: 100%; border-radius: 2px; }
+    .pct-wr     { flex: 0 0 38px; text-align: right; font-size: .68rem; }
+
+    /* Légende */
+    .legende-grille { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 4px; }
+    .legende-ligne  { display: flex; align-items: center; gap: 10px;
+                      font-size: .63rem; font-family: monospace; color: #777; }
+
+    /* Bar charts */
+    .rangee-graphiques { display: flex; gap: 32px; flex-wrap: wrap; }
+    .bloc-graphique    { flex: 1; min-width: 240px; }
+    .bloc-graphique h4 {
+      font-size: .72rem; font-weight: normal; color: #777;
+      font-family: monospace; margin-bottom: 12px;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    .rangee-barre  { display: flex; align-items: center; gap: 8px;
+                     margin-bottom: 8px; font-size: .68rem; font-family: monospace; }
+    .etiq-ouv     { flex: 0 0 108px; color: #555; white-space: nowrap;
+                    overflow: hidden; text-overflow: ellipsis; }
+    .piste-barre  { flex: 1; height: 7px; background: #e8e3dc;
+                    border-radius: 3px; overflow: hidden; min-width: 50px; }
+    .remplissage  { height: 100%; border-radius: 3px; }
+    .val-barre    { flex: 0 0 88px; color: #888; text-align: right; }
+
+    #statut { font-size: .62rem; color: #bbb; margin-top: 6px; font-family: monospace; }
+  </style>
+</head>
+<body>
+
+  <h2>Explorateur d'ouvertures</h2>
+
+  <p class="intro">
+    Les ouvertures maitrisées par un joueur contribuent grandement à la définition de son style de jeu. Pour s'en rendre compte, il est intéressant de se pencher sur l'explorateur d'ouvertures ci-dessous. Jouez un coup pour voir les suites possibles et les winrate associés à chaque séquence de coups.
+  </p>
+
+  <!-- Titre et en-têtes de l'échiquier -->
+  <div class="section">
+    <h3>Echiquier interactif</h3>
+    <p class="sous-titre">Profondeur de 10 coups · 5 093 parties</p>
+
+    <div class="controles" id="controles-camp">
+      <button class="bouton actif" data-camp="w">♙ Blancs</button>
+      <button class="bouton"       data-camp="b">♟ Noirs</button>
+    </div>
+
+    <div class="disposition">
+
+      <!-- Visualisation échiquier -->
+      <div class="echiquier-ext">
+        <div class="coord-ligne">
+          <div class="labels-rangs" id="labels-rangs"></div>
+          <svg id="echiquier" width="448" height="448"></svg>
+        </div>
+        <div class="labels-colonnes" id="labels-colonnes"></div>
+        <p id="statut">Chargement…</p>
+      </div>
+
+      <!-- Panneau ouvertures / coups -->
+      <div class="panneau">
+
+        <div class="carte">
+          <h4>Ouverture</h4>
+          <div id="nom-ouverture">Position initiale</div>
+        </div>
+
+        <div class="carte">
+          <h4>Séquence jouée</h4>
+          <div id="fil-coups">—</div>
+        </div>
+
+        <button id="btn-retour">← Retour</button>
+
+        <div class="carte">
+          <h4>Coups suivants : Fréquence et winrate</h4>
+          <ul id="liste-coups">
+            <li style="color:#bbb;cursor:default;font-size:.7rem;border:none">En attente…</li>
+          </ul>
+        </div>
+
+        <!-- Légende -->
+        <div class="carte">
+          <h4>Légende</h4>
+          <div class="legende-grille">
+
+            <!-- Winrate : 6 blocs proportionnels aux seuils 35/45/50/55/65 -->
+            <div class="legende-ligne">
+              <span style="flex:0 0 60px">Winrate</span>
+
+              <div style="flex:1;position:relative;">
+
+                <!-- Barre couleur : segments proportionnels (35+10+5+5+10+35 = 100) -->
+                <div style="display:flex;height:7px;border-radius:3px;overflow:hidden;">
+                  <div style="flex:35;background:#c0392b"></div>
+                  <div style="flex:10;background:#e07060"></div>
+                  <div style="flex:5; background:#f0b8b0"></div>
+                  <div style="flex:5; background:#85c1a3"></div>
+                  <div style="flex:10;background:#4a9e7a"></div>
+                  <div style="flex:35;background:#1a5f40"></div>
+                </div>
+
+                <!-- Ligne verticale 50% : strictement dans la hauteur de la barre -->
+                <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:1.5px;height:7px;background:#fff;opacity:.9;pointer-events:none;"></div>
+
+                <!-- Label 50% au-dessus de la barre -->
+                <div style="position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:.57rem;font-family:monospace;color:#444;font-weight:bold;white-space:nowrap;">50%</div>
+
+                <!-- Labels seuils positionnés précisément en % sous la barre -->
+                <div style="position:relative;height:14px;margin-top:3px;font-size:.57rem;font-family:monospace;color:#bbb;">
+                  <span style="position:absolute;left:0%;  transform:translateX(0%)">0%</span>
+                  <span style="position:absolute;left:35%; transform:translateX(-50%)">35%</span>
+                  <span style="position:absolute;left:45%; transform:translateX(-50%)">45%</span>
+                  <span style="position:absolute;left:55%; transform:translateX(-50%)">55%</span>
+                  <span style="position:absolute;left:65%; transform:translateX(-50%)">65%</span>
+                  <span style="position:absolute;left:100%;transform:translateX(-100%)">100%</span>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Fréquence = épaisseur de la flèche -->
+            <div class="legende-ligne" style="margin-top:8px;font-size:.58rem;color:#bbb;font-family:monospace">
+              Plus la flèche est épaisse, plus le coup a été joué fréquemment.
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Bar charts ouvertures les plus jouées -->
+  <div class="section">
+    <h3>Ouvertures les plus jouées</h3>
+    <div class="rangee-graphiques">
+      <div class="bloc-graphique">
+        <h4>Avec les Blancs</h4>
+        <div id="graphique-blancs"></div>
+      </div>
+      <div class="bloc-graphique">
+        <h4>Avec les Noirs</h4>
+        <div id="graphique-noirs"></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="note">
+En observant mes ouvertures, ce qui frappe d'emblée est l'étroitesse de mon répertoire. Avec les blancs, 1.e4 est joué dans plus de 97 % des parties. Cela mène régulièrement à l'Écossaise, ligne choisie contre 1.e5, et à l'alapine face à la Sicilienne (1…c5 2.c3) afin d'éviter les grandes lignes théoriques.
+Côté noir, le répertoire est tout aussi restreint. Face à 1.e4, la Caro-Kann s'impose comme la réponse de loin la plus jouée. C'est une défense solide, moins théorique que la Française ou la Sicilienne, qui convient à un style positionnel comme le mien. Face à 1.d4, c5 est le coup choisi.
+Cela mène majoritairement à des ouvertures comme le gambit Benko ou la Benoni. Un répertoire restreint donc, mais bien maitrisé. Cela permet de concentrer son apprentissage sur la tactique, la stratégie ou les finales plutôt qu'à l'apprentissage de nombreuses lignes théoriques.
+</p>
+
+  <!-- -----------------------------------------------------------------
+       SECTION 2 : SCRIPT ET TRAITEMENT DES DONNÉES
+    ----------------------------------------------------------------- -->
+  <script>
+
+  // Labels de l'échiquier
+  var TAILLE  = 56;
+  var COLS    = ['a','b','c','d','e','f','g','h'];
+  var RANGS   = ['1','2','3','4','5','6','7','8'];
+
+  // Glyphes des pièces
+  var GLYPHES = {
+    w: { P:'♙', N:'♘', B:'♗', R:'♖', Q:'♕', K:'♔' },
+    b: { P:'♟', N:'♞', B:'♝', R:'♜', Q:'♛', K:'♚' }
+  };
+
+  var etat = {
+    camp      : 'w',
+    coups     : [],
+    plateau   : null,
+    dep       : null,
+    arr       : null,
+    arbre     : null,
+    labels    : null,
+    bar       : null,
+    selection : null,
+    orientation : 'w' // Orientation de l'échiquier : 'w' = blancs en bas (défaut), 'b' = noirs en bas
+  };
+
+  // Construction de l'échiquier SVG
+
+  // Labels de rangs (reconstruits à chaque switch blanc --> noir)
+  function construireLabelsRangs() {
+    var cont = document.getElementById('labels-rangs');
+    cont.innerHTML = '';
+    // Si orientation blancs : 8 en haut → 1 en bas. Si noirs : 1 en haut → 8 en bas
+    var ordre = etat.orientation === 'w'
+      ? [7,6,5,4,3,2,1,0]
+      : [0,1,2,3,4,5,6,7];
+    ordre.forEach(function(r) {
+      var el = document.createElement('div');
+      el.className = 'label-rang';
+      el.textContent = RANGS[r];
+      cont.appendChild(el);
+    });
+  }
+
+  // Labels de colonnes (reconstruits à chaque switch blanc --> noir)
+  function construireLabelsColonnes() {
+    var cont = document.getElementById('labels-colonnes');
+    cont.innerHTML = '';
+    // Si orientation blancs : a→h. Si noirs : h→a
+    var ordre = etat.orientation === 'w'
+      ? COLS
+      : COLS.slice().reverse();
+    ordre.forEach(function(c) {
+      var el = document.createElement('div');
+      el.className = 'label-col';
+      el.textContent = c;
+      cont.appendChild(el);
+    });
+  }
+
+  construireLabelsRangs();
+  construireLabelsColonnes();
+
+  var svg = d3.select('#echiquier');
+
+  // Calque cases
+  var calqueCases = svg.append('g').attr('id','g-cases');
+  var carteCases  = {};
+
+  for (var rang = 0; rang < 8; rang++) {
+    for (var col = 0; col < 8; col++) {
+      (function(c, r) {
+        carteCases[c+'-'+r] = calqueCases.append('rect')
+          .attr('width', TAILLE).attr('height', TAILLE)
+          .attr('class', (r+c)%2===1 ? 'case-claire' : 'case-sombre');
+      })(col, rang);
+    }
+  }
+
+  var calqueFleches = svg.append('g').attr('id','g-fleches');
+  var calquePieces  = svg.append('g').attr('id','g-pieces');
+  var calqueClics   = svg.append('g').attr('id','g-clics');
+
+  // Convertit une colonne (0-7) et un rang (0-7) en coordonnées pixel selon l'orientation
+  // Quand les blancs sont en bas : col 0 = gauche, rang 0 = bas
+  // Quand les noirs sont en bas  : col 0 = droite, rang 0 = haut
+  function colRangVersXY(col, rang) {
+    if (etat.orientation === 'w') {
+      return { x: col * TAILLE, y: (7 - rang) * TAILLE };
+    } else {
+      return { x: (7 - col) * TAILLE, y: rang * TAILLE };
+    }
+  }
+
+  // Repositionne toutes les cases selon l'orientation courante
+  function repositionnerCases() {
+    for (var r = 0; r < 8; r++) {
+      for (var c = 0; c < 8; c++) {
+        var pos = colRangVersXY(c, r);
+        carteCases[c+'-'+r].attr('x', pos.x).attr('y', pos.y);
+      }
+    }
+  }
+
+  // Initialise le plateau de départ d'une partie d'échecs
+function initPlateau() {
+    var p = {};
+    var rangee_arr = ['R','N','B','Q','K','B','N','R']; // ordre des pièces majeures
+    for (var i = 0; i < 8; i++) {
+      // Pièces blanches
+      p[COLS[i]+'1'] = ['w', rangee_arr[i]]; // rangée 1 : pièces 
+      p[COLS[i]+'2'] = ['w', 'P'];           // rangée 2 : pions
+      // Pièces noires
+      p[COLS[i]+'7'] = ['b', 'P'];           // rangée 7 : pions
+      p[COLS[i]+'8'] = ['b', rangee_arr[i]]; // rangée 8 : pièces 
+    }
+    return p;
+}
+
+// Convertit une case "e4" en coordonnées numériques (colonne, rangée)
+function coordCase(caseStr) {
+    return { c: COLS.indexOf(caseStr[0]), r: parseInt(caseStr[1]) - 1 };
+}
+
+// Vérifie si une pièce peut aller de dep → arr selon les règles
+function peut_aller(plateau, dep, arr, trait, estCapture) {
+    if (!plateau[dep]) return false; // pas de pièce sur la case de départ
+    var coul = plateau[dep][0], tp = plateau[dep][1];
+    if (coul !== trait) return false; // pas le bon camp
+
+    var d = coordCase(dep), a = coordCase(arr);
+    var dc = a.c - d.c, dr = a.r - d.r;
+
+    //  Déplacements des pions 
+    if (tp === 'P') {
+      var dir     = (coul === 'w') ? 1 : -1; // direction du pion
+      var rangDep = (coul === 'w') ? 1 : 6; // rangée de départ
+
+      // Capture en diagonale
+      if (estCapture) return Math.abs(dc) === 1 && dr === dir;
+
+     
+      if (dc !== 0) return false;
+
+      // Avance 1 case
+      if (dr === dir && !plateau[arr]) return true;
+
+      // Avance 2 cases depuis rangée initial
+      var intermed = COLS[d.c] + (d.r + dir + 1);
+      if (dr === 2*dir && d.r === rangDep && !plateau[intermed] && !plateau[arr]) return true;
+
+      return false;
+    }
+
+    // Cavalier 
+    if (tp === 'N') {
+      return (Math.abs(dc) === 1 && Math.abs(dr) === 2) ||
+             (Math.abs(dc) === 2 && Math.abs(dr) === 1);
+    }
+
+    //  Fou 
+    if (tp === 'B') {
+      if (Math.abs(dc) !== Math.abs(dr) || dc === 0) return false; // doit être diagonal
+      var sc = dc > 0 ? 1 : -1, sr = dr > 0 ? 1 : -1;
+      var c = d.c + sc, r = d.r + sr;
+
+      // Vérifie qu'aucune pièce ne bloque le chemin
+      while (c !== a.c || r !== a.r) {
+        if (plateau[COLS[c] + (r+1)]) return false;
+        c += sc; r += sr;
+      }
+      return true;
+    }
+
+    // Tour 
+    if (tp === 'R') {
+      if (dc !== 0 && dr !== 0) return false; // doit être horizontal ou vertical
+
+      // Mouvement vertical
+      if (dc === 0) {
+        var s = dr > 0 ? 1 : -1;
+        for (var ri = d.r + s; ri !== a.r; ri += s)
+          if (plateau[COLS[d.c] + (ri+1)]) return false;
+      }
+      // Mouvement horizontal
+      else {
+        var s2 = dc > 0 ? 1 : -1;
+        for (var ci = d.c + s2; ci !== a.c; ci += s2)
+          if (plateau[COLS[ci] + (d.r+1)]) return false;
+      }
+      return true;
+    }
+
+    // Dame
+    if (tp === 'Q') {
+      var estDiag = Math.abs(dc) === Math.abs(dr) && dc !== 0;
+      var estLigne = (dc === 0 || dr === 0) && (dc !== 0 || dr !== 0);
+      if (!estDiag && !estLigne) return false;
+
+      var stepC = dc === 0 ? 0 : (dc > 0 ? 1 : -1);
+      var stepR = dr === 0 ? 0 : (dr > 0 ? 1 : -1);
+      var c2 = d.c + stepC, r2 = d.r + stepR;
+
+      // Vérifie les cases intermédiaires
+      while (c2 !== a.c || r2 !== a.r) {
+        if (plateau[COLS[c2] + (r2 + 1)]) return false;
+        c2 += stepC; r2 += stepR;
+      }
+      return true;
+    }
+
+    //  Roi 
+    if (tp === 'K') {
+      return Math.abs(dc) <= 1 && Math.abs(dr) <= 1 && (dc !== 0 || dr !== 0);
+    }
+
+    return false;
+}
+
+// Gère la sélection d'une pièce dans l'interface
+function selectionnerPiece(caseStr) {
+    if (etat.selection === caseStr) {
+      etat.selection = null;
+    } else {
+      etat.selection = caseStr;
+    }
+    afficher(); 
+}
+
+// Joue un coup en notation SAN (ex : "Nf3", "exd5", "O-O")
+function jouerCoup(plateau, san, trait) {
+    var p  = Object.assign({}, plateau); 
+    var m  = san.replace(/[+#!?]/g, ''); 
+    var rr = (trait === 'w') ? '1' : '8'; 
+
+    // Petit roque
+    if (m === 'O-O') {
+      var d='e'+rr, a='g'+rr;
+      p[a]=p[d]; delete p[d];
+      p['f'+rr]=p['h'+rr]; delete p['h'+rr];
+      return { plateau:p, dep:d, arr:a };
+    }
+
+    // Grand roque
+    if (m === 'O-O-O') {
+      var d2='e'+rr, a2='c'+rr;
+      p[a2]=p[d2]; delete p[d2];
+      p['d'+rr]=p['a'+rr]; delete p['a'+rr];
+      return { plateau:p, dep:d2, arr:a2 };
+    }
+
+    // Promotion éventuelle
+    var promo = null;
+    if (m.indexOf('=') !== -1) {
+      promo = m.split('=')[1][0];
+      m = m.split('=')[0];
+    }
+
+    // Destination du coup
+    var dest = m.slice(-2);
+    if (!/^[a-h][1-8]$/.test(dest)) return { plateau:p, dep:null, arr:null };
+
+    var estCapture = m.indexOf('x') !== -1;
+    var mc = m.replace('x','');
+
+    // Détermine le type de pièce
+    var typePiece, disamb;
+    if (mc[0] === mc[0].toUpperCase() && /[A-Z]/.test(mc[0])) {
+      typePiece = mc[0];
+      disamb = mc.slice(1, -2);
+    } else {
+      typePiece = 'P';
+      disamb = mc.slice(0, -2);
+    }
+
+    // Recherche des pièces pouvant jouer le coup
+    var candidats = [];
+    var cases = Object.keys(p);
+    for (var ki = 0; ki < cases.length; ki++) {
+      var cs = cases[ki];
+      if (!p[cs] || p[cs][0] !== trait || p[cs][1] !== typePiece) continue;
+
+      
+      if (disamb.length === 2) {
+        if (cs !== disamb) continue;
+      } else if (disamb.length === 1) {
+        if (COLS.indexOf(disamb) !== -1) {
+          if (cs[0] !== disamb) continue;
+        } else {
+          if (cs[1] !== disamb) continue;
+        }
+      }
+
+      // Vérifie si la pièce peut aller à la destination
+      if (peut_aller(p, cs, dest, trait, estCapture)) candidats.push(cs);
+    }
+
+    // On prend la pièce valide
+    var caseDep = candidats[0] || null;
+    if (caseDep) {
+      p[dest] = p[caseDep];
+      if (promo) p[dest] = [trait, promo]; // promotion
+      delete p[caseDep];
+
+      // Prise en passant
+      if (typePiece === 'P' && estCapture && !plateau[dest]) {
+        var rangEP = parseInt(dest[1]) + (trait === 'w' ? -1 : 1);
+        delete p[dest[0] + rangEP];
+      }
+    }
+
+    return { plateau:p, dep:caseDep, arr:dest };
+}
+
+
+function reconstruire(listeCoups) {
+    var p = initPlateau(), trait = 'w', d = null, a = null;
+    for (var i = 0; i < listeCoups.length; i++) {
+      var res = jouerCoup(p, listeCoups[i], trait);
+      p = res.plateau; d = res.dep; a = res.arr;
+      trait = (trait === 'w') ? 'b' : 'w'; // alterne le trait
+    }
+    return { plateau:p, dep:d, arr:a };
+}
+
+
+  // Centre pixel d'une case selon l'orientation courante
+  function pixelCentre(col, rang) {
+    var pos = colRangVersXY(col, rang);
+    return { x: pos.x + TAILLE/2, y: pos.y + TAILLE/2 };
+  }
+
+  // Couleur HSL associée au winrate : 6 zones distinctes rouge → vert
+  function couleurWR(wr) {
+    if (wr < 35)  return '#c0392b';  // rouge vif   — défaite majoritaire
+    if (wr < 45)  return '#e07060';  // rouge       — défavorable
+    if (wr < 50)  return '#f0b8b0';  // rouge pâle  — légèrement défavorable
+    if (wr < 55)  return '#85c1a3';  // vert pâle   — légèrement favorable
+    if (wr < 65)  return '#4a9e7a';  // vert        — favorable
+    return '#1a5f40';                // vert vif    — victoire majoritaire
+  }
+
+  // Rendu principal
+  function afficher() {
+    var pos      = reconstruire(etat.coups);
+    etat.plateau = pos.plateau;
+    etat.dep     = pos.dep;
+    etat.arr     = pos.arr;
+    repositionnerCases();
+    renderCases();
+    renderPieces();
+    renderFleches();
+    renderPanneau();
+  }
+
+  // Met à jour la couleur et la surbrillance des cases
+function renderCases() {
+    Object.keys(carteCases).forEach(function(cle) {
+      var parts = cle.split('-');
+      var col = +parts[0], rang = +parts[1];
+      var cs = COLS[col] + RANGS[rang];
+
+      // Couleur de base
+      var cls = (rang+col)%2===1 ? 'case-claire' : 'case-sombre';
+
+      // Surbrillances
+      if (cs === etat.dep) cls = 'case-hl-dep';
+      if (cs === etat.arr) cls = 'case-hl-arr';
+      if (cs === etat.selection) cls = 'case-selectionnee';
+
+      carteCases[cle].attr('class', cls);
+    });
+}
+
+// Affiche les pièces sur le plateau
+function renderPieces() {
+    calquePieces.selectAll('*').remove();
+    var p = etat.plateau;
+
+    Object.keys(p).forEach(function(cs) {
+      var pc = p[cs];
+      if (!pc) return;
+
+      var coord = coordCase(cs);
+      var centre = pixelCentre(coord.c, coord.r);
+      var estSel = (etat.selection === cs);
+
+      calquePieces.append('text')
+        .attr('class','piece')
+        .attr('x', centre.x)
+        .attr('y', centre.y + 2)
+        .style('opacity', estSel ? 1 : 0.95)
+        .style('filter', estSel ? 'drop-shadow(0 0 6px rgba(0,0,0,0.35))' : 'none')
+        .style('transform', estSel ? 'scale(1.25)' : 'scale(1)')
+        .style('transform-origin', 'center')
+        .text(GLYPHES[pc[0]][pc[1]])
+        .on('click', function() { selectionnerPiece(cs); });
+    });
+}
+
+// Dessine les flèches des coups disponibles
+function renderFleches() {
+    calqueFleches.selectAll('*').remove();
+    var dispos = getCoupsDispos();
+    var cles = Object.keys(dispos);
+    if (!cles.length) return;
+
+    var maxN = d3.max(cles.map(m => dispos[m].n));
+    var defs = calqueFleches.append('defs');
+
+    cles.forEach(function(san) {
+      var s = dispos[san];
+      var dest = san.replace(/[x+#!=?]/g,'').replace(/=[NBRQ]/,'').slice(-2);
+      if (!/^[a-h][1-8]$/.test(dest)) return;
+
+      var caseDep = s.de;
+      if (!caseDep) return;
+
+      var couleur = couleurWR(s.wr);
+      var ep = 1.2 + (s.n / maxN) * 3.6;
+      var idMk = 'mk_' + san.replace(/[^a-zA-Z0-9]/g,'_');
+
+      // Pointe de flèche
+      defs.append('marker')
+        .attr('id', idMk)
+        .attr('markerWidth', 5).attr('markerHeight', 5)
+        .attr('refX', 4.5).attr('refY', 2.5)
+        .attr('orient', 'auto')
+        .append('polygon')
+          .attr('points','0 0.5,5 2.5,0 4.5')
+          .attr('fill', couleur);
+
+      var pdep = pixelCentre(...Object.values(coordCase(caseDep)));
+      var parr = pixelCentre(...Object.values(coordCase(dest)));
+
+      var estCav = etat.plateau[caseDep] && etat.plateau[caseDep][1] === 'N';
+      if (estCav) tracerFlecheL(calqueFleches, pdep, parr, couleur, ep, idMk, san, s);
+      else        tracerFlecheDroite(calqueFleches, pdep, parr, couleur, ep, idMk, san, s);
+    });
+
+    renderClics();
+}
+
+// Flèche droite
+function tracerFlecheDroite(g, dep, arr, coul, ep, idMk, san, s) {
+    var dx = arr.x-dep.x, dy = arr.y-dep.y;
+    var len = Math.sqrt(dx*dx + dy*dy);
+    if (len < 1) return;
+
+    var nx = dx/len, ny = dy/len;
+
+    g.append('line')
+      .attr('x1', dep.x + nx*TAILLE*0.30)
+      .attr('y1', dep.y + ny*TAILLE*0.30)
+      .attr('x2', arr.x - nx*TAILLE*0.28)
+      .attr('y2', arr.y - ny*TAILLE*0.28)
+      .attr('stroke', coul).attr('stroke-width', ep)
+      .attr('marker-end','url(#'+idMk+')')
+      .on('mouseover', e => montrerInfo(e, san+' · '+s.n+' parties · WR '+s.wr+'%'))
+      .on('mouseleave', cacherInfo);
+}
+
+// Flèche en L (cavalier)
+function tracerFlecheL(g, dep, arr, coul, ep, idMk, san, s) {
+    var coude = { x: arr.x, y: dep.y };
+
+    g.append('line')
+      .attr('x1', dep.x).attr('y1', dep.y)
+      .attr('x2', coude.x).attr('y2', coude.y)
+      .attr('stroke', coul).attr('stroke-width', ep)
+      .on('mouseover', e => montrerInfo(e, san+' · '+s.n+' parties · WR '+s.wr+'%'))
+      .on('mouseleave', cacherInfo);
+
+    g.append('line')
+      .attr('x1', coude.x).attr('y1', coude.y)
+      .attr('x2', coude.x).attr('y2', arr.y)
+      .attr('stroke', coul).attr('stroke-width', ep)
+      .attr('marker-end','url(#'+idMk+')')
+      .on('mouseover', e => montrerInfo(e, san+' · '+s.n+' parties · WR '+s.wr+'%'))
+      .on('mouseleave', cacherInfo);
+}
+
+// Met à jour le bloclatéral (nom ouverture + liste coups)
+function renderPanneau() {
+    var cle = etat.coups.join('|');
+    var labels = etat.labels && etat.labels[etat.camp];
+
+    document.getElementById('nom-ouverture').textContent =
+      (labels && labels[cle]) || (etat.coups.length ? '—' : 'Position initiale');
+
+    var filEl = document.getElementById('fil-coups');
+    if (!etat.coups.length) filEl.textContent = '—';
+    else {
+      var html = '';
+      etat.coups.forEach(function(mv, i) {
+        if (i%2===0) html += '<span style="color:#bbb">'+(Math.floor(i/2)+1)+'. </span>';
+        html += '<span class="jeton-coup" onclick="allerAuCoup('+i+')">'+mv+'</span> ';
+      });
+      filEl.innerHTML = html;
+    }
+
+    document.getElementById('btn-retour').style.display =
+      etat.coups.length ? 'inline-block' : 'none';
+
+    renderListeCoups();
+}
+
+// Liste des coups disponibles (triés par fréquence)
+function renderListeCoups() {
+    var dispos = getCoupsDispos();
+    var liste  = document.getElementById('liste-coups');
+    var tries  = Object.keys(dispos).sort((a,b)=>dispos[b].n - dispos[a].n);
+
+    if (!tries.length) {
+      liste.innerHTML = '<li style="color:#bbb;font-size:.7rem">Fin de l\'arbre</li>';
+      return;
+    }
+
+    var maxN = dispos[tries[0]].n;
+
+    liste.innerHTML = tries.map(function(san) {
+      var s = dispos[san], col = couleurWR(s.wr);
+      var larg = (s.n/maxN*100).toFixed(0);
+
+      return '<li onclick="jouerCoupUI(\''+san+'\')">'
+        +'<span class="nom-coup">'+san+'</span>'
+        +'<span class="nb-parties">'+s.n+' part.</span>'
+        +'<span class="barre-wrap"><span class="barre-fill" style="width:'+larg+'%;background:'+col+'"></span></span>'
+        +'<span class="pct-wr" style="color:'+col+'">'+s.wr+'%</span>'
+        +'</li>';
+    }).join('');
+}
+
+// Zones cliquables pour jouer un coup
+function renderClics() {
+    calqueClics.selectAll('*').remove();
+    var dispos = getCoupsDispos();
+    var carteDest = {};
+
+    Object.keys(dispos).forEach(function(san) {
+      var dest = san.replace(/[x+#!=?]/g,'').replace(/=[NBRQ]/,'').slice(-2);
+      if (/^[a-h][1-8]$/.test(dest)) carteDest[dest] = san;
+    });
+
+    for (var r = 0; r < 8; r++) {
+      for (var c = 0; c < 8; c++) {
+        (function(col, rang) {
+          var cs = COLS[col]+RANGS[rang];
+          var pos = colRangVersXY(col, rang);
+
+          calqueClics.append('rect')
+            .attr('x', pos.x).attr('y', pos.y)
+            .attr('width', TAILLE).attr('height', TAILLE)
+            .attr('fill','transparent')
+            .attr('cursor', carteDest[cs] ? 'pointer' : 'default')
+            .on('click', function() {
+              if (carteDest[cs]) jouerCoupUI(carteDest[cs]);
+            });
+        })(c, r);
+      }
+    }
+}
+
+
+  // Interactivité
+
+  function getCoupsDispos() {
+    if (!etat.arbre) return {};
+    return (etat.arbre[etat.camp] || {})[etat.coups.join('|')] || {};
+  }
+
+  function jouerCoupUI(san) {
+    etat.coups.push(san);
+    afficher();
+  }
+
+  function allerAuCoup(idx) {
+    etat.coups = etat.coups.slice(0, idx+1);
+    afficher();
+  }
+
+  document.getElementById('btn-retour').addEventListener('click', function() {
+    if (etat.coups.length) { etat.coups.pop(); afficher(); }
+  });
+
+  // Switch de camp : change le camp, retourne l'échiquier, remet les coups à zéro
+  document.getElementById('controles-camp').addEventListener('click', function(e) {
+    var btn = e.target.closest('.bouton'); if (!btn) return;
+    document.querySelectorAll('#controles-camp .bouton')
+      .forEach(function(b) { b.classList.remove('actif'); });
+    btn.classList.add('actif');
+    etat.camp        = btn.dataset.camp;
+    etat.orientation = btn.dataset.camp;  // flip : blancs en bas si 'w', noirs en bas si 'b'
+    etat.coups       = [];
+    etat.selection   = null;
+    // Reconstruire les labels de coordonnées selon la nouvelle orientation
+    construireLabelsRangs();
+    construireLabelsColonnes();
+    afficher();
+  });
+
+  // Infobulle
+  var infobulleEl = document.getElementById('infobulle');
+  function montrerInfo(event, texte) {
+    infobulleEl.innerHTML = texte;
+    infobulleEl.style.opacity = 1;
+    infobulleEl.style.left = (event.clientX+14)+'px';
+    infobulleEl.style.top  = (event.clientY-10)+'px';
+  }
+  function cacherInfo() { infobulleEl.style.opacity = 0; }
+
+  // Bar charts des ouvertures les plus jouées (barres sur pourcentage absolu)
+  function afficherBarCharts() {
+    if (!etat.bar) return;
+    var couleurs = { w:'#7a4f00', b:'#2a2a2a' };
+    ['w','b'].forEach(function(camp) {
+      var items = etat.bar[camp];
+      var cont  = document.getElementById(camp==='w' ? 'graphique-blancs' : 'graphique-noirs');
+      cont.innerHTML = items.map(function(d) {
+        return '<div class="rangee-barre">'
+          + '<span class="etiq-ouv" title="'+d.nom+'">'+d.nom+'</span>'
+          + '<span class="piste-barre">'
+          +   '<span class="remplissage" style="width:'+d.pct+'%;background:'+couleurs[camp]+';opacity:.7"></span>'
+          + '</span>'
+          + '<span class="val-barre">'+d.n+' <span style="color:#bbb">('+d.pct+'%)</span></span>'
+          + '</div>';
+      }).join('');
+    });
+  }
+
+  // Chargement du CSV
+  d3.dsv(';', '../data/games.csv').then(function(lignes) {
+
+    var SEUIL_MIN = 10;
+    var arbreBrut = { w:{}, b:{} };
+    var votesOuv  = { w:{}, b:{} };
+
+    var groupes = {
+      w:[['Écossaise', ['Scotch','Center Game']],['Sicilienne',['Sicilian','Alapin']],
+         ['Française', ['French']],['Philidor',['Philidor']],['Petroff',['Petrov']]],
+      b:[['Caro-Kann', ['Caro Kann']],['Scandinave',['Scandinavian']],
+         ['Benoni',    ['Benoni']],   ['Alekhine',  ['Alekhine']], ['Réti',['Reti']]]
+    };
+    var comptOuv = { w:{}, b:{} };
+    ['w','b'].forEach(function(camp) {
+      groupes[camp].forEach(function(g){ comptOuv[camp][g[0]] = 0; });
+    });
+    var totaux = { w:0, b:0 };
+
+    lignes.forEach(function(ligne) {
+      var tc = ligne.timeClass;
+      if (tc!=='blitz' && tc!=='bullet' && tc!=='rapid') return;
+
+      var camp  = (ligne.userColor==='white') ? 'w' : 'b';
+      var gagne = (ligne.result==='win');
+      var ouv   = (ligne.opening||'').trim();
+      var pgn   = ligne.pgn || '';
+
+      // Extraire les coups SAN depuis le PGN
+      pgn = pgn.replace(/\[[^\]]*\]/g,'').replace(/\{[^}]*\}/g,'')
+               .replace(/\d+\.+/g,'').replace(/1-0|0-1|1\/2-1\/2|\*/g,'');
+      var coups = pgn.trim().split(/\s+/).filter(function(m){ return m.length>0; });
+      if (!coups.length) return;
+
+      totaux[camp]++;
+
+      groupes[camp].forEach(function(g) {
+        if (g[1].some(function(k){ return ouv.indexOf(k)!==-1; })) comptOuv[camp][g[0]]++;
+      });
+
+      var nomCourt = ouv.replace(/\s+\d.*/,'').split(' ').slice(0,4).join(' ');
+
+      // Parcourir les 20 premiers demi-coups (soit 10 coups complets)
+      var plateau = initPlateau(), trait = 'w';
+      for (var prof = 0; prof < Math.min(20, coups.length); prof++) {
+        var cle = coups.slice(0, prof).join('|');
+        var mv  = coups[prof];
+        var res  = jouerCoup(plateau, mv, trait);
+        plateau  = res.plateau;
+        var dep  = res.dep;
+
+        if (!arbreBrut[camp][cle]) arbreBrut[camp][cle] = {};
+        if (!arbreBrut[camp][cle][mv])
+          arbreBrut[camp][cle][mv] = { n:0, v:0, origines:{} };
+        arbreBrut[camp][cle][mv].n++;
+        if (gagne) arbreBrut[camp][cle][mv].v++;
+        if (dep) {
+          var orig = arbreBrut[camp][cle][mv].origines;
+          orig[dep] = (orig[dep]||0) + 1;
+        }
+
+        var cleAp = coups.slice(0, prof+1).join('|');
+        if (!votesOuv[camp][cleAp]) votesOuv[camp][cleAp] = {};
+        votesOuv[camp][cleAp][nomCourt] = (votesOuv[camp][cleAp][nomCourt]||0) + 1;
+
+        trait = (trait==='w') ? 'b' : 'w';
+      }
+    });
+
+    // filtrage (n ≥ SEUIL_MIN)
+    var arbreFiltre = { w:{}, b:{} };
+    ['w','b'].forEach(function(camp) {
+      Object.keys(arbreBrut[camp]).forEach(function(cle) {
+        var f = {};
+        Object.keys(arbreBrut[camp][cle]).forEach(function(mv) {
+          var s = arbreBrut[camp][cle][mv];
+          if (s.n < SEUIL_MIN) return;
+          var orig = s.origines;
+          var best = Object.keys(orig).reduce(function(a,b){ return orig[b]>orig[a]?b:a; },
+                                              Object.keys(orig)[0]||null);
+          f[mv] = { n:s.n, wr:Math.round(s.v/s.n*1000)/10, de:best };
+        });
+        if (Object.keys(f).length) arbreFiltre[camp][cle] = f;
+      });
+    });
+
+    //  labels d'ouvertures
+    var labelsOuv = { w:{}, b:{} };
+    ['w','b'].forEach(function(camp) {
+      var clesValides = new Set(Object.keys(arbreFiltre[camp]));
+      Object.keys(votesOuv[camp]).forEach(function(cle) {
+        if (!clesValides.has(cle)) return;
+        var votes = votesOuv[camp][cle];
+        labelsOuv[camp][cle] = Object.keys(votes).reduce(function(a,b){ return votes[b]>votes[a]?b:a; });
+      });
+    });
+
+    //  bar charts
+    var donneesBar = { w:[], b:[] };
+    ['w','b'].forEach(function(camp) {
+      groupes[camp].forEach(function(g) {
+        var n   = comptOuv[camp][g[0]];
+        var pct = totaux[camp]>0 ? Math.round(n/totaux[camp]*1000)/10 : 0;
+        donneesBar[camp].push({ nom:g[0], n:n, pct:pct });
+      });
+      donneesBar[camp].sort(function(a,b){ return b.n-a.n; });
+    });
+
+    etat.arbre  = arbreFiltre;
+    etat.labels = labelsOuv;
+    etat.bar    = donneesBar;
+
+    document.getElementById('statut').textContent =
+      lignes.length.toLocaleString() + ' parties chargées';
+
+    afficher();
+    afficherBarCharts();
+  });
+
+  </script>
+</body>
+</html>
