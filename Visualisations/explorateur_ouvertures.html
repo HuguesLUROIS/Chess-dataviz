@@ -834,25 +834,21 @@ function renderPieces() {
   function cacherInfo() { infobulleEl.style.opacity = 0; }
 
 
-  // Bar charts des ouvertures les plus jouées
   function afficherBarCharts() {
-    if (!etat.bar) return;
-    var couleurs = { w:'#7a4f00', b:'#2a2a2a' };
-    ['w','b'].forEach(function(camp) {
-      var items = etat.bar[camp];
-      var maxN  = items[0].n;
-      var cont  = document.getElementById(camp==='w' ? 'graphique-blancs' : 'graphique-noirs');
-      cont.innerHTML = items.map(function(d) {
-        var pct = (d.n/maxN*100).toFixed(0);
-        return '<div class="rangee-barre">'
-          +'<span class="etiq-ouv" title="'+d.nom+'">'+d.nom+'</span>'
-          +'<span class="piste-barre"><span class="remplissage" style="width:'+pct+'%;background:'+couleurs[camp]+';opacity:.7"></span></span>'
-          +'<span class="val-barre">'+d.n+' <span style="color:#bbb">('+d.pct+'%)</span></span>'
-          +'</div>';
-      }).join('');
-    });
-  }
-
+  if (!etat.bar) return;
+  var couleurs = { w:'#7a4f00', b:'#2a2a2a' };
+  ['w','b'].forEach(function(camp) {
+    var items = etat.bar[camp];
+    var cont  = document.getElementById(camp==='w' ? 'graphique-blancs' : 'graphique-noirs');
+    cont.innerHTML = items.map(function(d) {
+      return '<div class="rangee-barre">'
+        +'<span class="etiq-ouv" title="'+d.nom+'">'+d.nom+'</span>'
+        +'<span class="piste-barre"><span class="remplissage" style="width:'+d.pct+'%;background:'+couleurs[camp]+';opacity:.7"></span></span>'
+        +'<span class="val-barre">'+d.n+' <span style="color:#bbb">('+d.pct+'%)</span></span>'
+        +'</div>';
+    }).join('');
+  });
+}
 
   // Chargement du CSV 
  
