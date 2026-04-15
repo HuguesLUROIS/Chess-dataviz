@@ -298,7 +298,7 @@
     k: 'Le roi reste sagement en arrière — jusqu\'en finale, où il devient une pièce active. Une présence centrale du roi signe des fins de parties disputées.'
   };
  
-  // Noms lisibles des types de pièces (affichés dans le panneau)
+  // Noms lisibles des types de pièces (affichés sur un bloc latéral)
   var NOMS_PIECES = {
     p: 'Pions', n: 'Cavaliers', b: 'Fous', r: 'Tours', q: 'Dame', k: 'Roi'
   };
@@ -517,7 +517,7 @@
  
     document.getElementById('info-piece').textContent = NOMS_PIECES[p.t];
  
-    // Afficher la note analytique associée à ce type de pièce
+    // Afficher l'explication associée à ce type de pièce
     var noteEl = document.getElementById('note-piece');
     noteEl.textContent = NOTES_PIECES[p.t];
     noteEl.style.display = 'block';
@@ -543,13 +543,12 @@
     var valeurMax = d3.max(donnees);
     if (!valeurMax) return;
  
-    // Échelle racine carrée : les cases peu fréquentées restent visibles
-    // sans que les plus visitées n'écrasent visuellement tout le reste
+    // Échelle racine carrée afin que les cases peu fréquentées restent visibles sans que les plus visitées n'écrasent visuellement tout le reste
     var echelleRayon = d3.scaleSqrt()
       .domain([0, valeurMax])
       .range([0, TAILLE * 0.42]);
  
-    // Transition fluide lors du changement de pièce sélectionnée
+    // Transition lors du changement de pièce sélectionnée
     cercles.forEach(function(c, idx) {
       c.transition()
         .duration(250)
@@ -557,8 +556,7 @@
         .attr('r', echelleRayon(donnees[idx] || 0));
     });
  
-    // Légende dynamique basée sur les quartiles des cases non nulles
-    // Cela donne une idée de la dispersion réelle des déplacements
+    // Légende basée sur les quartiles des cases aux déplacements non nuls
     var valeursNonNulles = donnees
       .filter(function(v) { return v > 0; })
       .sort(d3.ascending);
@@ -594,7 +592,7 @@
         .text(ld.info);
     });
  
-    // Top 5 des cases les plus fréquentées par cette pièce
+    // Top 5 cases visitées par le type de pièces considéré
     var classement = donnees
       .map(function(v, idx) {
         return { case: COLONNES[idx % 8] + RANGS[Math.floor(idx / 8)], valeur: v };
@@ -619,7 +617,7 @@
     document.getElementById('panneau-top').style.display = 'block';
   }
  
-  // Bascule entre Blancs et Noirs
+  // Switcher entre blancs et noirs
   document.querySelectorAll('.tbtn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       document.querySelectorAll('.tbtn').forEach(function(b) { b.classList.remove('actif'); });
@@ -630,9 +628,9 @@
   });
  
  
-// -----------------------------------------------------------------
+
   //  Chargement des données depuis le CSV
-  // -----------------------------------------------------------------
+
  
   d3.dsv(';', '../data/games.csv').then(function(lignes) {
  
