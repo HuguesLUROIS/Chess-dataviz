@@ -834,16 +834,18 @@ function renderPieces() {
   function cacherInfo() { infobulleEl.style.opacity = 0; }
 
 
-  function afficherBarCharts() {
+ function afficherBarCharts() {
   if (!etat.bar) return;
   var couleurs = { w:'#7a4f00', b:'#2a2a2a' };
   ['w','b'].forEach(function(camp) {
     var items = etat.bar[camp];
+    var maxPct = items[0].pct;   
     var cont  = document.getElementById(camp==='w' ? 'graphique-blancs' : 'graphique-noirs');
     cont.innerHTML = items.map(function(d) {
+      var larg = (d.pct / maxPct * 100).toFixed(0);   // proportionnel au maximum
       return '<div class="rangee-barre">'
         +'<span class="etiq-ouv" title="'+d.nom+'">'+d.nom+'</span>'
-        +'<span class="piste-barre"><span class="remplissage" style="width:'+d.pct+'%;background:'+couleurs[camp]+';opacity:.7"></span></span>'
+        +'<span class="piste-barre"><span class="remplissage" style="width:'+larg+'%;background:'+couleurs[camp]+';opacity:.7"></span></span>'
         +'<span class="val-barre">'+d.n+' <span style="color:#bbb">('+d.pct+'%)</span></span>'
         +'</div>';
     }).join('');
@@ -898,7 +900,7 @@ d3.dsv(';', '../data/games.csv').then(function(lignes) {
       // Nom court (pour regrouper l'ensemble des caro kann par exemple)
       var nomCourt = ouv.replace(/\s+\d.*/,'').split(' ').slice(0,4).join(' ');
 
-      // Parcourir les 10 premiers coups (Seuil arbitraire mais + est trop lourd en calcul et moins intéressant) 
+      // Parcourir les 10 premiers coups (Seuil arbitraire mais + est trop lourd en calcul et moins intéressant puisqu'on sort de la phase d'ouverture) 
       var plateau = initPlateau(), trait = 'w';
 
       for (var prof = 0; prof < Math.min(20, coups.length); prof++) {
