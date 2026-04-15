@@ -142,7 +142,7 @@
     .legende-ligne  { display: flex; align-items: center; gap: 10px;
                       font-size: .63rem; font-family: monospace; color: #777; }
     .barre-degrade  { flex: 1; height: 7px; border-radius: 3px;
-                      background: linear-gradient(to right, #922b21, #e8a89c, #f5f0eb, #85c1a3, #1a5f40); }
+                  background: linear-gradient(to right, #922b21, #e8a89c, #f5f0eb, #85c1a3, #1a5f40); }
     .exemples-ep    { display: flex; align-items: center; gap: 12px; }
     .ex-ep          { display: flex; align-items: center; gap: 5px; }
 
@@ -224,17 +224,17 @@
           <h4>Légende</h4>
           <div class="legende-grille">
 
-            <!-- Dégradé couleur = winrate -->
-            <div class="legende-ligne">
-              <span style="flex:0 0 60px">Winrate</span>
-              <div class="barre-degrade"></div>
-            </div>
-            <div class="legende-ligne" style="margin-top:-4px">
-              <span style="flex:0 0 60px"></span>
-              <span style="flex:1;display:flex;justify-content:space-between;font-size:.58rem;color:#bbb">
-                <span>0 %</span><span>50 %</span><span>100 %</span>
-              </span>
-            </div>
+         <!-- Dégradé couleur = winrate -->
+<div class="legende-ligne">
+  <span style="flex:0 0 60px">Winrate</span>
+  <div class="barre-degrade"></div>
+</div>
+<div class="legende-ligne" style="margin-top:-4px">
+  <span style="flex:0 0 60px"></span>
+  <span style="flex:1;display:flex;justify-content:space-between;font-size:.58rem;color:#bbb">
+    <span>0 %</span><span>30 %</span><span>50 %</span><span>70 %</span><span>100 %</span>
+  </span>
+</div>
 
           <!-- Épaisseur = fréquence -->
 <div class="legende-ligne" style="margin-top:8px;font-size:.58rem;color:#bbb;font-family:monospace">
@@ -530,12 +530,43 @@ function selectionnerPiece(caseStr) {
     return { x: col*TAILLE + TAILLE/2, y: (7-rang)*TAILLE + TAILLE/2 };
   }
   function couleurWR(wr) {
-    var t   = Math.max(0, Math.min(1, wr / 100));
-    var hue = t * 120;
-    var sat = 70 + Math.abs(t - 0.5) * 30;
-    var lum = 32 + (1 - Math.abs(t - 0.5)) * 8;
-    return 'hsl(' + hue.toFixed(0) + ',' + sat.toFixed(0) + '%,' + lum.toFixed(0) + '%)';
+  var t = Math.max(0, Math.min(100, wr));
+
+  // Zone rouge vif : 0 → 30%
+  if (t <= 30) {
+    var ratio = t / 30;
+    var r = Math.round(146 + (232 - 146) * ratio);
+    var g = Math.round(43  + (168 - 43)  * ratio);
+    var b = Math.round(33  + (156 - 33)  * ratio);
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
   }
+  // Zone rouge pâle : 30 → 45%
+  if (t <= 45) {
+    var ratio = (t - 30) / 15;
+    var r = Math.round(232 + (245 - 232) * ratio);
+    var g = Math.round(168 + (240 - 168) * ratio);
+    var b = Math.round(156 + (235 - 156) * ratio);
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
+  }
+  // Zone neutre : 45 → 55%
+  if (t <= 55) {
+    return 'rgb(245, 240, 235)';
+  }
+  // Zone vert pâle : 55 → 70%
+  if (t <= 70) {
+    var ratio = (t - 55) / 15;
+    var r = Math.round(245 + (133 - 245) * ratio);
+    var g = Math.round(240 + (193 - 240) * ratio);
+    var b = Math.round(235 + (163 - 235) * ratio);
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
+  }
+  // Zone vert vif : 70 → 100%
+  var ratio = (t - 70) / 30;
+  var r = Math.round(133 + (26  - 133) * ratio);
+  var g = Math.round(193 + (95  - 193) * ratio);
+  var b = Math.round(163 + (64  - 163) * ratio);
+  return 'rgb(' + r + ',' + g + ',' + b + ')';
+}
 
 
   // Rendu principal 
