@@ -85,7 +85,7 @@
     .piece { font-size: 34px; dominant-baseline: central; text-anchor: middle;
              pointer-events: none; user-select: none; }
 
-    /* Panneau latéral */
+    /* Bloc latéral */
     .panneau { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 10px; }
 
     .carte {
@@ -218,7 +218,7 @@
           <h4>Légende</h4>
           <div class="legende-grille">
 
-            <!-- Winrate : 6 blocs de couleur séparés -->
+            <!-- Winrate : 6 blocs de couleur distincts -->
             <div class="legende-ligne">
               <span style="flex:0 0 60px">Winrate</span>
               <div style="flex:1;display:flex;gap:2px">
@@ -304,17 +304,16 @@ Cela mène majoritairement à des ouvertures comme le gambit Benko ou la Benoni.
     labels    : null,
     bar       : null,
     selection : null,
-    // Orientation de l'échiquier : 'w' = blancs en bas (défaut), 'b' = noirs en bas
-    orientation : 'w'
+    orientation : 'w' // Orientation de l'échiquier : 'w' = blancs en bas (défaut), 'b' = noirs en bas
   };
 
   // Construction de l'échiquier SVG
 
-  // Labels de rangs (reconstruits à chaque flip)
+  // Labels de rangs (reconstruits à chaque switch blanc --> noir)
   function construireLabelsRangs() {
     var cont = document.getElementById('labels-rangs');
     cont.innerHTML = '';
-    // Si orientation blancs : 8 en haut → 1 en bas. Si noirs : 1 en haut → 8 en bas.
+    // Si orientation blancs : 8 en haut → 1 en bas. Si noirs : 1 en haut → 8 en bas
     var ordre = etat.orientation === 'w'
       ? [7,6,5,4,3,2,1,0]
       : [0,1,2,3,4,5,6,7];
@@ -326,11 +325,11 @@ Cela mène majoritairement à des ouvertures comme le gambit Benko ou la Benoni.
     });
   }
 
-  // Labels de colonnes (reconstruits à chaque flip)
+  // Labels de colonnes (reconstruits à chaque switch blanc --> noir)
   function construireLabelsColonnes() {
     var cont = document.getElementById('labels-colonnes');
     cont.innerHTML = '';
-    // Si orientation blancs : a→h. Si noirs : h→a.
+    // Si orientation blancs : a→h. Si noirs : h→a
     var ordre = etat.orientation === 'w'
       ? COLS
       : COLS.slice().reverse();
@@ -386,162 +385,227 @@ Cela mène majoritairement à des ouvertures comme le gambit Benko ou la Benoni.
     }
   }
 
-  function initPlateau() {
+  // Initialise le plateau de départ d'une partie d'échecs
+function initPlateau() {
     var p = {};
-    var rangee_arr = ['R','N','B','Q','K','B','N','R'];
+    var rangee_arr = ['R','N','B','Q','K','B','N','R']; // ordre des pièces majeures
     for (var i = 0; i < 8; i++) {
-      p[COLS[i]+'1'] = ['w', rangee_arr[i]];
-      p[COLS[i]+'2'] = ['w', 'P'];
-      p[COLS[i]+'7'] = ['b', 'P'];
-      p[COLS[i]+'8'] = ['b', rangee_arr[i]];
+      // Pièces blanches
+      p[COLS[i]+'1'] = ['w', rangee_arr[i]]; // rangée 1 : pièces 
+      p[COLS[i]+'2'] = ['w', 'P'];           // rangée 2 : pions
+      // Pièces noires
+      p[COLS[i]+'7'] = ['b', 'P'];           // rangée 7 : pions
+      p[COLS[i]+'8'] = ['b', rangee_arr[i]]; // rangée 8 : pièces 
     }
     return p;
-  }
+}
 
-  function coordCase(caseStr) {
+// Convertit une case "e4" en coordonnées numériques (colonne, rangée)
+function coordCase(caseStr) {
     return { c: COLS.indexOf(caseStr[0]), r: parseInt(caseStr[1]) - 1 };
-  }
+}
 
-  function peut_aller(plateau, dep, arr, trait, estCapture) {
-    if (!plateau[dep]) return false;
+// Vérifie si une pièce peut aller de dep → arr selon les règles
+function peut_aller(plateau, dep, arr, trait, estCapture) {
+    if (!plateau[dep]) return false; // pas de pièce sur la case de départ
     var coul = plateau[dep][0], tp = plateau[dep][1];
-    if (coul !== trait) return false;
+    if (coul !== trait) return false; // pas le bon camp
 
     var d = coordCase(dep), a = coordCase(arr);
     var dc = a.c - d.c, dr = a.r - d.r;
 
+    //  Déplacements des pions 
     if (tp === 'P') {
-      var dir     = (coul === 'w') ? 1 : -1;
-      var rangDep = (coul === 'w') ? 1 : 6;
+      var dir     = (coul === 'w') ? 1 : -1; // direction du pion
+      var rangDep = (coul === 'w') ? 1 : 6; // rangée de départ
+
+      // Capture en diagonale
       if (estCapture) return Math.abs(dc) === 1 && dr === dir;
+
+     
       if (dc !== 0) return false;
+
+      // Avance 1 case
       if (dr === dir && !plateau[arr]) return true;
+
+      // Avance 2 cases depuis rangée initial
       var intermed = COLS[d.c] + (d.r + dir + 1);
       if (dr === 2*dir && d.r === rangDep && !plateau[intermed] && !plateau[arr]) return true;
+
       return false;
     }
+
+    // Cavalier 
     if (tp === 'N') {
       return (Math.abs(dc) === 1 && Math.abs(dr) === 2) ||
              (Math.abs(dc) === 2 && Math.abs(dr) === 1);
     }
+
+    //  Fou 
     if (tp === 'B') {
-      if (Math.abs(dc) !== Math.abs(dr) || dc === 0) return false;
+      if (Math.abs(dc) !== Math.abs(dr) || dc === 0) return false; // doit être diagonal
       var sc = dc > 0 ? 1 : -1, sr = dr > 0 ? 1 : -1;
       var c = d.c + sc, r = d.r + sr;
+
+      // Vérifie qu'aucune pièce ne bloque le chemin
       while (c !== a.c || r !== a.r) {
         if (plateau[COLS[c] + (r+1)]) return false;
         c += sc; r += sr;
       }
       return true;
     }
+
+    // Tour 
     if (tp === 'R') {
-      if (dc !== 0 && dr !== 0) return false;
+      if (dc !== 0 && dr !== 0) return false; // doit être horizontal ou vertical
+
+      // Mouvement vertical
       if (dc === 0) {
         var s = dr > 0 ? 1 : -1;
         for (var ri = d.r + s; ri !== a.r; ri += s)
           if (plateau[COLS[d.c] + (ri+1)]) return false;
-      } else {
+      }
+      // Mouvement horizontal
+      else {
         var s2 = dc > 0 ? 1 : -1;
         for (var ci = d.c + s2; ci !== a.c; ci += s2)
           if (plateau[COLS[ci] + (d.r+1)]) return false;
       }
       return true;
     }
+
+    // Dame
     if (tp === 'Q') {
       var estDiag = Math.abs(dc) === Math.abs(dr) && dc !== 0;
       var estLigne = (dc === 0 || dr === 0) && (dc !== 0 || dr !== 0);
       if (!estDiag && !estLigne) return false;
+
       var stepC = dc === 0 ? 0 : (dc > 0 ? 1 : -1);
       var stepR = dr === 0 ? 0 : (dr > 0 ? 1 : -1);
       var c2 = d.c + stepC, r2 = d.r + stepR;
+
+      // Vérifie les cases intermédiaires
       while (c2 !== a.c || r2 !== a.r) {
         if (plateau[COLS[c2] + (r2 + 1)]) return false;
         c2 += stepC; r2 += stepR;
       }
       return true;
     }
+
+    //  Roi 
     if (tp === 'K') {
       return Math.abs(dc) <= 1 && Math.abs(dr) <= 1 && (dc !== 0 || dr !== 0);
     }
-    return false;
-  }
 
-  function selectionnerPiece(caseStr) {
+    return false;
+}
+
+// Gère la sélection d'une pièce dans l'interface
+function selectionnerPiece(caseStr) {
     if (etat.selection === caseStr) {
       etat.selection = null;
     } else {
       etat.selection = caseStr;
     }
-    afficher();
-  }
+    afficher(); 
+}
 
-  function jouerCoup(plateau, san, trait) {
-    var p  = Object.assign({}, plateau);
-    var m  = san.replace(/[+#!?]/g, '');
-    var rr = (trait === 'w') ? '1' : '8';
+// Joue un coup en notation SAN (ex : "Nf3", "exd5", "O-O")
+function jouerCoup(plateau, san, trait) {
+    var p  = Object.assign({}, plateau); 
+    var m  = san.replace(/[+#!?]/g, ''); 
+    var rr = (trait === 'w') ? '1' : '8'; 
 
+    // Petit roque
     if (m === 'O-O') {
       var d='e'+rr, a='g'+rr;
-      p[a]=p[d]; delete p[d]; p['f'+rr]=p['h'+rr]; delete p['h'+rr];
+      p[a]=p[d]; delete p[d];
+      p['f'+rr]=p['h'+rr]; delete p['h'+rr];
       return { plateau:p, dep:d, arr:a };
     }
+
+    // Grand roque
     if (m === 'O-O-O') {
       var d2='e'+rr, a2='c'+rr;
-      p[a2]=p[d2]; delete p[d2]; p['d'+rr]=p['a'+rr]; delete p['a'+rr];
+      p[a2]=p[d2]; delete p[d2];
+      p['d'+rr]=p['a'+rr]; delete p['a'+rr];
       return { plateau:p, dep:d2, arr:a2 };
     }
 
+    // Promotion éventuelle
     var promo = null;
-    if (m.indexOf('=') !== -1) { promo = m.split('=')[1][0]; m = m.split('=')[0]; }
+    if (m.indexOf('=') !== -1) {
+      promo = m.split('=')[1][0];
+      m = m.split('=')[0];
+    }
 
+    // Destination du coup
     var dest = m.slice(-2);
     if (!/^[a-h][1-8]$/.test(dest)) return { plateau:p, dep:null, arr:null };
 
     var estCapture = m.indexOf('x') !== -1;
     var mc = m.replace('x','');
 
+    // Détermine le type de pièce
     var typePiece, disamb;
     if (mc[0] === mc[0].toUpperCase() && /[A-Z]/.test(mc[0])) {
-      typePiece = mc[0]; disamb = mc.slice(1, -2);
+      typePiece = mc[0];
+      disamb = mc.slice(1, -2);
     } else {
-      typePiece = 'P'; disamb = mc.slice(0, -2);
+      typePiece = 'P';
+      disamb = mc.slice(0, -2);
     }
 
+    // Recherche des pièces pouvant jouer le coup
     var candidats = [];
     var cases = Object.keys(p);
     for (var ki = 0; ki < cases.length; ki++) {
       var cs = cases[ki];
       if (!p[cs] || p[cs][0] !== trait || p[cs][1] !== typePiece) continue;
-      if (disamb.length === 2) { if (cs !== disamb) continue; }
-      else if (disamb.length === 1) {
-        if (COLS.indexOf(disamb) !== -1) { if (cs[0] !== disamb) continue; }
-        else                            { if (cs[1] !== disamb) continue; }
+
+      
+      if (disamb.length === 2) {
+        if (cs !== disamb) continue;
+      } else if (disamb.length === 1) {
+        if (COLS.indexOf(disamb) !== -1) {
+          if (cs[0] !== disamb) continue;
+        } else {
+          if (cs[1] !== disamb) continue;
+        }
       }
+
+      // Vérifie si la pièce peut aller à la destination
       if (peut_aller(p, cs, dest, trait, estCapture)) candidats.push(cs);
     }
 
+    // On prend la pièce valide
     var caseDep = candidats[0] || null;
     if (caseDep) {
       p[dest] = p[caseDep];
-      if (promo) p[dest] = [trait, promo];
+      if (promo) p[dest] = [trait, promo]; // promotion
       delete p[caseDep];
+
+      // Prise en passant
       if (typePiece === 'P' && estCapture && !plateau[dest]) {
         var rangEP = parseInt(dest[1]) + (trait === 'w' ? -1 : 1);
         delete p[dest[0] + rangEP];
       }
     }
-    return { plateau:p, dep:caseDep, arr:dest };
-  }
 
-  function reconstruire(listeCoups) {
+    return { plateau:p, dep:caseDep, arr:dest };
+}
+
+
+function reconstruire(listeCoups) {
     var p = initPlateau(), trait = 'w', d = null, a = null;
     for (var i = 0; i < listeCoups.length; i++) {
       var res = jouerCoup(p, listeCoups[i], trait);
       p = res.plateau; d = res.dep; a = res.arr;
-      trait = (trait === 'w') ? 'b' : 'w';
+      trait = (trait === 'w') ? 'b' : 'w'; // alterne le trait
     }
     return { plateau:p, dep:d, arr:a };
-  }
+}
+
 
   // Centre pixel d'une case selon l'orientation courante
   function pixelCentre(col, rang) {
@@ -555,7 +619,7 @@ Cela mène majoritairement à des ouvertures comme le gambit Benko ou la Benoni.
     if (wr < 40)  return '#e07060';  // rouge       — défavorable
     if (wr < 50)  return '#f0b8b0';  // rouge pâle  — légèrement défavorable
     if (wr < 60)  return '#85c1a3';  // vert pâle   — légèrement favorable
-    if (wr < 70)  return '#4a9e7a';  // vert        — favorable
+    if (wr < 70)  return '#4a9e7a';  // vert        — favorable sc
     return '#1a5f40';                // vert vif    — victoire majoritaire
   }
 
@@ -572,62 +636,74 @@ Cela mène majoritairement à des ouvertures comme le gambit Benko ou la Benoni.
     renderPanneau();
   }
 
-  function renderCases() {
+  // Met à jour la couleur et la surbrillance des cases
+function renderCases() {
     Object.keys(carteCases).forEach(function(cle) {
       var parts = cle.split('-');
-      var col   = +parts[0], rang = +parts[1];
-      var cs    = COLS[col] + RANGS[rang];
-      var cls   = (rang+col)%2===1 ? 'case-claire' : 'case-sombre';
+      var col = +parts[0], rang = +parts[1];
+      var cs = COLS[col] + RANGS[rang];
+
+      // Couleur de base
+      var cls = (rang+col)%2===1 ? 'case-claire' : 'case-sombre';
+
+      // Surbrillances
       if (cs === etat.dep) cls = 'case-hl-dep';
       if (cs === etat.arr) cls = 'case-hl-arr';
       if (cs === etat.selection) cls = 'case-selectionnee';
+
       carteCases[cle].attr('class', cls);
     });
-  }
+}
 
-  function renderPieces() {
+// Affiche les pièces sur le plateau
+function renderPieces() {
     calquePieces.selectAll('*').remove();
     var p = etat.plateau;
+
     Object.keys(p).forEach(function(cs) {
       var pc = p[cs];
       if (!pc) return;
+
       var coord = coordCase(cs);
       var centre = pixelCentre(coord.c, coord.r);
-      var estSelectionnee = (etat.selection === cs);
+      var estSel = (etat.selection === cs);
+
       calquePieces.append('text')
         .attr('class','piece')
         .attr('x', centre.x)
         .attr('y', centre.y + 2)
-        .style('opacity', estSelectionnee ? 1 : 0.95)
-        .style('filter', estSelectionnee ? 'drop-shadow(0px 0px 6px rgba(0,0,0,0.35))' : 'none')
-        .style('transform', estSelectionnee ? 'scale(1.25)' : 'scale(1)')
+        .style('opacity', estSel ? 1 : 0.95)
+        .style('filter', estSel ? 'drop-shadow(0 0 6px rgba(0,0,0,0.35))' : 'none')
+        .style('transform', estSel ? 'scale(1.25)' : 'scale(1)')
         .style('transform-origin', 'center')
-        .text(GLYPHES[pc[0]][pc[1]] || '?')
-        .style('cursor', 'pointer')
+        .text(GLYPHES[pc[0]][pc[1]])
         .on('click', function() { selectionnerPiece(cs); });
     });
-  }
+}
 
-  function renderFleches() {
+// Dessine les flèches des coups disponibles
+function renderFleches() {
     calqueFleches.selectAll('*').remove();
     var dispos = getCoupsDispos();
-    var cles   = Object.keys(dispos);
+    var cles = Object.keys(dispos);
     if (!cles.length) return;
 
-    var maxN = d3.max(cles.map(function(mv) { return dispos[mv].n; }));
+    var maxN = d3.max(cles.map(m => dispos[m].n));
     var defs = calqueFleches.append('defs');
 
     cles.forEach(function(san) {
       var s = dispos[san];
       var dest = san.replace(/[x+#!=?]/g,'').replace(/=[NBRQ]/,'').slice(-2);
       if (!/^[a-h][1-8]$/.test(dest)) return;
+
       var caseDep = s.de;
-      if (!caseDep || !/^[a-h][1-8]$/.test(caseDep)) return;
+      if (!caseDep) return;
 
       var couleur = couleurWR(s.wr);
-      var ep      = 1.2 + (s.n / maxN) * 3.6;
-      var idMk    = 'mk_' + san.replace(/[^a-zA-Z0-9]/g,'_');
+      var ep = 1.2 + (s.n / maxN) * 3.6;
+      var idMk = 'mk_' + san.replace(/[^a-zA-Z0-9]/g,'_');
 
+      // Pointe de flèche
       defs.append('marker')
         .attr('id', idMk)
         .attr('markerWidth', 5).attr('markerHeight', 5)
@@ -637,73 +713,67 @@ Cela mène majoritairement à des ouvertures comme le gambit Benko ou la Benoni.
           .attr('points','0 0.5,5 2.5,0 4.5')
           .attr('fill', couleur);
 
-      var cdep = coordCase(caseDep);
-      var carr = coordCase(dest);
-      var pdep = pixelCentre(cdep.c, cdep.r);
-      var parr = pixelCentre(carr.c, carr.r);
+      var pdep = pixelCentre(...Object.values(coordCase(caseDep)));
+      var parr = pixelCentre(...Object.values(coordCase(dest)));
 
-      var estCavalier = etat.plateau[caseDep] && etat.plateau[caseDep][1] === 'N';
-      if (estCavalier) {
-        tracerFlecheL(calqueFleches, pdep, parr, couleur, ep, idMk, san, s);
-      } else {
-        tracerFlecheDroite(calqueFleches, pdep, parr, couleur, ep, idMk, san, s);
-      }
+      var estCav = etat.plateau[caseDep] && etat.plateau[caseDep][1] === 'N';
+      if (estCav) tracerFlecheL(calqueFleches, pdep, parr, couleur, ep, idMk, san, s);
+      else        tracerFlecheDroite(calqueFleches, pdep, parr, couleur, ep, idMk, san, s);
     });
 
     renderClics();
-  }
+}
 
-  function tracerFlecheDroite(g, dep, arr, coul, ep, idMk, san, s) {
+// Flèche droite
+function tracerFlecheDroite(g, dep, arr, coul, ep, idMk, san, s) {
     var dx = arr.x-dep.x, dy = arr.y-dep.y;
     var len = Math.sqrt(dx*dx + dy*dy);
     if (len < 1) return;
+
     var nx = dx/len, ny = dy/len;
+
     g.append('line')
-      .attr('x1', dep.x + nx*TAILLE*0.30).attr('y1', dep.y + ny*TAILLE*0.30)
-      .attr('x2', arr.x - nx*TAILLE*0.28).attr('y2', arr.y - ny*TAILLE*0.28)
+      .attr('x1', dep.x + nx*TAILLE*0.30)
+      .attr('y1', dep.y + ny*TAILLE*0.30)
+      .attr('x2', arr.x - nx*TAILLE*0.28)
+      .attr('y2', arr.y - ny*TAILLE*0.28)
       .attr('stroke', coul).attr('stroke-width', ep)
-      .attr('stroke-linecap','round').attr('opacity', 0.88)
       .attr('marker-end','url(#'+idMk+')')
-      .on('mouseover', function(e){ montrerInfo(e, san+'  ·  '+s.n+' parties  ·  WR '+s.wr+'%'); })
+      .on('mouseover', e => montrerInfo(e, san+' · '+s.n+' parties · WR '+s.wr+'%'))
       .on('mouseleave', cacherInfo);
-  }
+}
 
-  function tracerFlecheL(g, dep, arr, coul, ep, idMk, san, s) {
+// Flèche en L (cavalier)
+function tracerFlecheL(g, dep, arr, coul, ep, idMk, san, s) {
     var coude = { x: arr.x, y: dep.y };
-    var lenH  = Math.abs(arr.x - dep.x);
-    var signH = (arr.x > dep.x) ? 1 : -1;
-    var signV = (arr.y > dep.y) ? 1 : -1;
-    var x1s   = dep.x + signH * Math.min(TAILLE * 0.28, lenH * 0.25);
-    var y2e   = arr.y - signV * TAILLE * 0.26;
 
     g.append('line')
-      .attr('x1', x1s).attr('y1', dep.y)
+      .attr('x1', dep.x).attr('y1', dep.y)
       .attr('x2', coude.x).attr('y2', coude.y)
       .attr('stroke', coul).attr('stroke-width', ep)
-      .attr('stroke-linecap','round').attr('opacity', 0.88)
-      .on('mouseover', function(e){ montrerInfo(e, san+'  ·  '+s.n+' parties  ·  WR '+s.wr+'%'); })
+      .on('mouseover', e => montrerInfo(e, san+' · '+s.n+' parties · WR '+s.wr+'%'))
       .on('mouseleave', cacherInfo);
 
     g.append('line')
       .attr('x1', coude.x).attr('y1', coude.y)
-      .attr('x2', coude.x).attr('y2', y2e)
+      .attr('x2', coude.x).attr('y2', arr.y)
       .attr('stroke', coul).attr('stroke-width', ep)
-      .attr('stroke-linecap','round').attr('opacity', 0.88)
       .attr('marker-end','url(#'+idMk+')')
-      .on('mouseover', function(e){ montrerInfo(e, san+'  ·  '+s.n+' parties  ·  WR '+s.wr+'%'); })
+      .on('mouseover', e => montrerInfo(e, san+' · '+s.n+' parties · WR '+s.wr+'%'))
       .on('mouseleave', cacherInfo);
-  }
+}
 
-  function renderPanneau() {
-    var cle    = etat.coups.join('|');
+// Met à jour le bloclatéral (nom ouverture + liste coups)
+function renderPanneau() {
+    var cle = etat.coups.join('|');
     var labels = etat.labels && etat.labels[etat.camp];
+
     document.getElementById('nom-ouverture').textContent =
       (labels && labels[cle]) || (etat.coups.length ? '—' : 'Position initiale');
 
     var filEl = document.getElementById('fil-coups');
-    if (!etat.coups.length) {
-      filEl.textContent = '—';
-    } else {
+    if (!etat.coups.length) filEl.textContent = '—';
+    else {
       var html = '';
       etat.coups.forEach(function(mv, i) {
         if (i%2===0) html += '<span style="color:#bbb">'+(Math.floor(i/2)+1)+'. </span>';
@@ -711,22 +781,30 @@ Cela mène majoritairement à des ouvertures comme le gambit Benko ou la Benoni.
       });
       filEl.innerHTML = html;
     }
-    document.getElementById('btn-retour').style.display = etat.coups.length ? 'inline-block' : 'none';
-    renderListeCoups();
-  }
 
-  function renderListeCoups() {
+    document.getElementById('btn-retour').style.display =
+      etat.coups.length ? 'inline-block' : 'none';
+
+    renderListeCoups();
+}
+
+// Liste des coups disponibles (triés par fréquence)
+function renderListeCoups() {
     var dispos = getCoupsDispos();
     var liste  = document.getElementById('liste-coups');
-    var tries  = Object.keys(dispos).sort(function(a,b){ return dispos[b].n - dispos[a].n; });
+    var tries  = Object.keys(dispos).sort((a,b)=>dispos[b].n - dispos[a].n);
+
     if (!tries.length) {
-      liste.innerHTML = '<li style="color:#bbb;cursor:default;font-size:.7rem;border:none">Fin de l\'arbre</li>';
+      liste.innerHTML = '<li style="color:#bbb;font-size:.7rem">Fin de l\'arbre</li>';
       return;
     }
+
     var maxN = dispos[tries[0]].n;
+
     liste.innerHTML = tries.map(function(san) {
       var s = dispos[san], col = couleurWR(s.wr);
       var larg = (s.n/maxN*100).toFixed(0);
+
       return '<li onclick="jouerCoupUI(\''+san+'\')">'
         +'<span class="nom-coup">'+san+'</span>'
         +'<span class="nb-parties">'+s.n+' part.</span>'
@@ -734,31 +812,38 @@ Cela mène majoritairement à des ouvertures comme le gambit Benko ou la Benoni.
         +'<span class="pct-wr" style="color:'+col+'">'+s.wr+'%</span>'
         +'</li>';
     }).join('');
-  }
+}
 
-  function renderClics() {
+// Zones cliquables pour jouer un coup
+function renderClics() {
     calqueClics.selectAll('*').remove();
     var dispos = getCoupsDispos();
     var carteDest = {};
+
     Object.keys(dispos).forEach(function(san) {
       var dest = san.replace(/[x+#!=?]/g,'').replace(/=[NBRQ]/,'').slice(-2);
       if (/^[a-h][1-8]$/.test(dest)) carteDest[dest] = san;
     });
+
     for (var r = 0; r < 8; r++) {
       for (var c = 0; c < 8; c++) {
         (function(col, rang) {
           var cs = COLS[col]+RANGS[rang];
           var pos = colRangVersXY(col, rang);
+
           calqueClics.append('rect')
             .attr('x', pos.x).attr('y', pos.y)
             .attr('width', TAILLE).attr('height', TAILLE)
             .attr('fill','transparent')
             .attr('cursor', carteDest[cs] ? 'pointer' : 'default')
-            .on('click', function() { if (carteDest[cs]) jouerCoupUI(carteDest[cs]); });
+            .on('click', function() {
+              if (carteDest[cs]) jouerCoupUI(carteDest[cs]);
+            });
         })(c, r);
       }
     }
-  }
+}
+
 
   // Interactivité
 
@@ -895,7 +980,7 @@ Cela mène majoritairement à des ouvertures comme le gambit Benko ou la Benoni.
       }
     });
 
-    // Étape 2 : filtrage (n ≥ SEUIL_MIN)
+    // filtrage (n ≥ SEUIL_MIN)
     var arbreFiltre = { w:{}, b:{} };
     ['w','b'].forEach(function(camp) {
       Object.keys(arbreBrut[camp]).forEach(function(cle) {
@@ -912,7 +997,7 @@ Cela mène majoritairement à des ouvertures comme le gambit Benko ou la Benoni.
       });
     });
 
-    // Étape 3 : labels d'ouvertures
+    //  labels d'ouvertures
     var labelsOuv = { w:{}, b:{} };
     ['w','b'].forEach(function(camp) {
       var clesValides = new Set(Object.keys(arbreFiltre[camp]));
@@ -923,7 +1008,7 @@ Cela mène majoritairement à des ouvertures comme le gambit Benko ou la Benoni.
       });
     });
 
-    // Étape 4 : bar charts
+    //  bar charts
     var donneesBar = { w:[], b:[] };
     ['w','b'].forEach(function(camp) {
       groupes[camp].forEach(function(g) {
