@@ -22,7 +22,7 @@ Les visualisations sont accessibles via le site interactif ci-dessous :
 
 ## Exécution
 
-Les codes sources sont consultables dans le dossier "Visualisations". Le lien vers le site cité plus haut suffit pour explorer l'ensemble des visualisations. Une vidéo de démonstration est disponible dans le dossier "demo".
+Les codes sources sont consultables dans le dossier "Visualisations". Le lien vers le site cité plus haut suffit pour explorer l'ensemble des visualisations. Une vidéo de démonstration est disponible dans le dossier "demo" et le rapport dans le dossier "rapport".
 
 ---
 
