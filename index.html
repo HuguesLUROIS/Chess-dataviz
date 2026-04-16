@@ -3,31 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <title>Chess Dataviz</title>
-
+ 
   <!--  -----------------------------------------------------------------
-                  Structure et visualisation de la page
+       Section 1 : Structure et mise en page de la page d'accueil
     ----------------------------------------------------------------- -->
-
+ 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
+ 
+    /* Style global du corps : police Georgia, fond beige clair, texte sombre */
     body {
       font-family: Georgia, serif;
       background: #f7f4ef;
       color: #2a2a2a;
       min-height: 100vh;
     }
-
-    /* Barre de navigation fixe */
+ 
+    /*  Barre de navigation  */
     .nav-principale {
-      position: fixed;
+      position: fixed;          
       top: 0; left: 0; right: 0;
       background: #fff;
       border-bottom: 1px solid #e0dbd4;
-      z-index: 200;
+      z-index: 200;            
       height: 48px;
     }
-
+ 
+    /*  */
     .nav-interieur {
       max-width: 960px;
       margin: 0 auto;
@@ -35,16 +37,19 @@
       height: 100%;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: space-between; 
     }
-
+ 
+    /* Titre cliquable (retour accueil) */
     .nav-titre {
       font-size: 0.9rem;
       cursor: pointer;
     }
-
+ 
+    /* Liens de navigation */
     .nav-liens { display: flex; gap: 20px; }
-
+ 
+    /* Style des boutons menant vers chaque visualisation */
     .nav-lien {
       font-family: monospace;
       font-size: 0.72rem;
@@ -53,24 +58,26 @@
       background: transparent;
       cursor: pointer;
     }
-
+ 
+    /* Effet sur les liens de navigation */
     .nav-lien:hover { color: #333; }
-
-    /* iframe viz */
+ 
+    /* ifFrame qui affiche les visualisations */
     #iframe-viz {
       display: none;
       position: fixed;
-      top: 48px; left: 0; right: 0; bottom: 0;
+      top: 48px; left: 0; right: 0; bottom: 0; /* Sous la nav, plein écran */
       width: 100%;
       height: calc(100vh - 48px);
       border: none;
     }
-
-    /* HOME */
+ 
+    /*  )  */
     #contenu-accueil {
-      padding-top: 48px;
+      padding-top: 48px; 
     }
-
+ 
+    /* Bloc : image + titre + description  */
     .hero {
       max-width: 960px;
       margin: 0 auto;
@@ -79,7 +86,8 @@
       gap: 28px;
       align-items: center;
     }
-
+ 
+    /* Image */
     .hero-img {
       width: 140px;
       height: 140px;
@@ -87,19 +95,22 @@
       object-fit: cover;
       border: 1px solid #e0dbd4;
     }
-
+ 
+    /* Titre de la page */
     .hero-titre {
       font-size: 2rem;
       margin-bottom: 10px;
     }
-
+ 
+    /* Sous-titre au-dessus du titre  */
     .hero-eyebrow {
       font-family: monospace;
       font-size: 0.7rem;
       color: #aaa;
       margin-bottom: 10px;
     }
-
+ 
+    /* Paragraphe de description */
     .hero-desc {
       font-size: 0.95rem;
       line-height: 1.7;
@@ -107,8 +118,8 @@
       border-left: 2px solid #ddd;
       padding-left: 14px;
     }
-
-    /* VIZ GRID */
+ 
+    /*  Titre de section  */
     .section-titre {
       max-width: 960px;
       margin: 0 auto;
@@ -118,51 +129,60 @@
       color: #aaa;
       text-transform: uppercase;
     }
-
-   .grille-viz {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 0 28px 60px;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-}
+ 
+    /* grille des blocs de visualisation (2 colonnes) */
+    .grille-viz {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 0 28px 60px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+ 
+    /* Bloc d'une visualisation */
     .carte-viz {
       background: #fff;
       border: 1px solid #e0dbd4;
       border-radius: 10px;
       overflow: hidden;
       cursor: pointer;
-      transition: 0.2s;
+      transition: 0.2s; 
     }
-
+ 
+    /* Effet sur les cartes */
     .carte-viz:hover {
       transform: translateY(-3px);
       box-shadow: 0 8px 18px rgba(0,0,0,0.08);
     }
-
+ 
+    /* Image d'aperçu de la visualisation */
     .viz-img {
       width: 100%;
       height: 120px;
       object-fit: cover;
     }
-
+ 
+    /* Zone de texte sous l'image de la carte */
     .viz-content {
       padding: 14px;
     }
-
+ 
+    /* Nom de la visualisation */
     .viz-nom {
       font-size: 0.95rem;
       margin-bottom: 6px;
     }
-
+ 
+    /* Description de la visualisation */
     .viz-desc {
       font-size: 0.7rem;
       color: #777;
       font-family: monospace;
       line-height: 1.5;
     }
-
+ 
+    /* Pied de page */
     .pied {
       text-align: center;
       font-family: monospace;
@@ -172,82 +192,108 @@
     }
   </style>
 </head>
-
+ 
 <body>
-
-<!-- NAV -->
+ 
+<!-- Barre de navigation  -->
 <nav class="nav-principale">
   <div class="nav-interieur">
+    <!-- Logo, titre et clic pour revenir à l'accueil -->
     <span class="nav-titre" onclick="afficherAccueil()">♟ Chess Dataviz</span>
+ 
+    <!-- Liens vers chaque visualisation -->
     <div class="nav-liens">
-  <button class="nav-lien" onclick="afficherViz('progression')">Progression</button>
-  <button class="nav-lien" onclick="afficherViz('explorateur')">Explorateur d'ouvertures</button>
-  <button class="nav-lien" onclick="afficherViz('heatmap')">Heatmap des déplacements</button>
-  <button class="nav-lien" onclick="afficherViz('distribution')">Distribution</button>
-</div>
+      <button class="nav-lien" onclick="afficherViz('progression')">Progression</button>
+      <button class="nav-lien" onclick="afficherViz('explorateur')">Explorateur d'ouvertures</button>
+      <button class="nav-lien" onclick="afficherViz('heatmap')">Heatmap des déplacements</button>
+      <button class="nav-lien" onclick="afficherViz('distribution')">Distribution</button>
+    </div>
   </div>
 </nav>
-
-<!-- IFRAME -->
+ 
+<!--  iframe de visualisation  -->
+<!-- Prend tout l'écran sous la nav quand une viz est sélectionnée -->
 <iframe id="iframe-viz"></iframe>
-
-<!-- HOME -->
+ 
+<!--  Contenu de la page d'accueil  -->
 <div id="contenu-accueil">
-
+ 
+  <!-- Bloc image + titre + description du projet -->
   <div class="hero">
     <img class="hero-img" src="Images/Tactique.png">
-
+ 
     <div>
+      <!-- Sous-titre  -->
       <div class="hero-eyebrow">Chess.com · 2018–2026 · Data storytelling</div>
-
+ 
+      <!-- Titre -->
       <h1 class="hero-titre">
         Analyse de 5000 parties d'échecs personnelles jouées en ligne de 2018 à 2026
       </h1>
-
+ 
+      <!-- Description du projet -->
       <p class="hero-desc">
         Ce projet de Data Storytelling vise à comprendre mon style de jeu à partir de 5 093 parties jouées sur Chess.com.
-        L’objectif est d’analyser la progression, le répertoire d’ouvertures et quelques observations statistiques intéressantes des parties d'un joueur d'échecs amateur.
+        L'objectif est d'analyser la progression, le répertoire d'ouvertures et quelques observations statistiques intéressantes des parties d'un joueur d'échecs amateur.
       </p>
     </div>
   </div>
-   <div style="display:flex;border:1px solid #e0dbd4;border-radius:10px;background:#fff;overflow:hidden;max-width:600px;margin:0 auto 32px;">
-        <div style="flex:1;padding:16px 18px;text-align:center;border-right:1px solid #e0dbd4;">
-          <div style="font-size:1.4rem;font-family:Georgia,serif;margin-bottom:4px;">5 093</div>
-          <div style="font-family:monospace;font-size:0.6rem;color:#aaa;text-transform:uppercase;letter-spacing:.08em;">parties</div>
-        </div>
-        <div style="flex:1;padding:16px 18px;text-align:center;border-right:1px solid #e0dbd4;">
-          <div style="font-size:1.4rem;font-family:Georgia,serif;margin-bottom:4px;">53,5%</div>
-          <div style="font-family:monospace;font-size:0.6rem;color:#aaa;text-transform:uppercase;letter-spacing:.08em;">victoires</div>
-        </div>
-        <div style="flex:1;padding:16px 18px;text-align:center;border-right:1px solid #e0dbd4;">
-          <div style="font-size:1.4rem;font-family:Georgia,serif;margin-bottom:4px;">+1100</div>
-          <div style="font-family:monospace;font-size:0.6rem;color:#aaa;text-transform:uppercase;letter-spacing:.08em;">points ELO</div>
-        </div>
-        <div style="flex:1;padding:16px 18px;text-align:center;">
-          <div style="font-size:1.4rem;font-family:Georgia,serif;margin-bottom:4px;">74,7%</div>
-          <div style="font-family:monospace;font-size:0.6rem;color:#aaa;text-transform:uppercase;letter-spacing:.08em;">précision moy.</div>
-        </div>
-      </div>
+ 
+  <!-- ── Bande de statistiques clés ── -->
+  <!-- 4 métriques globales pour accrocher le lecteur dès l'accueil -->
+  <div style="display:flex;border:1px solid #e0dbd4;border-radius:10px;background:#fff;overflow:hidden;max-width:600px;margin:0 auto 32px;">
+ 
+    <!-- stat 1 : nombre total de parties -->
+    <div style="flex:1;padding:16px 18px;text-align:center;border-right:1px solid #e0dbd4;">
+      <div style="font-size:1.4rem;font-family:Georgia,serif;margin-bottom:4px;">5 093</div>
+      <div style="font-family:monospace;font-size:0.6rem;color:#aaa;text-transform:uppercase;letter-spacing:.08em;">parties</div>
+    </div>
+ 
+    <!-- stat 2 : taux de victoire global -->
+    <div style="flex:1;padding:16px 18px;text-align:center;border-right:1px solid #e0dbd4;">
+      <div style="font-size:1.4rem;font-family:Georgia,serif;margin-bottom:4px;">53,5%</div>
+      <div style="font-family:monospace;font-size:0.6rem;color:#aaa;text-transform:uppercase;letter-spacing:.08em;">victoires</div>
+    </div>
+ 
+    <!-- stat 3 : progression ELO totale -->
+    <div style="flex:1;padding:16px 18px;text-align:center;border-right:1px solid #e0dbd4;">
+      <div style="font-size:1.4rem;font-family:Georgia,serif;margin-bottom:4px;">+1100</div>
+      <div style="font-family:monospace;font-size:0.6rem;color:#aaa;text-transform:uppercase;letter-spacing:.08em;">points ELO</div>
+    </div>
+ 
+    <!-- stat 4 : précision moyenne toutes cadences -->
+    <div style="flex:1;padding:16px 18px;text-align:center;">
+      <div style="font-size:1.4rem;font-family:Georgia,serif;margin-bottom:4px;">74,7%</div>
+      <div style="font-family:monospace;font-size:0.6rem;color:#aaa;text-transform:uppercase;letter-spacing:.08em;">précision moy.</div>
+    </div>
+ 
+  </div>
+ 
+  <!-- Titre visualisations  -->
   <p class="section-titre">Visualisations</p>
-
+ 
+  <!-- Grille des 4 cartes de visualisationn -->
   <div class="grille-viz">
-
+ 
+    <!-- Carte 1 : Progression ELO et précision -->
     <div class="carte-viz" onclick="afficherViz('progression')">
       <img class="viz-img" src="Images/progression.png">
       <div class="viz-content">
-        <div class="viz-nom">Progression </div>
+        <div class="viz-nom">Progression</div>
         <div class="viz-desc">Évolution du Elo et précision dans le temps.</div>
       </div>
     </div>
-
-       <div class="carte-viz" onclick="afficherViz('explorateur')">
+ 
+    <!-- Carte 2 : Explorateur d'ouvertures interactif -->
+    <div class="carte-viz" onclick="afficherViz('explorateur')">
       <img class="viz-img" src="Images/ouvertures.png">
       <div class="viz-content">
-        <div class="viz-nom">Explorateur d’ouvertures</div>
-        <div class="viz-desc">Répertoire et visualisations d’ouvertures.</div>
+        <div class="viz-nom">Explorateur d'ouvertures</div>
+        <div class="viz-desc">Répertoire et visualisations d'ouvertures.</div>
       </div>
     </div>
-
+ 
+    <!-- Carte 3 : Heatmap des déplacements par pièce -->
     <div class="carte-viz" onclick="afficherViz('heatmap')">
       <img class="viz-img" src="Images/heatmap_deplacements.png">
       <div class="viz-content">
@@ -255,45 +301,51 @@
         <div class="viz-desc">Cases du plateau les plus utilisées.</div>
       </div>
     </div>
-
-     <div class="carte-viz" onclick="afficherViz('distribution')">
+ 
+    <!-- Carte 4 : Distribution des parties par longueur et issue -->
+    <div class="carte-viz" onclick="afficherViz('distribution')">
       <img class="viz-img" src="Images/distribution.png">
       <div class="viz-content">
         <div class="viz-nom">Distribution des parties selon leur longueur</div>
         <div class="viz-desc">Structure des parties selon leur issue.</div>
       </div>
     </div>
-
+ 
   </div>
-
+ 
+  <!-- Pied de page -->
   <div class="pied">
     Chess Dataviz · 5 093 parties · 2018–2026
   </div>
-
+ 
 </div>
-
+ 
+<!--  Section 2 : JavaScript — Navigation entre accueil et visualisations -->
 <script>
-
+ 
+/* Chemins relatifs vers chaque fichier de visualisation */
 const CHEMINS = {
-  progression: "Visualisations/progression.html",
+  progression:  "Visualisations/progression.html",
   distribution: "Visualisations/distribution_coups.html",
-  heatmap: "Visualisations/heatmap_deplacements.html",
-  explorateur: "Visualisations/explorateur_ouvertures.html"
+  heatmap:      "Visualisations/heatmap_deplacements.html",
+  explorateur:  "Visualisations/explorateur_ouvertures.html"
 };
-
+ 
+/* Affiche une visualisation dans l'iframe et masque l'accueil */
 function afficherViz(viz) {
   document.getElementById("contenu-accueil").style.display = "none";
   const iframe = document.getElementById("iframe-viz");
   iframe.style.display = "block";
-  iframe.src = CHEMINS[viz];
+  iframe.src = CHEMINS[viz]; /* Charge le HTML de la viz dans l'iFrame */
 }
-
+ 
+/* Revient à l'accueil et masque l'iframe */
 function afficherAccueil() {
   document.getElementById("iframe-viz").style.display = "none";
   document.getElementById("contenu-accueil").style.display = "block";
 }
-
+ 
 </script>
-
+ 
 </body>
 </html>
