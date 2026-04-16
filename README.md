@@ -1,6 +1,6 @@
 # ♟ Chess Dataviz
 
-Ce projet explore 5 093 parties d'échecs personnelles jouées sur Chess.com entre 2018 et 2026, à travers quatre visualisations interactives construites en JavaScript, notamment à l’aide de la bibliothèque D3.js. Les données proviennent d'un export CSV depuis le site [chessinsights.xyz](https://chessinsights.xyz/) .
+Ce projet explore 5 093 parties d'échecs personnelles jouées sur Chess.com entre 2018 et 2026, à travers quatre visualisations interactives construites en JavaScript, notamment à l’aide de la bibliothèque D3.js. Les données proviennent d'un export CSV depuis le site [chessinsights.xyz](https://chessinsights.xyz/) 
 
 Les visualisations sont accessibles via le site interactif ci-dessous : 
 
